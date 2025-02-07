@@ -4,19 +4,18 @@
 #include "vex.h"
 #include <vector>
 
-// 遥控器输出重定义到某一行
-void PrintInLine(int line);
-
 // 从选项中选择一个选项
 int ChoiceIndex(std::vector<char*> options);
 
 // 窗口基类
 class BaseWindow{
     public: 
+    int num = 0;
     BaseWindow(std::string name_, BaseWindow* DadWindow_, BaseWindow* (*funcPtr_)()){
         name = name_;
         DadWindow = DadWindow_;
         funcPtr = funcPtr_;
+        num = 0;
     }
 
     BaseWindow* Tick(){
@@ -52,7 +51,13 @@ extern BaseWindow* TestWindow;  //  测试模式
 
 extern BaseWindow* AutoChoiceWindow_Compete;     //  比赛-自动选择
 extern BaseWindow* RemoteControlWindow_Auto;  // 自动-遥控选择
+extern BaseWindow* TestMotorChoiceWindow;        // 电机测试（选择）
+extern BaseWindow* TestAirpoweredChoiceWindow;   // 活塞测试（选择）
+extern BaseWindow* TestInertialChoiceWindow;     // 陀螺仪测试（选择）
 
+extern BaseWindow* TestMotorWindow;        // 电机测试
+extern BaseWindow* TestAirpoweredWindow;   // 活塞测试
+extern BaseWindow* TestInertialWindow;     // 陀螺仪测试
 
 // 各个函数实现------------------------------------------
 
@@ -80,6 +85,25 @@ BaseWindow* AutoChoiceWindow_CompeteFun();
 
 // 自动-遥控选择
 BaseWindow* RemoteControlWindow_AutoFun();  
+
+// 电机测试（选择）
+BaseWindow* TestMotorChoiceWindowFun();    
+
+// 活塞测试（选择）
+BaseWindow* TestAirpoweredChoiceWindowFun();   
+
+// 陀螺仪测试（选择）
+BaseWindow* TestInertialChoiceWindowFun();     
+
+
+// 电机测试
+BaseWindow* TestMotorWindowFun();        
+
+// 活塞测试
+BaseWindow* TestAirpoweredWindowFun();   
+
+// 陀螺仪测试
+BaseWindow* TestInertialWindowFun();     
 
 
 // Controller.Screen.clearScreen();  // 清除屏幕

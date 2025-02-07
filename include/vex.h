@@ -14,6 +14,7 @@
 #include "ChassisControl.h"
 #include "ControllerWindow.h"
 #include "AutoFun.h"
+#include "units.h"
 
 #define waitUntil(condition)                                                   \
   do {                                                                         \
