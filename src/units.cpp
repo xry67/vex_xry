@@ -1,5 +1,6 @@
-#include "units.h"
 #include "vex.h"
+#include "robot-config.h"
+#include "units.h"
 
 // 使字符串居中
 void CenterStr(char* str){

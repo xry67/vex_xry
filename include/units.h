@@ -2,6 +2,8 @@
 #define UNITS_H 
 
 #include <vector>
+#include "vex.h"
+#include "robot-config.h"
 
 // 遥控器输出重定义到某一行
 void PrintInLine(int line);

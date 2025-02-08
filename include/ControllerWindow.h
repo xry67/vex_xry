@@ -2,6 +2,7 @@
 #define CONTROLLERWINDOW_H  
 
 #include "vex.h"
+#include "robot-config.h"
 #include <vector>
 
 // 从选项中选择一个选项

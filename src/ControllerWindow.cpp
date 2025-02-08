@@ -1,4 +1,8 @@
 #include "vex.h"
+#include "robot-config.h"
+#include "ControllerWindow.h"
+#include "RemoteControl.h"
+#include "units.h"
 
 BaseWindow* InitWindow = new BaseWindow("初始化", nullptr, InitWindowFun);
 BaseWindow* ModWindow  = new BaseWindow("模式选择", nullptr, ModWindowFun);
@@ -116,6 +120,8 @@ BaseWindow* RemoteControlWindow_ModFun(){
     }
 
     std::cout << options[index] << std::endl;
+    Controller.Screen.clearScreen();  // 清除屏幕
+    RemoteControl();
 
     return ModWindow;
 }
@@ -263,8 +269,10 @@ BaseWindow* RemoteControlWindow_AutoFun(){
     }
 
     std::cout << options[index] << std::endl;
+    Controller.Screen.clearScreen();  // 清除屏幕
+    RemoteControl();
 
-    return ModWindow;
+    return RemoteControlWindow_Auto->Back();;
 }
 
 // 电机测试（选择）

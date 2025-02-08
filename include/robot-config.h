@@ -5,7 +5,7 @@
 #include <functional>
 #include "vex.h"
 #include "AutoFun.h"
-
+#include "PID.h"
 
 using namespace vex;
 
@@ -27,15 +27,9 @@ extern motor RightMotor2;//20
 extern motor RightMotor3;//19
 extern motor_group RightMotorGroup;  // 右电机组
 
-/**
- * Used to initialize code/tasks/devices added using tools in VEXcode Pro.
- *
- * This should be called at the start of your int main function.
- */
-void vexcodeInit(void);
+extern inertial ChassisInertial;  // 底盘陀螺仪
+extern smartdrive Smartdrive;  // 官方底盘驱动
 
-extern std::vector<AutoFun> AutoFunctions;
-void auto1();
-void auto2();
+extern std::vector<AutoFun> AutoFunctions;  // 自动路径储存
 
 #endif

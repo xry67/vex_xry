@@ -5,16 +5,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <iostream>
 #include "v5.h"
 #include "v5_vcs.h"
 
-#include "robot-config.h"
-#include "PID.h"
-#include "ChassisControl.h"
-#include "ControllerWindow.h"
-#include "AutoFun.h"
-#include "units.h"
 
 #define waitUntil(condition)                                                   \
   do {                                                                         \

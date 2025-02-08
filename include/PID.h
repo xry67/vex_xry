@@ -4,7 +4,6 @@
 #include <iostream>  
 #include <chrono>  
 #include <thread>  
-#include "vex.h"
 
 // PID算法类
 class PID {  
@@ -22,7 +21,7 @@ public:
         double derivative = (error - prev_error) / dt;  
         
         double output = kp * error + ki * integral + kd * derivative;  
-        std::cout << "PID: " << error << " " << integral << " " << derivative << std::endl;
+        // std::cout << "PID: " << error << " " << integral << " " << derivative << std::endl;
         prev_error = error;  
         return output;  
     }  

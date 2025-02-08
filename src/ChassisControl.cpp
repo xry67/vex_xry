@@ -3,8 +3,11 @@
 #include <algorithm> // 包含 min 和 max 函数
 #include <thread>  
 #include "vex.h"
-#include "PID.h"
+#include "robot-config.h"
 #include "ChassisControl.h"
+#include "units.h"
+
+ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
 
 // 底盘运动控制算法
 
@@ -80,7 +83,6 @@
   }
 
   // 直线运动函数
-  // bdqpnu
   void ChassisControl::Move(double v, double val, double yaw, char direction){
       // 最大速度
       // 运动距离
@@ -96,7 +98,7 @@
       int    negative = 1;   // 负方向指示器
       int yaw_negative= 1;   // 负偏指示器
 
-
+      //  方向指示器
       if (direction == 'u'){
           negative = -1;
           yaw_negative = 1;
@@ -128,27 +130,39 @@
       PID pid(5, 0.001, 0.1); // 创建PID控制器实例 
       pid.setSetpoint(val); // 设置目标位置
 
+      std::cout << "in" << std::endl;
+      while (MoveEnd == false){
+          wait(10, msec);
+          Moveing = false;
+      }
+      std::cout << "out" << std::endl;
+
       Moveing = true;  // 当前在运动
+      MoveEnd = false; // 运动没有完成
 
       while (true) {  
-          double current_position = GetPositions_mean();  
-          std::cout << "P: " << LeftMotor1.position(degrees);
-          std::cout << "\t\t V: " << LeftMotor1.velocity(dps) << std::endl;
-          double output = pid.calculate(current_position, dt);  
+          double current_position = GetPositions_mean();  // 当前位置
+          double output = pid.calculate(current_position, dt);  // 补偿
           // 控制小车运动 
-          ChassisForward(std::min(v, output) * negative, yaw * yaw_negative); 
+          ChassisForward(std::min(v, output) * negative, yaw * yaw_negative);   //  控制移动
 
           // 检查目标是否达到  
           if (fabs(current_position - val) <= 0.1) {   
               break;  
           }  
 
+          // 多线程保护
+          if (Moveing == false){
+            std::cout << "endddd" << std::endl;
+              break;
+          }
+
           // 算法收敛保护
           if (output <= Stuck_threshold){
             break;
           }
 
-          // 电机抱死检测
+          // 电机抱死保护
           if (GetVelocity_mean() <= Stuck_threshold){
               stuck_time_count += dt * 1000.0;  // 计算抱死时间
               if (stuck_time_count >= Stuck_time_out){
@@ -172,15 +186,18 @@
 
       ChassisStoppingHold();
       Moveing = false;  // 运动停止了
-  
-  
+      MoveEnd = true; // 运动完成
+
+      std::cout << "ans: " << GetPositions_mean() << std::endl;
+
+
   }
 
   // 直线运动函数(可选多线程)
   void ChassisControl::Move(double v, double val, double yaw, char direction, bool task){
-
+    std::cout << "Move in" << std::endl;
     if (task == true){
-        ChassisMoveParams* Params = new ChassisMoveParams;
+        ChassisMoveParams* Params = new ChassisMoveParams();
         Params->self = this;
         Params->v = v;
         Params->val = val;
@@ -191,11 +208,21 @@
         vex::task Task(MoveTask, p);
     }
     else{
-        Move(v, val, yaw, direction, yaw);    
+        Move(v, val, yaw, direction);    
     }
   }
 
-  //  多线程运动友元函数
+  // 旋转函数
+  void Turn(double v, double val, char direction){
+
+  }
+
+  // 旋转函数(可选多线程)
+  void Turn(double v, double val, char direction, bool task){
+
+  }
+
+//  多线程运动友元函数
 int MoveTask(void* args){
     ChassisMoveParams* params = (ChassisMoveParams*)args;
     ChassisControl* self= params->self;       // 当前类
@@ -203,7 +230,8 @@ int MoveTask(void* args){
     double val          = params->val;        // 路径长度
     char direction      = params->direction;  // 运动方向
     double yaw          = params->yaw;        // 偏转
-    self->Move(v, val, direction, yaw, yaw);
-    delete args;
+    self->Move(v, val, yaw, direction);
+
+    // delete args;
     return 0;
 }

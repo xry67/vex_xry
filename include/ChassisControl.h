@@ -6,7 +6,6 @@
 #include <thread>  
 #include "vex.h"
 
-
 // 底盘运动控制算法
 class ChassisControl{
   public: 
@@ -42,6 +41,7 @@ class ChassisControl{
     double  Stuck_time_out  = 1000;  // 电机卡死保护，默认1000毫秒
     double  Stuck_threshold = 5;     // 电机卡死认定阈值，单位dps
     bool    Moveing         = false; // 记录是否在运动
+    bool    MoveEnd         = true;  // 记录运动是否完成
 
 };
 
@@ -51,10 +51,12 @@ int MoveTask(void* args);
 // 多线程准备的结构体函数
 struct ChassisMoveParams{
     ChassisControl* self;
-    double v;        // 速度
-    double val;      // 加速度
-    double yaw;      // 减速度
+    double v = 0.0;        // 速度
+    double val = 0.0;      // 加速度
+    double yaw = 0.0;      // 减速度
     char direction;  // 运动方向
 };
+
+extern ChassisControl ChassisControlSTS;  // sts底盘控制
 
 #endif
