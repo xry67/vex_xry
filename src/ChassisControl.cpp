@@ -147,7 +147,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
           ChassisForward(std::min(v, output) * negative, yaw * yaw_negative);   //  控制移动
 
           // 检查目标是否达到  
-          if (fabs(current_position - val) <= 0.1) {   
+          if (fabs(current_position - val) <= 0.1) {
               break;  
           }  
 
