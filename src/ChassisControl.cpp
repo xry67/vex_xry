@@ -127,15 +127,14 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       }
 
 
-      PID pid(5, 0.001, 0.1); // 创建PID控制器实例 
+      PID pid(8, 0.03, 0.1); // 创建PID控制器实例 
       pid.setSetpoint(val); // 设置目标位置
 
-      std::cout << "in" << std::endl;
+      // 多线程阻断等待
       while (MoveEnd == false){
           wait(10, msec);
           Moveing = false;
       }
-      std::cout << "out" << std::endl;
 
       Moveing = true;  // 当前在运动
       MoveEnd = false; // 运动没有完成
@@ -147,13 +146,12 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
           ChassisForward(std::min(v, output) * negative, yaw * yaw_negative);   //  控制移动
 
           // 检查目标是否达到  
-          if (fabs(current_position - val) <= 0.1) {
+          if (fabs(current_position - val) <= 1) {
               break;  
           }  
 
           // 多线程保护
           if (Moveing == false){
-            std::cout << "endddd" << std::endl;
               break;
           }
 
@@ -189,13 +187,10 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       MoveEnd = true; // 运动完成
 
       std::cout << "ans: " << GetPositions_mean() << std::endl;
-
-
   }
 
   // 直线运动函数(可选多线程)
   void ChassisControl::Move(double v, double val, double yaw, char direction, bool task){
-    std::cout << "Move in" << std::endl;
     if (task == true){
         ChassisMoveParams* Params = new ChassisMoveParams();
         Params->self = this;
@@ -213,16 +208,115 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
   }
 
   // 旋转函数
-  void Turn(double v, double val, char direction){
+  void ChassisControl::Turn(double v, double val, char direction){
+      // 最大速度
+      // 运动距离
+      // 方向
+      ChassisInertial.resetRotation();  // 陀螺仪初始化
+ 
+      double dt = 0.01;
+      double stuck_time_count = 0;  // 电机卡死时间统计
+      double start_time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count();  // 运动开始时间
+      double move_time_out = Move_time_out + (val / v * 1000) * 1000;
+      int yaw_negative= 1;   // 负偏指示器
 
+      //  方向指示器
+      if (direction == 'q' || direction == 'b' || direction == 'l'){
+          yaw_negative = -1;
+      }
+      else if (direction == 'p' || direction == 'd' || direction == 'r'){
+          yaw_negative = 1;
+      }
+
+
+      PID pid(10, 8, 0.1); // 创建PID控制器实例 
+      pid.setSetpoint(val); // 设置目标位置
+
+      // 多线程阻断等待
+      while (MoveEnd == false){
+          wait(10, msec);
+          Moveing = false;
+      }
+
+      Moveing = true;  // 当前在运动
+      MoveEnd = false; // 运动没有完成
+
+      while (true) {  
+          double current_position = abs(ChassisInertial.rotation());  // 当前位置
+          double output = pid.calculate(current_position, dt);  // 补偿
+          // std::cout << output << std::endl;
+          // 控制小车运动 
+          ChassisForward(std::min(v, output), yaw_negative);   //  控制移动
+
+          // 检查目标是否达到  
+          if (fabs(current_position - val) <= 1) {
+              break;  
+          }  
+
+          // 多线程保护
+          if (Moveing == false){
+              break;
+          }
+
+          // 算法收敛保护
+          if (output <= Stuck_threshold){
+            break;
+          }
+
+          // 电机抱死保护
+          if (GetVelocity_mean() <= Stuck_threshold){
+              stuck_time_count += dt * 1000.0;  // 计算抱死时间
+              if (stuck_time_count >= Stuck_time_out){
+                std::cout << "stuck_time_count" << std::endl;
+                break;
+              }
+          }
+          else{
+            stuck_time_count = 0; // 不抱死则刷新计数
+          }
+
+          // 超时保护
+          double now_time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count();// 当前时间
+          if (now_time - start_time >= move_time_out / 1000){
+              std::cout << "timeout" << std::endl;
+              break;
+          }
+
+          wait(dt * 1000.0, msec);
+      }  
+
+      ChassisStoppingHold();
+      Moveing = false;  // 运动停止了
+      MoveEnd = true; // 运动完成
+
+      std::cout << "ans: " << abs(ChassisInertial.rotation()) << std::endl;
   }
 
   // 旋转函数(可选多线程)
-  void Turn(double v, double val, char direction, bool task){
+  void ChassisControl::Turn(double v, double val, char direction, bool task){
+      if (task == true){
+          ChassisMoveParams* Params = new ChassisMoveParams();
+          Params->self = this;
+          Params->v = v;
+          Params->val = val;
+          Params->direction = direction;
 
+          void* p = Params;
+          vex::task Task(TurnTask, p);
+      }
+      else{
+          Turn(v, val, direction);    
+      }
   }
 
-//  多线程运动友元函数
+    // 等待底盘运动完成
+  void ChassisControl::WaitMoveFinish(){
+      while(Moveing){
+          wait(10, msec);
+      }
+  }
+
+//  多线程运动（直线）友元函数
 int MoveTask(void* args){
     ChassisMoveParams* params = (ChassisMoveParams*)args;
     ChassisControl* self= params->self;       // 当前类
@@ -231,6 +325,19 @@ int MoveTask(void* args){
     char direction      = params->direction;  // 运动方向
     double yaw          = params->yaw;        // 偏转
     self->Move(v, val, yaw, direction);
+
+    // delete args;
+    return 0;
+}
+
+//  多线程运动（旋转）友元函数
+int TurnTask(void* args){
+    ChassisMoveParams* params = (ChassisMoveParams*)args;
+    ChassisControl* self= params->self;       // 当前类
+    double v            = params->v;          // 速度
+    double val          = params->val;        // 路径长度
+    char direction      = params->direction;  // 运动方向
+    self->Turn(v, val, direction);
 
     // delete args;
     return 0;

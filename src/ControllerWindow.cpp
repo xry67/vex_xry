@@ -106,7 +106,7 @@ BaseWindow* ModWindowFun(){
 //  模式-遥控
 BaseWindow* RemoteControlWindow_ModFun(){
     int index = -1;
-    std::vector<char*> options = {"左单摇杆", "右单摇杆", "双摇杆", "坦克操控"};
+    std::vector<char*> options = {"双摇杆", "左单摇杆", "右单摇杆", "坦克操控"};
     PrintInLine(1);
     Controller.Screen.print("遥控>遥控选择");
     PrintInLine(3);
@@ -413,7 +413,7 @@ BaseWindow* TestInertialWindowFun(){
 
     while (true){
         PrintInLine(2);
-        Controller.Screen.print("位置：%f           ", Gyro_new.angle(deg));
+        Controller.Screen.print("位置：%f           ", Gyro_new.rotation());
 
         if (Controller.ButtonB.pressing()){
           return TestInertialWindow->Back();

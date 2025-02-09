@@ -11,6 +11,8 @@ using namespace vex;
 
 extern int ControllerScreenWidth;  // 屏幕宽度
 extern int RemoteControlMod;       // 遥控模式
+extern int PowerLimit;             // 电量低警示
+extern double blindCA;             // 摇杆死区
 
 
 //  硬件定义

@@ -28,8 +28,20 @@ void ChassisInertialInit(){
     }
 }
 
+// 电量监控
+vex::task LowBatteryMonitor_task;
+int LowBatteryMonitor(){
+    while (true) {
+        if (Brain.Battery.capacity(pct) <= PowerLimit) {
+            Controller.rumble(". .");
+        }
+        vex::task::sleep(1000);
+    }
+}
+
 // 初始化 
 void vexcodeInit(void) {
+    LowBatteryMonitor_task = vex::task(LowBatteryMonitor);  // 电量监控开启
     ChassisInertialInit();  // 底盘陀螺仪初始化
     AddAutoFun();           // 自动函数初始化
 }

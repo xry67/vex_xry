@@ -3,57 +3,108 @@
 #include "RemoteControl.h"
 #include "units.h"
 
-// 底盘控制
-void ChassisControl(){
+// 左电机控制
+void LeftMotorControl(int val){
+    LeftMotor1.spin(vex::forward, 0.128*val, voltageUnits::volt);
+    LeftMotor2.spin(vex::forward, 0.128*val, voltageUnits::volt);
+    LeftMotor3.spin(vex::forward, 0.128*val , voltageUnits::volt);
 
-    float axis1 = Controller.Axis1.position();
-    float axis2 = Controller.Axis2.position();
-    float axis3 = Controller.Axis3.position();
-    float axis4 = Controller.Axis4.position();
+}
 
-    //  1：左 2：右 3：双 4：坦克
-    if (RemoteControlMod == 1){
-        float Sensitivity_1 = 1;
-        float Sensitivity_2 = 1;
+// 右电机控制
+void RightMotorControl(int val){
+    RightMotor1.spin(vex::forward, 0.128*val , voltageUnits::volt);
+    RightMotor2.spin(vex::forward, 0.128*val , voltageUnits::volt);
+    RightMotor3.spin(vex::forward, 0.128*val , voltageUnits::volt);
+}
 
-        char* formattedString = "->左摇杆控制<-";
-        CenterStr(formattedString);
-        Controller.Screen.print(formattedString);
-        LeftMotorGroup.spin(forward, axis3 * Sensitivity_1 + axis4 * Sensitivity_2, voltageUnits::volt);
-        RightMotorGroup.spin(forward, axis3 * Sensitivity_1 - axis4 * Sensitivity_2, voltageUnits::volt);
+// 电机停止
+void BaseMotorStop(int mode = 1) {
+    if (mode == 2) {
+        LeftMotor1.stop(hold);
+        RightMotor1.stop(hold);    
+        RightMotor3.stop(hold);
+        LeftMotor2.stop(hold);
+        LeftMotor3.stop(hold);
+        RightMotor2.stop(hold);
     }
+    else if (mode == 1) {
+        LeftMotor1.stop(brake);
+        RightMotor1.stop(brake);
+        LeftMotor2.stop(brake);
+        LeftMotor3.stop(brake);
+        RightMotor2.stop(brake);
+        RightMotor3.stop(brake);
+    }
+    else {
+        LeftMotor1.stop(coast);
+        RightMotor1.stop(coast);
+        LeftMotor2.stop(coast);
+        RightMotor2.stop(coast);
+        LeftMotor3.stop(coast);
+        RightMotor3.stop(coast);
+    }
+  
+}
 
+// 底盘控制
+void ChassisControlFun(){
+
+    int axis1 = Controller.Axis1.position();
+    int axis2 = Controller.Axis2.position();
+    int axis3 = Controller.Axis3.position();
+    int axis4 = Controller.Axis4.position();
+
+    //  1：双 2：左 3：右 4：坦克
     if (RemoteControlMod == 2){
         float Sensitivity_1 = 1;
-        float Sensitivity_2 = 1;
+        float Sensitivity_2 = 0.9;
+        if (abs(axis3) > blindCA || abs(axis4) > blindCA ){
+            LeftMotorControl(axis3 * Sensitivity_1 + axis4 * Sensitivity_2);
+            RightMotorControl(axis3 * Sensitivity_1 - axis4 * Sensitivity_2);
+        }
+        else{
+            BaseMotorStop(0);
+        }
 
-        char* formattedString = "->右摇杆控制<-";
-        CenterStr(formattedString);
-        Controller.Screen.print(formattedString);
-        LeftMotorGroup.spin(forward, axis2 * Sensitivity_1 + axis1 * Sensitivity_2, voltageUnits::volt);
-        RightMotorGroup.spin(forward, axis2 * Sensitivity_1 - axis1 * Sensitivity_2, voltageUnits::volt);
     }
 
     if (RemoteControlMod == 3){
         float Sensitivity_1 = 1;
-        float Sensitivity_2 = 1;
+        float Sensitivity_2 = 0.9;
+        if (abs(axis2) > blindCA || abs(axis1) > blindCA ){
+            LeftMotorControl(axis2 * Sensitivity_1 + axis1 * Sensitivity_2);
+            RightMotorControl(axis2 * Sensitivity_1 - axis1 * Sensitivity_2);
+        }
+        else{
+            BaseMotorStop(0);
+        }
+    }
 
-        char* formattedString = "->双摇杆控制<-";
-        CenterStr(formattedString);
-        Controller.Screen.print(formattedString);
-        LeftMotorGroup.spin(forward, axis3 * Sensitivity_1 + axis1 * Sensitivity_2, voltageUnits::volt);
-        RightMotorGroup.spin(forward, axis3 * Sensitivity_1 - axis1 * Sensitivity_2, voltageUnits::volt);
+    if (RemoteControlMod == 1){
+        float Sensitivity_1 = 1;
+        float Sensitivity_2 = 0.9;
+        // 死区判定
+        if (abs(axis3) > blindCA || abs(axis1) > blindCA ){
+            LeftMotorControl(axis3 * Sensitivity_1 + axis1 * Sensitivity_2);
+            RightMotorControl(axis3 * Sensitivity_1 - axis1 * Sensitivity_2);
+        }
+        else{
+            BaseMotorStop(0);
+        }
     }
 
     if (RemoteControlMod == 4){
         float Sensitivity_1 = 1;
         // float Sensitivity_2 = 1;
-        
-        char* formattedString = "->坦克摇杆控制<-";
-        CenterStr(formattedString);
-        Controller.Screen.print(formattedString);
-        LeftMotorGroup.spin(forward, axis3 * Sensitivity_1, voltageUnits::volt);
-        RightMotorGroup.spin(forward, axis2 * Sensitivity_1, voltageUnits::volt);
+        if (abs(axis3) > blindCA || abs(axis2) > blindCA ){
+            LeftMotorControl(axis3 * Sensitivity_1);
+            RightMotorControl(axis2 * Sensitivity_1);
+        }
+        else{
+            BaseMotorStop(0);
+        }
+
     }
 }
 
@@ -88,6 +139,7 @@ void UpdataRemoteControlDataList(RemoteControlDataList *RemoteControlData_list){
 bool HoldButtonB(RemoteControlDataList *RemoteControlData_list, int limit = 100){
     int count = 0;
     for (int i=0; i<RemoteControlData_list->size(); i++){
+        // 个数检测
         if (count >= limit){
             return true;
         }
@@ -95,6 +147,12 @@ bool HoldButtonB(RemoteControlDataList *RemoteControlData_list, int limit = 100)
             // 屏幕更新
             PrintInLine(3);
             Controller.Screen.print("             退出(B: %2d)", count);
+
+            // 震动
+            if (count == limit * 0.9){
+                std::cout << "---" << std::endl;
+                Controller.rumble("..");
+            }
             return false;
         }
         count += 1;
@@ -116,7 +174,7 @@ void RemoteControl(){
         UpdataRemoteControlDataList(&RemoteControlData_list);
 
         // 底盘控制
-        ChassisControl();
+        ChassisControlFun();
 
         // 其他控制
 

@@ -4,7 +4,9 @@
 using namespace vex;
 
 int ControllerScreenWidth = 210;  // 屏幕宽度
-int RemoteControlMod      = 0;    // 遥控模式  1：左 2：右 3：双 4：坦克
+int RemoteControlMod      = 3;    // 遥控模式  1：左 2：右 3：双 4：坦克
+int PowerLimit            = 25;   // 电量低警示
+double blindCA            = 2;    // 摇杆死区
 
 
 // 自动程序加入
@@ -26,4 +28,3 @@ motor RightMotor3 = motor(PORT20, ratio6_1, 0);//19
 motor_group RightMotorGroup = motor_group(RightMotor1, RightMotor2, RightMotor3);  // 右边边电机组
 
 inertial ChassisInertial = inertial(PORT6);  // 底盘陀螺仪
-// smartdrive Smartdrive = smartdrive(LeftMotorGroup, RightMotorGroup, ChassisInertial, 259.34, 320, 40, mm, 1);  // 官方底盘 驱动
