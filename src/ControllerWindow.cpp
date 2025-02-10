@@ -4,8 +4,9 @@
 #include "RemoteControl.h"
 #include "units.h"
 
-BaseWindow* InitWindow = new BaseWindow("初始化", nullptr, InitWindowFun);
-BaseWindow* ModWindow  = new BaseWindow("模式选择", nullptr, ModWindowFun);
+BaseWindow* InitWindow          = new BaseWindow("初始化", nullptr, InitWindowFun);
+BaseWindow* RemoteControlWindow = new BaseWindow("遥控选择", InitWindow, RemoteControlWindowFun);
+BaseWindow* ModWindow           = new BaseWindow("模式选择", RemoteControlWindow, ModWindowFun);
 
 BaseWindow* RemoteControlWindow_Mod     = new BaseWindow("模式-遥控", ModWindow, RemoteControlWindow_ModFun);     //  模式-遥控
 BaseWindow* RemoteControlWindow_Compete = new BaseWindow("比赛-遥控模式", ModWindow, RemoteControlWindow_CompeteFun); //  比赛-遥控模式
@@ -77,6 +78,54 @@ int ChoiceIndex(std::vector<char*> options){
 
 // 初始化函数
 BaseWindow* InitWindowFun(){
+    // 站位选择
+
+    PrintInLine(1);
+    Controller.Screen.print("选择你的站位");
+    PrintInLine(2);
+    Controller.Screen.print("     红方(A) 蓝方(B)");
+
+    while (true){
+        // 选项确认 
+        if (Controller.ButtonA.pressing()){
+            stance = 'r';
+            break;
+        }
+
+        if (Controller.ButtonB.pressing()){
+            stance = 'b';
+           break;
+        }
+
+        wait(50, msec);
+    }
+
+    // 如果遥控已经确定，则跳过遥控选择 进行模式选择
+    if (RemoteControlModLock){
+        return ModWindow;
+    }
+    else{
+        return RemoteControlWindow;
+    }
+}
+
+// 遥控模式选择
+BaseWindow* RemoteControlWindowFun(){
+    int index = -1;
+    std::vector<char*> options = {"双摇杆", "左单摇杆", "右单摇杆", "坦克操控"};
+    PrintInLine(1);
+    Controller.Screen.print("遥控>遥控选择");
+    PrintInLine(3);
+    Controller.Screen.print("      确定(A)   返回(B)");
+
+    index = ChoiceIndex(options);  // 获取用户操作
+    RemoteControlMod = index + 1;  // 更改遥控选择
+
+    if (index == -1){
+      return RemoteControlWindow->Back();
+    }
+
+    std::cout << options[index] << std::endl;
 
     return ModWindow;
 }
@@ -89,10 +138,18 @@ BaseWindow* ModWindowFun(){
     PrintInLine(1);
     Controller.Screen.print("选择你的操作");
     PrintInLine(3);
-    Controller.Screen.print("                 确定(A)");
+    Controller.Screen.print("      确定(A)   返回(B)");
 
-    while (index == -1){
-        index = ChoiceIndex(options);
+    index = ChoiceIndex(options);  // 获取用户操作
+    if (index == -1){
+      // 如果遥控已经确定，则跳过遥控选择 进行站位选择
+      if (RemoteControlModLock){
+          return ModWindow->Back()->Back();
+      }
+      else{
+          return ModWindow->Back();
+      }
+      
     }
 
     std::cout << options[index] << std::endl;
@@ -105,22 +162,22 @@ BaseWindow* ModWindowFun(){
 
 //  模式-遥控
 BaseWindow* RemoteControlWindow_ModFun(){
-    int index = -1;
-    std::vector<char*> options = {"双摇杆", "左单摇杆", "右单摇杆", "坦克操控"};
-    PrintInLine(1);
-    Controller.Screen.print("遥控>遥控选择");
-    PrintInLine(3);
-    Controller.Screen.print("      确定(A)   返回(B)");
+    // int index = -1;
+    // std::vector<char*> options = {"双摇杆", "左单摇杆", "右单摇杆", "坦克操控"};
+    // PrintInLine(1);
+    // Controller.Screen.print("遥控>遥控选择");
+    // PrintInLine(3);
+    // Controller.Screen.print("      确定(A)   返回(B)");
 
-    index = ChoiceIndex(options);  // 获取用户操作
-    RemoteControlMod = index + 1;  // 更改遥控选择
+    // index = ChoiceIndex(options);  // 获取用户操作
+    // RemoteControlMod = index + 1;  // 更改遥控选择
 
-    if (index == -1){
-      return RemoteControlWindow_Mod->Back();
-    }
+    // if (index == -1){
+    //   return RemoteControlWindow_Mod->Back();
+    // }
 
-    std::cout << options[index] << std::endl;
-    Controller.Screen.clearScreen();  // 清除屏幕
+    // std::cout << options[index] << std::endl;
+    // Controller.Screen.clearScreen();  // 清除屏幕
     RemoteControl();
 
     return ModWindow;
@@ -254,22 +311,22 @@ BaseWindow* AutoChoiceWindow_CompeteFun(){
 
 // 自动-遥控选择
 BaseWindow* RemoteControlWindow_AutoFun(){
-    int index = -1;
-    std::vector<char*> options = {"左单摇杆", "右单摇杆", "双摇杆", "坦克操控"};
-    PrintInLine(1);
-    Controller.Screen.print("自动结束>遥控选择");
-    PrintInLine(3);
-    Controller.Screen.print("      确定(A)   返回(B)");
+    // int index = -1;
+    // std::vector<char*> options = {"左单摇杆", "右单摇杆", "双摇杆", "坦克操控"};
+    // PrintInLine(1);
+    // Controller.Screen.print("自动结束>遥控选择");
+    // PrintInLine(3);
+    // Controller.Screen.print("      确定(A)   返回(B)");
 
-    index = ChoiceIndex(options);  // 获取用户操作
-    RemoteControlMod = index + 1;  // 更改遥控选择
+    // index = ChoiceIndex(options);  // 获取用户操作
+    // RemoteControlMod = index + 1;  // 更改遥控选择
 
-    if (index == -1){
-      return RemoteControlWindow_Auto->Back();
-    }
+    // if (index == -1){
+    //   return RemoteControlWindow_Auto->Back();
+    // }
 
-    std::cout << options[index] << std::endl;
-    Controller.Screen.clearScreen();  // 清除屏幕
+    // std::cout << options[index] << std::endl;
+    // Controller.Screen.clearScreen();  // 清除屏幕
     RemoteControl();
 
     return RemoteControlWindow_Auto->Back();;

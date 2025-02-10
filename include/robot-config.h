@@ -11,8 +11,10 @@ using namespace vex;
 
 extern int ControllerScreenWidth;  // 屏幕宽度
 extern int RemoteControlMod;       // 遥控模式
+extern bool RemoteControlModLock;  // ture: 不再选择遥控模式，以RemoteControlMod初始值为准，false:需要选择
 extern int PowerLimit;             // 电量低警示
 extern double blindCA;             // 摇杆死区
+extern char stance;                // 站位选择
 
 
 //  硬件定义

@@ -4,10 +4,11 @@
 using namespace vex;
 
 int ControllerScreenWidth = 210;  // 屏幕宽度
-int RemoteControlMod      = 3;    // 遥控模式  1：左 2：右 3：双 4：坦克
+int RemoteControlMod      = 0;    // 遥控模式  1：双 2：左 3：右 4：坦克
+bool RemoteControlModLock = false ;// ture: 不再选择遥控模式，以RemoteControlMod初始值为准，false:需要选择
 int PowerLimit            = 25;   // 电量低警示
 double blindCA            = 2;    // 摇杆死区
-
+char stance               = 'r';  // 站位选择
 
 // 自动程序加入
 std::vector<AutoFun> AutoFunctions;

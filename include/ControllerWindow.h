@@ -65,6 +65,9 @@ extern BaseWindow* TestInertialWindow;     // 陀螺仪测试
 // 初始化函数
 BaseWindow* InitWindowFun();
 
+// 遥控模式选择
+BaseWindow* RemoteControlWindowFun();
+
 // 模式选择
 BaseWindow* ModWindowFun();
 
