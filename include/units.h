@@ -17,6 +17,9 @@ std::vector<char*> generateNumberStrings(int start, int end);
 // 获得字母序列
 std::vector<char*> generateAlphabetStrings(char start, char end);
 
+// 将角度规范到-180到180
+double NormsAngle(double val);
+
 // 等待转圈的字符
 class WaitStr
 {

@@ -1,6 +1,7 @@
 #include "vex.h"
 #include "robot-config.h"
 #include "RemoteControl.h"
+#include "ChassisControl.h"
 #include "units.h"
 
 // 左电机控制
@@ -177,6 +178,9 @@ void RemoteControl(){
         ChassisControlFun();
 
         // 其他控制
+        if (Controller.ButtonA.pressing()){
+          ChassisControlSTS.MoveTo(0, 0, 800, false);
+        }
 
         // 退出
         if (HoldButtonB(&RemoteControlData_list, 50)){

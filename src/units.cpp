@@ -48,3 +48,8 @@ std::vector<char*> generateAlphabetStrings(char start, char end) {
 
     return vec; // 返回含有char*的vector  
 } 
+
+// 将角度规范到-180到180
+double NormsAngle(double val){
+  return val - ((int)val / 360) * 360;
+}

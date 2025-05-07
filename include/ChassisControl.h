@@ -16,10 +16,10 @@ class ChassisControl{
   // 底盘前进
   void ChassisForward(double v, double yaw);
 
-  // 获取当前的位置
+  // 获取当前电机的位置
   double GetPositions_mean();
 
-  // 获取当前的速度
+  // 获取当前电机的速度
   double GetVelocity_mean();
 
   // 设置电机归位 
@@ -28,17 +28,25 @@ class ChassisControl{
   // 直线运动函数
   void Move(double v, double val, double yaw, char direction);
 
+
   // 直线运动函数(可选多线程)
   void Move(double v, double val, double yaw, char direction, bool task);
 
   // 旋转函数
   void Turn(double v, double val, char direction);
 
+  // 旋转到指定角度
+  void TurnTo(double v, double val, bool task);
+
   // 旋转函数(可选多线程)
   void Turn(double v, double val, char direction, bool task);
 
   // 等待底盘运动完成
   void WaitMoveFinish();
+
+  // 使用坐标-移动到某一坐标位置
+  void MoveTo(double x, double y, double v, bool task);
+
 
   private: 
     double  Move_time_out   = 3000;  // 超时保护，默认3000毫秒

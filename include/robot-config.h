@@ -34,6 +34,8 @@ extern motor_group RightMotorGroup;  // 右电机组
 extern inertial ChassisInertial;  // 底盘陀螺仪
 extern smartdrive Smartdrive;  // 官方底盘驱动
 
+extern rotation Rotation_x;  // 底盘定位轮x
+
 extern std::vector<AutoFun> AutoFunctions;  // 自动路径储存
 
 #endif
