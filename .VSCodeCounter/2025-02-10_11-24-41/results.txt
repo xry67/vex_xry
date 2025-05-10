@@ -1,0 +1,53 @@
+Date : 2025-02-10 11:24:41
+Directory : c:\Users\32685\Documents\vexcode-projects\WindowsTest
+Total : 24 files,  1278 codes, 230 comments, 397 blanks, all 1905 lines
+
+Languages
++----------+------------+------------+------------+------------+------------+
+| language | files      | code       | comment    | blank      | total      |
++----------+------------+------------+------------+------------+------------+
+| C++      |         21 |      1,179 |        197 |        363 |      1,739 |
+| Makefile |          3 |         99 |         33 |         34 |        166 |
++----------+------------+------------+------------+------------+------------+
+
+Directories
++----------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                             | files      | code       | comment    | blank      | total      |
++----------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                                |         24 |      1,278 |        230 |        397 |      1,905 |
+| . (Files)                                                                        |          1 |         12 |          9 |         10 |         31 |
+| include                                                                          |         12 |        371 |         60 |        137 |        568 |
+| src                                                                              |          9 |        808 |        137 |        226 |      1,171 |
+| vex                                                                              |          2 |         87 |         24 |         24 |        135 |
++----------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++----------------------------------------------------------------------------------+----------+------------+------------+------------+------------+
+| filename                                                                         | language | code       | comment    | blank      | total      |
++----------------------------------------------------------------------------------+----------+------------+------------+------------+------------+
+| c:\Users\32685\Documents\vexcode-projects\WindowsTest\include\AutoFun.h          | C++      |         12 |          0 |          3 |         15 |
+| c:\Users\32685\Documents\vexcode-projects\WindowsTest\include\ChassisControl.h   | C++      |         36 |         14 |         18 |         68 |
+| c:\Users\32685\Documents\vexcode-projects\WindowsTest\include\Controller.h       | C++      |          0 |          0 |          1 |          1 |
+| c:\Users\32685\Documents\vexcode-projects\WindowsTest\include\ControllerWindow.h | C++      |         62 |         21 |         32 |        115 |
+| c:\Users\32685\Documents\vexcode-projects\WindowsTest\include\PID.h              | C++      |         29 |          2 |          8 |         39 |
+| c:\Users\32685\Documents\vexcode-projects\WindowsTest\include\RemoteControl.h    | C++      |        117 |          9 |         31 |        157 |
+| c:\Users\32685\Documents\vexcode-projects\WindowsTest\include\RobotControl.h     | C++      |          5 |          1 |          6 |         12 |
+| c:\Users\32685\Documents\vexcode-projects\WindowsTest\include\auto.h             | C++      |         11 |          2 |          5 |         18 |
+| c:\Users\32685\Documents\vexcode-projects\WindowsTest\include\initialize.h       | C++      |         34 |          5 |          9 |         48 |
+| c:\Users\32685\Documents\vexcode-projects\WindowsTest\include\robot-config.h     | C++      |         28 |          1 |         10 |         39 |
+| c:\Users\32685\Documents\vexcode-projects\WindowsTest\include\units.h            | C++      |         21 |          5 |          9 |         35 |
+| c:\Users\32685\Documents\vexcode-projects\WindowsTest\include\vex.h              | C++      |         16 |          0 |          5 |         21 |
+| c:\Users\32685\Documents\vexcode-projects\WindowsTest\makefile                   | Makefile |         12 |          9 |         10 |         31 |
+| c:\Users\32685\Documents\vexcode-projects\WindowsTest\src\ChassisControl.cpp     | C++      |        248 |         42 |         54 |        344 |
+| c:\Users\32685\Documents\vexcode-projects\WindowsTest\src\ControllerWindow.cpp   | C++      |        326 |         61 |        108 |        495 |
+| c:\Users\32685\Documents\vexcode-projects\WindowsTest\src\RemoteControl.cpp      | C++      |        142 |         17 |         30 |        189 |
+| c:\Users\32685\Documents\vexcode-projects\WindowsTest\src\RobotControl.cpp       | C++      |          6 |          5 |          3 |         14 |
+| c:\Users\32685\Documents\vexcode-projects\WindowsTest\src\auto1.cpp              | C++      |         11 |          1 |          2 |         14 |
+| c:\Users\32685\Documents\vexcode-projects\WindowsTest\src\auto2.cpp              | C++      |          9 |          0 |          5 |         14 |
+| c:\Users\32685\Documents\vexcode-projects\WindowsTest\src\main.cpp               | C++      |         13 |          1 |          5 |         19 |
+| c:\Users\32685\Documents\vexcode-projects\WindowsTest\src\robot-config.cpp       | C++      |         21 |          2 |          8 |         31 |
+| c:\Users\32685\Documents\vexcode-projects\WindowsTest\src\units.cpp              | C++      |         32 |          8 |         11 |         51 |
+| c:\Users\32685\Documents\vexcode-projects\WindowsTest\vex\mkenv.mk               | Makefile |         68 |         17 |         17 |        102 |
+| c:\Users\32685\Documents\vexcode-projects\WindowsTest\vex\mkrules.mk             | Makefile |         19 |          7 |          7 |         33 |
+| Total                                                                            |          |      1,278 |        230 |        397 |      1,905 |
++----------------------------------------------------------------------------------+----------+------------+------------+------------+------------+

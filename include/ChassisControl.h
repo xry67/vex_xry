@@ -32,6 +32,12 @@ class ChassisControl{
   // 直线运动函数(可选多线程)
   void Move(double v, double val, double yaw, char direction, bool task);
 
+  // 直线运动函数
+  void MoveToDistance(double v, double val, std::string DistanceChioce);
+
+  // 直线运动函数(可选多线程)
+  void MoveToDistance(double v, double val, std::string DistanceChioce, bool task);
+
   // 旋转函数
   void Turn(double v, double val, char direction);
 
@@ -51,7 +57,7 @@ class ChassisControl{
   private: 
     double  Move_time_out   = 3000;  // 超时保护，默认3000毫秒
     double  Stuck_time_out  = 1000;  // 电机卡死保护，默认1000毫秒
-    double  Stuck_threshold = 5;     // 电机卡死认定阈值，单位dps
+    double  Stuck_threshold = 2;     // 电机卡死认定阈值，单位dps
     bool    Moveing         = false; // 记录是否在运动
     bool    MoveEnd         = true;  // 记录运动是否完成
 

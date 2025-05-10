@@ -8,6 +8,47 @@
 #include "Positioning.h"
 #include "units.h"
 
+double GetDistance_front(){
+  double value1 = Distance_fl.objectDistance(mm);
+  double value2 = Distance_fl.objectDistance(mm);
+  return (value1 + value2) / 2.0;
+}
+
+double GetDistance_back(){
+  double value1 = Distance_bl.objectDistance(mm);
+  double value2 = Distance_bl.objectDistance(mm);
+  return (value1 + value2) / 2.0;
+}
+
+double GetDistance_left(){
+  return Distance_l.objectDistance(mm);
+}
+
+double GetDistance_right(){
+  return Distance_r.objectDistance(mm);
+}
+
+double GetDistance(std::string aspect){
+  if (aspect == "front"){
+    return GetDistance_front();
+  }
+
+  if (aspect == "back"){
+    return GetDistance_front();
+  }
+  
+  if (aspect == "left"){
+    return GetDistance_front();
+  }
+  
+  if (aspect == "right"){
+    return GetDistance_front();
+  }
+  return 0.0;
+}
+
+
+
 ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
 
 // 底盘运动控制算法
@@ -234,8 +275,8 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       }
 
 
-      PID pid(10, 8, 0.1); // 创建PID控制器实例 
-      pid.setSetpoint(val); // 设置目标位置
+      PID pid(20, 1, 0.5); // 创建PID控制器实例 
+      pid.setSetpoint(taget_angle); // 设置目标位置
 
       // 多线程阻断等待
       while (MoveEnd == false){
@@ -248,23 +289,30 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
 
       while (true) {  
           double current_position = ChassisInertial.rotation();  // 当前位置
-          double output = pid.calculate(abs(current_position - start_angle), dt);  // 补偿
+          double output = pid.calculate(current_position, dt) * yaw_negative;  // 补偿
+          // std::cout << "current_position" << current_position << std::endl;
+          // std::cout << "output" << output << std::endl;
+
           // std::cout << output << std::endl;
           // 控制小车运动 
           ChassisForward(std::min(v, output), yaw_negative);   //  控制移动
+          
 
           // 检查目标是否达到  
-          if (abs(current_position - taget_angle) <= 1) {
-              break;  
+          if (abs(current_position - taget_angle) <= 1 && abs(output) < 10) {
+            std::cout << "OVER" << std::endl;
+            break;  
           }  
 
           // 多线程保护
           if (Moveing == false){
+              std::cout << "Moveing STOP" << std::endl;
               break;
           }
 
           // 算法收敛保护
-          if (output <= Stuck_threshold){
+          if (abs(output) <= Stuck_threshold){
+            std::cout << "output MININUM" << std::endl;
             break;
           }
 
@@ -316,7 +364,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
 
   // 旋转到指定角度
   void ChassisControl::TurnTo(double v, double val, bool task){
-    double start_angle   = ChassisInertial.rotation();
+    double start_angle        = ChassisInertial.rotation();
     double start_angle_norm   = NormsAngle(start_angle);
 
     std::cout << start_angle_norm - val  << std::endl;
@@ -340,10 +388,18 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
 
     // 使用坐标-移动到某一坐标位置
   void ChassisControl::MoveTo(double x, double y, double v, bool task){
+    PositioningSTS.TurnOFF();
     double target_angle = PositioningSTS.GetAngle(x - PositioningSTS.x, y - PositioningSTS.y);
+    std::cout << "xy:" << x - PositioningSTS.x << " " << y - PositioningSTS.y << std::endl;
+    std::cout << "angle:" << target_angle << std::endl;
+
     this->TurnTo(v, target_angle, task);
 
-    return ;
+    // wait(2000, msec);
+    std::cout<< ChassisInertial.rotation(deg) << std::endl;
+    PositioningSTS.TurnOn();
+
+    //return ;
 
     double val = sqrt((x - PositioningSTS.x) * (x - PositioningSTS.x) + (y - PositioningSTS.y) * (y - PositioningSTS.y));
     char direction = 'n';
@@ -354,7 +410,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
     // 偏转
     // 方向
     // 多线程
-    Rotation_x.resetPosition();
+    Rotation_y.resetPosition();
 
     double dt = 0.01;
     double stuck_time_count = 0;  // 电机卡死时间统计
@@ -389,7 +445,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
     MoveEnd = false; // 运动没有完成
 
     while (true) {  
-        double current_position = Rotation_x.position(deg);  // 当前位置
+        double current_position = Rotation_y.position(deg);  // 当前位置
         double output = pid.calculate(current_position, dt);  // 补偿
         // 控制小车运动 
         ChassisForward(std::min(v, output) * negative, yaw * yaw_negative);   //  控制移动
@@ -436,6 +492,108 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
     MoveEnd = true; // 运动完成
 
     std::cout << "ans: " << GetPositions_mean() << std::endl;
+
+  }
+
+    // 直线运动函数
+  void ChassisControl::MoveToDistance(double v, double val, std::string DistanceChioce){
+      // 最大速度
+      // 运动距离
+      // 偏转
+      // 方向
+      // 多线程
+      ChassisRsetPosition();  // 电机初始化
+
+      double start_val = GetDistance(DistanceChioce);
+      double dt = 0.01;
+      double stuck_time_count = 0;  // 电机卡死时间统计
+      double start_time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count();  // 运动开始时间
+      double move_time_out = Move_time_out + ((start_val - val) / v * 1000);
+      int    negative = 1;   // 负方向指示器
+      
+
+      //  方向指示器
+      if (DistanceChioce == "front"){
+        if (start_val > val)
+        {
+          negative = -1;
+        }
+      }
+
+      PID pid(3, 1, 0.1); // 创建PID控制器实例。 
+      pid.setSetpoint(val); // 设置目标位置
+
+      // 多线程阻断等待
+      while (MoveEnd == false){
+          wait(10, msec);
+          Moveing = false;
+      }
+
+      Moveing = true;  // 当前在运动
+      MoveEnd = false; // 运动没有完成
+
+      while (true) {  
+          double current_position = GetDistance(DistanceChioce);  // 当前位置
+          double output = pid.calculate(current_position, dt) * negative;  // 补偿
+          std::cout << "->"  << current_position << " " << output << std::endl;
+
+          // 控制小车运动 
+          if (output > 0){
+            ChassisForward(std::min(v, output), 0);   //  控制移动
+          }
+          else{
+            ChassisForward(std::max(v * -1, output), 0);   //  控制移动
+          }
+
+          // 检查目标是否达到  
+          if (fabs(current_position - val) <= 1) {
+              std::cout << "OVER" << std::endl;
+              break;  
+          }  
+
+          // 多线程保护
+          if (Moveing == false){
+              std::cout << "Moveing STOP" << std::endl;
+              break;
+          }
+
+          // 算法收敛保护
+          if (abs(output) <= Stuck_threshold){
+            std::cout << "output MININUM" << std::endl;
+            break;
+          }
+
+          // 电机抱死保护
+          if (GetVelocity_mean() <= Stuck_threshold){
+              stuck_time_count += dt * 1000.0;  // 计算抱死时间
+              if (stuck_time_count >= Stuck_time_out){
+                std::cout << "stuck_time_count" << std::endl;
+                break;
+              }
+          }
+          else{
+            stuck_time_count = 0; // 不抱死则刷新计数
+          }
+
+          // 超时保护
+          double now_time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count();// 当前时间
+          if (now_time - start_time >= move_time_out / 1000){
+              std::cout << "timeout" << std::endl;
+              break;
+          }
+
+          wait(dt * 1000.0, msec);
+      }  
+
+      ChassisStoppingHold();
+      Moveing = false;  // 运动停止了
+      MoveEnd = true; // 运动完成
+
+      std::cout << "ans: " << GetDistance(DistanceChioce) << std::endl;
+  }
+
+  // 直线运动函数(可选多线程)
+  void ChassisControl::MoveToDistance(double v, double val, std::string DistanceChioce, bool task){
 
   }
 

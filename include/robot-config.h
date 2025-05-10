@@ -35,6 +35,15 @@ extern inertial ChassisInertial;  // 底盘陀螺仪
 extern smartdrive Smartdrive;  // 官方底盘驱动
 
 extern rotation Rotation_x;  // 底盘定位轮x
+extern rotation Rotation_y;  // 底盘定位轮y
+
+// 距离传感器
+extern distance Distance_fl;  // 左前
+extern distance Distance_fr;  // 右前
+extern distance Distance_bl;  // 左后
+extern distance Distance_br;  // 右后
+extern distance Distance_l;  // 左
+extern distance Distance_r;  // 右
 
 extern std::vector<AutoFun> AutoFunctions;  // 自动路径储存
 
