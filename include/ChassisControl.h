@@ -5,6 +5,7 @@
 #include <chrono>  
 #include <thread>  
 #include "vex.h"
+#include "PID.h"
 
 // 底盘运动控制算法
 class ChassisControl{
@@ -13,8 +14,17 @@ class ChassisControl{
   // 底盘停止（抱死）
   void ChassisStoppingHold();
   
+  // 底盘直行初始化
+  void ChassisStraight(int negative);
+
   // 底盘前进
   void ChassisForward(double v, double yaw);
+
+  // 底盘左轮控制
+  void ChassisLeftControl(double v);
+
+  // 底盘左轮控制
+  void ChassisRightControl(double v);
 
   // 获取当前电机的位置
   double GetPositions_mean();
@@ -32,11 +42,17 @@ class ChassisControl{
   // 直线运动函数(可选多线程)
   void Move(double v, double val, double yaw, char direction, bool task);
 
-  // 直线运动函数
+  // 直线运动函数（使用距离传感器）
   void MoveToDistance(double v, double val, std::string DistanceChioce);
 
-  // 直线运动函数(可选多线程)
+  // 直线运动函数(使用距离传感器)
   void MoveToDistance(double v, double val, std::string DistanceChioce, bool task);
+
+  // 直线运动函数（使用定位轮）
+  void MoveBySmallWheel(double v, double val, double yaw, char direction);
+
+  // 直线运动函数（使用定位轮）
+  void MoveBySmallWheel(double v, double val, double yaw, char direction, bool task);
 
   // 旋转函数
   void Turn(double v, double val, char direction);
@@ -46,6 +62,12 @@ class ChassisControl{
 
   // 旋转函数(可选多线程)
   void Turn(double v, double val, char direction, bool task);
+
+  // 追随某个目标
+  void FollowTarget(double v, double val, aivision::colordesc Color);
+
+  // 追随某个目标(多线程)
+  void FollowTarget(double v, double val, aivision::colordesc Color, bool task);
 
   // 等待底盘运动完成
   void WaitMoveFinish();
@@ -60,6 +82,10 @@ class ChassisControl{
     double  Stuck_threshold = 2;     // 电机卡死认定阈值，单位dps
     bool    Moveing         = false; // 记录是否在运动
     bool    MoveEnd         = true;  // 记录运动是否完成
+
+    PID     *StraightPid;            // 创建PID控制器实例 
+    double  StraightAngle   = 0.0;   // 记录直行的角度
+    int     StraightNegative = 1;    // 记录执行方向
 
 };
 

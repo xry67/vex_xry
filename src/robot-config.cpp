@@ -9,6 +9,8 @@ bool RemoteControlModLock = false ;// ture: 不再选择遥控模式，以Remote
 int PowerLimit            = 25;   // 电量低警示
 double blindCA            = 2;    // 摇杆死区
 char stance               = 'r';  // 站位选择
+int aiVision_w            = 316;  // ai相机的宽度 
+int aiVision_h            = 211;  // ai相机的宽度
 
 // 自动程序加入
 std::vector<AutoFun> AutoFunctions;
@@ -30,8 +32,12 @@ motor_group RightMotorGroup = motor_group(RightMotor1, RightMotor2, RightMotor3)
 
 inertial ChassisInertial = inertial(PORT16);  // 底盘陀螺仪
 
-rotation Rotation_x = rotation(PORT14, false);  // 底盘定位轮x
-rotation Rotation_y = rotation(PORT1, true);  // 底盘定位轮y
+rotation Rotation_x = rotation(PORT14, true);  // 底盘定位轮x
+rotation Rotation_y = rotation(PORT1, false);  // 底盘定位轮y
+
+// 视觉传感器
+aivision::colordesc Red = aivision::colordesc(1, 175, 44, 66, 17.00, 0.34);
+aivision aiVision = aivision(PORT13, Red);
 
 // 距离传感器
 distance Distance_fl = distance(PORT2);  // 左前

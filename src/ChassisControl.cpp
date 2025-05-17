@@ -34,15 +34,15 @@ double GetDistance(std::string aspect){
   }
 
   if (aspect == "back"){
-    return GetDistance_front();
+    return GetDistance_back();
   }
   
   if (aspect == "left"){
-    return GetDistance_front();
+    return GetDistance_left();
   }
   
   if (aspect == "right"){
-    return GetDistance_front();
+    return GetDistance_right();
   }
   return 0.0;
 }
@@ -55,7 +55,12 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
 
   // 底盘停止（抱死）
   void ChassisControl::ChassisStoppingHold(){
-      ChassisForward(0, 0);
+      LeftMotor1.spin(vex::forward,  0, dps);
+      LeftMotor2.spin(vex::forward,  0, dps);
+      LeftMotor3.spin(vex::forward,  0, dps);
+      RightMotor1.spin(vex::forward, 0, dps);
+      RightMotor2.spin(vex::forward, 0, dps);
+      RightMotor3.spin(vex::forward, 0, dps);
       LeftMotor1.setStopping(hold);
       LeftMotor2.setStopping(hold);
       LeftMotor3.setStopping(hold);
@@ -64,8 +69,36 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       RightMotor3.setStopping(hold);
   }
 
+  // 底盘直行初始化
+  void ChassisControl::ChassisStraight(int negative){
+      this->StraightPid     = new PID(20, 0.1, 0.1);
+      this->StraightAngle    = ChassisInertial.rotation();
+      this->StraightPid->setSetpoint(this->StraightAngle);
+      this->StraightNegative = negative;
+  }
+
   // 底盘前进
   void ChassisControl::ChassisForward(double v, double yaw = 0){
+
+      if (yaw == 0){
+        double now_rotation = ChassisInertial.rotation();
+
+        double output = this->StraightPid->calculate(now_rotation, 0.01) * -1;  // 补偿
+        if (output < 0){
+          output = std::max(output, -10.0);
+        }else{
+          output = std::min(output, 10.0);
+        }
+        std::cout << "s-> " << now_rotation << " " << output << std::endl;
+
+        LeftMotor1.spin(vex::forward,  v - (output * this->StraightNegative), dps);
+        LeftMotor2.spin(vex::forward,  v - (output * this->StraightNegative), dps);
+        LeftMotor3.spin(vex::forward,  v - (output * this->StraightNegative), dps);
+        RightMotor1.spin(vex::forward, v + (output * this->StraightNegative), dps);
+        RightMotor2.spin(vex::forward, v + (output * this->StraightNegative), dps);
+        RightMotor3.spin(vex::forward, v + (output * this->StraightNegative), dps);
+        return ;
+      }
       
       double left_yaw  = 1.0;
       double right_yaw = 1.0;
@@ -87,6 +120,21 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       RightMotor2.spin(vex::forward, v * right_yaw, dps);
       RightMotor3.spin(vex::forward, v * right_yaw, dps);
   }
+
+  // 底盘左轮控制
+  void ChassisControl::ChassisLeftControl(double v){
+    LeftMotor1.spin(vex::forward,  v, dps);
+    LeftMotor2.spin(vex::forward,  v, dps);
+    LeftMotor3.spin(vex::forward,  v, dps);
+  }
+
+  // 底盘左轮控制
+  void ChassisControl::ChassisRightControl(double v){
+    RightMotor1.spin(vex::forward, v, dps);
+    RightMotor2.spin(vex::forward, v, dps);
+    RightMotor3.spin(vex::forward, v, dps);
+  }
+
 
   // 获取当前的位置
   double ChassisControl::GetPositions_mean(){
@@ -495,7 +543,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
 
   }
 
-    // 直线运动函数
+  // 直线运动函数
   void ChassisControl::MoveToDistance(double v, double val, std::string DistanceChioce){
       // 最大速度
       // 运动距离
@@ -514,13 +562,13 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
 
       //  方向指示器
       if (DistanceChioce == "front"){
-        if (start_val > val)
-        {
           negative = -1;
-        }
+      }
+      else if (DistanceChioce == "back"){
+          negative = 1;
       }
 
-      PID pid(3, 1, 0.1); // 创建PID控制器实例。 
+      PID pid(5, 0.1, 0.1); // 创建PID控制器实例。 
       pid.setSetpoint(val); // 设置目标位置
 
       // 多线程阻断等待
@@ -595,6 +643,254 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
   // 直线运动函数(可选多线程)
   void ChassisControl::MoveToDistance(double v, double val, std::string DistanceChioce, bool task){
 
+  }
+
+  // 直线运动函数（使用定位轮）
+  void ChassisControl::MoveBySmallWheel(double v, double val, double yaw, char direction){
+      // 最大速度
+      // 运动距离
+      // 偏转
+      // 方向
+      // 多线程
+      // ChassisRsetPosition();  // 电机初始化
+      Rotation_x.resetPosition();       // 定位轮初始化
+
+      double dt = 0.01;
+      double stuck_time_count = 0;  // 电机卡死时间统计
+      double start_time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count();  // 运动开始时间
+      double move_time_out = Move_time_out + (val / v * 1000);
+      int    negative = 1;   // 负方向指示器
+      int yaw_negative= 1;   // 负偏指示器
+
+      //  方向指示器
+      if (direction == 'u'){
+          negative = -1;
+          val *= -1;
+          yaw_negative = 1;
+          yaw = 0;
+      }
+      else if (direction == 'n'){
+          negative = 1;
+          yaw_negative = 1;
+          yaw = 0;
+      }
+      else if (direction == 'p'){
+          negative = 1;
+          yaw_negative = 1;
+      }
+      else if (direction == 'q'){
+          negative = 1;
+          yaw_negative = -1;
+      }
+      else if (direction == 'b'){
+          val *= -1;
+          negative = -1;
+          yaw_negative = 1;
+      }
+      else if (direction == 'd'){
+          negative = -1;
+          yaw_negative = -1;
+          val *= -1;
+      }
+
+      // 直线修正指示器
+      if (abs(yaw) < 0.01){
+        ChassisControl::ChassisStraight(negative);
+        Brain.Screen.printAt( 10, 50, "start %f", ChassisInertial.rotation());
+      }
+
+
+      PID pid(3, 0.01, 0.01); // 创建PID控制器实例 
+      pid.setSetpoint(val); // 设置目标位置
+
+      // 多线程阻断等待
+      while (MoveEnd == false){
+          wait(10, msec);
+          Moveing = false;
+      }
+
+      Moveing = true;  // 当前在运动
+      MoveEnd = false; // 运动没有完成
+
+      while (true) {  
+          double current_position = Rotation_x.position(deg);  // 当前位置
+          double output = pid.calculate(current_position, dt);  // 补偿
+          Brain.Screen.printAt( 10, 120, "out %f", output);
+
+          std::cout << current_position << " " << output << std::endl;
+
+          // 控制小车运动 
+          if (output < 0){
+            ChassisForward(std::max(v * -1, output), yaw * yaw_negative);   //  控制移动
+          }
+          else{
+            ChassisForward(std::min(v, output), yaw * yaw_negative);   //  控制移动
+          }
+
+          // 检查目标是否达到  
+          if (fabs(current_position - val) <= 1 && GetVelocity_mean() <= Stuck_threshold) {
+              std::cout << "OVER" << std::endl;
+              break;  
+          }  
+
+          // 多线程保护
+          if (Moveing == false){
+              std::cout << "Moveing STOP" << std::endl;
+              break;
+          }
+
+          // 算法收敛保护
+          if (abs(output) <= Stuck_threshold){
+            std::cout << "output MININUM" << std::endl;
+            break;
+          }
+
+          // 电机抱死保护
+          if (GetVelocity_mean() <= Stuck_threshold){
+              stuck_time_count += dt * 1000.0;  // 计算抱死时间
+              if (stuck_time_count >= Stuck_time_out){
+                std::cout << "stuck_time_count" << std::endl;
+                break;
+              }
+          }
+          else{
+            stuck_time_count = 0; // 不抱死则刷新计数
+          }
+
+          // 超时保护
+          double now_time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count();// 当前时间
+          if (now_time - start_time >= move_time_out / 1000){
+              std::cout << "timeout" << std::endl;
+              break;
+          }
+
+          wait(dt * 1000.0, msec);
+      }  
+
+      ChassisStoppingHold();
+      Moveing = false;  // 运动停止了
+      MoveEnd = true; // 运动完成
+
+      std::cout << "ans: " << Rotation_x.position(deg) << std::endl;
+      Brain.Screen.printAt( 10, 90, "end %f", ChassisInertial.rotation());
+  }
+
+  // 追随某个目标
+  void ChassisControl::FollowTarget(double v, double val, aivision::colordesc Color, bool task){
+
+  }
+
+  // 追随某个目标(多线程)
+  void ChassisControl::FollowTarget(double v, double val, aivision::colordesc Color){
+    // 最大速度
+      // 运动距离
+      // 偏转
+      // 方向
+      // 多线程
+      // ChassisRsetPosition();  // 电机初始化
+      Rotation_x.resetPosition();       // 定位轮初始化
+
+      double dt = 0.01;
+      double stuck_time_count = 0;  // 电机卡死时间统计
+      double start_time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count();  // 运动开始时间
+      double move_time_out = Move_time_out + (val / v * 1000);
+      int    negative = 1;   // 负方向指示器
+      int yaw_negative= 1;   // 负偏指示器
+
+      PID pid(3, 0.01, 0.01); // 创建PID控制器实例 
+      pid.setSetpoint(val); // 设置目标位置
+
+      PID pid_target(5, 0.1, 0.1); // 创建PID控制器实例 
+      pid_target.setSetpoint(aiVision_w / 2); // 设置目标位置
+
+      // 多线程阻断等待
+      while (MoveEnd == false){
+          wait(10, msec);
+          Moveing = false;
+      }
+
+      Moveing = true;  // 当前在运动
+      MoveEnd = false; // 运动没有完成
+
+      while (true) {  
+          double current_position = Rotation_x.position(deg);  // 当前位置
+          double output = pid.calculate(current_position, dt);  // 前进补偿
+          
+          // 视觉传感器
+          aiVision.takeSnapshot(Color);  // 当前视觉传感器的数据
+          double output_target = 0.0;
+
+          std::cout << current_position << " " << output << std::endl;
+          
+          // 获取相机元素
+          if (aiVision.objectCount > 0){
+            output_target = pid_target.calculate(aiVision.largestObject.centerX, dt) * -1;  // 前进补偿
+            Brain.Screen.printAt( 10, 10, "target %d, %d", aiVision.largestObject.centerX, 5);
+            if (output_target > 0){
+              output_target = std::min(v / 2, output_target);
+            }else{
+              output_target = std::max(v / 2 * -1, output_target);
+            }
+            Brain.Screen.printAt( 10, 90, "output_target %f", output_target);
+          }
+          ChassisLeftControl(output_target);
+          ChassisRightControl( -1 * output_target);
+          continue;
+
+          if (output > 0){
+            output = std::min(v, output);
+          }else{
+            output = std::max(v * -1, output);
+          }
+          ChassisLeftControl(output + output_target);
+          ChassisRightControl(output - output_target);
+
+          // 检查目标是否达到  
+          if (fabs(current_position - val) <= 1 && GetVelocity_mean() <= Stuck_threshold) {
+              std::cout << "OVER" << std::endl;
+              break;  
+          }  
+
+          // 多线程保护
+          if (Moveing == false){
+              std::cout << "Moveing STOP" << std::endl;
+              break;
+          }
+
+          // 算法收敛保护
+          if (abs(output) <= Stuck_threshold){
+            std::cout << "output MININUM" << std::endl;
+            break;
+          }
+
+          // 电机抱死保护
+          if (GetVelocity_mean() <= Stuck_threshold){
+              stuck_time_count += dt * 1000.0;  // 计算抱死时间
+              if (stuck_time_count >= Stuck_time_out){
+                std::cout << "stuck_time_count" << std::endl;
+                break;
+              }
+          }
+          else{
+            stuck_time_count = 0; // 不抱死则刷新计数
+          }
+
+          // 超时保护
+          double now_time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count();// 当前时间
+          if (now_time - start_time >= move_time_out / 1000){
+              std::cout << "timeout" << std::endl;
+              break;
+          }
+
+          wait(dt * 1000.0, msec);
+      }  
+
+      ChassisStoppingHold();
+      Moveing = false;  // 运动停止了
+      MoveEnd = true; // 运动完成
+
+      std::cout << "ans: " << Rotation_x.position(deg) << std::endl;
+      Brain.Screen.printAt( 10, 90, "end %f", ChassisInertial.rotation());
   }
 
 //  多线程运动（直线）友元函数

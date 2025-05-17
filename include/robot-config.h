@@ -15,6 +15,8 @@ extern bool RemoteControlModLock;  // ture: 不再选择遥控模式，以Remote
 extern int PowerLimit;             // 电量低警示
 extern double blindCA;             // 摇杆死区
 extern char stance;                // 站位选择
+extern int aiVision_w;             // ai相机的宽度 
+extern int aiVision_h;             // ai相机的宽度
 
 
 //  硬件定义
@@ -44,6 +46,10 @@ extern distance Distance_bl;  // 左后
 extern distance Distance_br;  // 右后
 extern distance Distance_l;  // 左
 extern distance Distance_r;  // 右
+
+// 视觉传感器
+extern aivision::colordesc Red;
+extern aivision aiVision;
 
 extern std::vector<AutoFun> AutoFunctions;  // 自动路径储存
 
