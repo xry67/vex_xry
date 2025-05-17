@@ -338,16 +338,13 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       while (true) {  
           double current_position = ChassisInertial.rotation();  // 当前位置
           double output = pid.calculate(current_position, dt) * yaw_negative;  // 补偿
-          // std::cout << "current_position" << current_position << std::endl;
-          // std::cout << "output" << output << std::endl;
 
-          // std::cout << output << std::endl;
           // 控制小车运动 
           ChassisForward(std::min(v, output), yaw_negative);   //  控制移动
           
 
           // 检查目标是否达到  
-          if (abs(current_position - taget_angle) <= 1 && abs(output) < 10) {
+          if (abs(current_position - taget_angle) <= 2 && abs(output) < 50) {
             std::cout << "OVER" << std::endl;
             break;  
           }  
@@ -715,9 +712,10 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       while (true) {  
           double current_position = Rotation_x.position(deg);  // 当前位置
           double output = pid.calculate(current_position, dt);  // 补偿
-          Brain.Screen.printAt( 10, 120, "out %f", output);
+          // Brain.Screen.printAt( 10, 120, "out %f", output);
 
-          std::cout << current_position << " " << output << std::endl;
+          // std::cout << current_position << " " << output << std::endl;
+          Brain.Screen.printAt( 10, 80, "out %f", output);
 
           // 控制小车运动 
           if (output < 0){
@@ -728,7 +726,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
           }
 
           // 检查目标是否达到  
-          if (fabs(current_position - val) <= 1 && GetVelocity_mean() <= Stuck_threshold) {
+          if (fabs(current_position - val) <= 10 && output <= Stuck_threshold * 20) {
               std::cout << "OVER" << std::endl;
               break;  
           }  
@@ -771,8 +769,8 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       Moveing = false;  // 运动停止了
       MoveEnd = true; // 运动完成
 
-      std::cout << "ans: " << Rotation_x.position(deg) << std::endl;
-      Brain.Screen.printAt( 10, 90, "end %f", ChassisInertial.rotation());
+      // std::cout << "ans: " << Rotation_x.position(deg) << std::endl;
+      Brain.Screen.printAt( 10, 150, "end %f", Rotation_x.position(deg));
   }
 
   // 追随某个目标
@@ -797,7 +795,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       int    negative = 1;   // 负方向指示器
       int yaw_negative= 1;   // 负偏指示器
 
-      PID pid(3, 0.01, 0.01); // 创建PID控制器实例 
+      PID pid(4.1, 0.01, 0.01); // 创建PID控制器实例 
       pid.setSetpoint(val); // 设置目标位置
 
       PID pid_target(5, 0.1, 0.1); // 创建PID控制器实例 
@@ -833,9 +831,6 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
             }
             Brain.Screen.printAt( 10, 90, "output_target %f", output_target);
           }
-          ChassisLeftControl(output_target);
-          ChassisRightControl( -1 * output_target);
-          continue;
 
           if (output > 0){
             output = std::min(v, output);
@@ -846,7 +841,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
           ChassisRightControl(output - output_target);
 
           // 检查目标是否达到  
-          if (fabs(current_position - val) <= 1 && GetVelocity_mean() <= Stuck_threshold) {
+          if (fabs(current_position - val) <= 10 && GetVelocity_mean() <= Stuck_threshold) {
               std::cout << "OVER" << std::endl;
               break;  
           }  

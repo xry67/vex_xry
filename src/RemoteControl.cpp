@@ -178,7 +178,7 @@ void RemoteControl(){
         ChassisControlFun();
 
         // 退出
-        if (HoldButtonB(&RemoteControlData_list, 50)){
+        if (HoldButtonB(&RemoteControlData_list, 5)){
             return ;
         }
 
