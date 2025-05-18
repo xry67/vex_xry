@@ -3,6 +3,7 @@
 #include "ControllerWindow.h"
 #include "RemoteControl.h"
 #include "units.h"
+#include "ChassisControl.h"
 
 BaseWindow* InitWindow          = new BaseWindow("初始化", nullptr, InitWindowFun);
 BaseWindow* RemoteControlWindow = new BaseWindow("遥控选择", InitWindow, RemoteControlWindowFun);
@@ -206,7 +207,7 @@ BaseWindow* RemoteControlWindow_CompeteFun(){
 
 //  自动测试模式
 BaseWindow* AutoWindowFun(){
-    int index = -1;
+    int index = 0;
     // 获取各个自动程序的名称和内容
     std::vector<char*> options;
 
@@ -217,8 +218,64 @@ BaseWindow* AutoWindowFun(){
     Controller.Screen.print("自动>自动选择");
     PrintInLine(3);
     Controller.Screen.print("      确定(A)   返回(B)");
+    ChassisControlSTS.Reset();  // 初始化
+    
+    // 获取用户操作
+    int n   = options.size();
+    bool print_flag = true;
 
-    index = ChoiceIndex(options);  // 获取用户操作
+    while (true){
+        if (print_flag){
+            PrintInLine(2);
+
+            char formattedString[50]; // 创建字符数组来存储格式化字符串  
+            // 使用 snprintf 生成格式化字符串  
+            snprintf(formattedString, 50, "-> %s <-", options[index]); 
+            // 使字符串居中
+            CenterStr(formattedString);
+
+            Controller.Screen.print(formattedString);
+        }
+   
+        print_flag = false;
+
+        // 选项加一
+        if (Controller.ButtonRight.pressing()  || Controller.Axis4.position() > 50  || Controller.Axis1.position() > 50){
+            index = (index + 1) % n;
+            print_flag = true;
+        }
+
+        // 选项减一
+        if (Controller.ButtonLeft.pressing()  || Controller.Axis4.position() < -50  || Controller.Axis1.position() < -50){
+            index = index - 1;
+            if (index == -1){
+                index = n - 1;
+            }
+            print_flag = true;
+        }
+
+        // 底盘重新初始化
+        if (Controller.ButtonX.pressing()){
+            PrintInLine(1);
+            Controller.Screen.print("自动>初始化成功！");
+            ChassisControlSTS.Reset();  // 初始化
+            wait(500, msec);
+            PrintInLine(1);
+            Controller.Screen.print("自动>自动选择");
+        }
+
+        // 选项确认 
+        if (Controller.ButtonA.pressing()){
+             break;
+        }
+
+        // 退出选择
+        if (Controller.ButtonB.pressing()){
+          break;
+        }
+
+        wait(100, msec);
+    }
 
     if (index == -1){
       return RemoteControlWindow_Mod->Back();

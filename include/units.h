@@ -17,6 +17,18 @@ std::vector<char*> generateNumberStrings(int start, int end);
 // 获得字母序列
 std::vector<char*> generateAlphabetStrings(char start, char end);
 
+// 输出到某一行并且打印文字
+void PrintAt(int line, char* str);
+
+// 输出到某一行并且打印文字
+void PrintAt(int line, char* str, int num);
+
+// 输出到某一行并且打印文字
+void PrintAt(int line, char* str, float num);
+
+// 输出到某一行并且打印文字
+void PrintAt(int line, char* str, double num);
+
 // 将角度规范到-180到180
 double NormsAngle(double val);
 

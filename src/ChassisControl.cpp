@@ -48,10 +48,16 @@ double GetDistance(std::string aspect){
 }
 
 
-
 ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
 
 // 底盘运动控制算法
+
+  // 底盘重新清零
+  void ChassisControl::Reset(){
+      ChassisInertial.resetRotation();  // 陀螺仪归零
+      Moveing         = true; // 记录是否在运动
+      MoveEnd         = true;  // 记录运动是否完成
+  }
 
   // 底盘停止（抱死）
   void ChassisControl::ChassisStoppingHold(){
@@ -69,6 +75,37 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       RightMotor3.setStopping(hold);
   }
 
+  // 底盘停止（滑行）
+  void ChassisControl::ChassisStoppingCoast(){
+      LeftMotor1.spin(vex::forward,  0, dps);
+      LeftMotor2.spin(vex::forward,  0, dps);
+      LeftMotor3.spin(vex::forward,  0, dps);
+      RightMotor1.spin(vex::forward, 0, dps);
+      RightMotor2.spin(vex::forward, 0, dps);
+      RightMotor3.spin(vex::forward, 0, dps);
+      LeftMotor1.stop(coast);
+      RightMotor1.stop(coast);
+      LeftMotor2.stop(coast);
+      RightMotor2.stop(coast);
+      LeftMotor3.stop(coast);
+      RightMotor3.stop(coast);
+  }
+
+  // 底盘停止
+  void ChassisControl::ChassisStop(){
+    if (this->StopMod == "Hold"){
+      this->ChassisControl::ChassisStoppingHold();
+    }
+    else{
+      this->ChassisControl::ChassisStoppingCoast();
+    }
+  }
+
+  // 设置停止方式
+  void ChassisControl::SetStopMod(std::string str){
+      this->StopMod = str;
+  }
+
   // 底盘直行初始化
   void ChassisControl::ChassisStraight(int negative){
       this->StraightPid     = new PID(20, 0.1, 0.1);
@@ -79,7 +116,6 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
 
   // 底盘前进
   void ChassisControl::ChassisForward(double v, double yaw = 0){
-
       if (yaw == 0){
         double now_rotation = ChassisInertial.rotation();
 
@@ -134,7 +170,6 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
     RightMotor2.spin(vex::forward, v, dps);
     RightMotor3.spin(vex::forward, v, dps);
   }
-
 
   // 获取当前的位置
   double ChassisControl::GetPositions_mean(){
@@ -272,7 +307,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
           wait(dt * 1000.0, msec);
       }  
 
-      ChassisStoppingHold();
+      ChassisStop();
       Moveing = false;  // 运动停止了
       MoveEnd = true; // 运动完成
 
@@ -303,6 +338,9 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       // 运动距离
       // 方向
       // ChassisInertial.resetRotation();  // 陀螺仪初始化
+
+      PrintAt(1, "Turn %f", val);
+      PrintAt(2, "Moving...");
   
       double taget_angle = 0.0;
       double start_angle   = ChassisInertial.rotation();
@@ -345,19 +383,19 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
 
           // 检查目标是否达到  
           if (abs(current_position - taget_angle) <= 2 && abs(output) < 50) {
-            std::cout << "OVER" << std::endl;
+            PrintAt(2, " ->到位");
             break;  
           }  
 
           // 多线程保护
           if (Moveing == false){
-              std::cout << "Moveing STOP" << std::endl;
+              PrintAt(2, " ->打断");
               break;
           }
 
           // 算法收敛保护
           if (abs(output) <= Stuck_threshold){
-            std::cout << "output MININUM" << std::endl;
+            PrintAt(2, " ->收敛");
             break;
           }
 
@@ -365,7 +403,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
           if (GetVelocity_mean() <= Stuck_threshold){
               stuck_time_count += dt * 1000.0;  // 计算抱死时间
               if (stuck_time_count >= Stuck_time_out){
-                std::cout << "stuck_time_count" << std::endl;
+                PrintAt(2, " ->抱死");
                 break;
               }
           }
@@ -376,18 +414,19 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
           // 超时保护
           double now_time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count();// 当前时间
           if (now_time - start_time >= move_time_out / 1000){
-              std::cout << "timeout" << std::endl;
+              PrintAt(2, " ->超时");
               break;
           }
 
           wait(dt * 1000.0, msec);
       }  
 
-      ChassisStoppingHold();
+      ChassisStop();
+      PrintAt(3, " %d", (int)ChassisInertial.rotation());
       Moveing = false;  // 运动停止了
       MoveEnd = true; // 运动完成
 
-      std::cout << "ans: " << abs(ChassisInertial.rotation()) << std::endl;
+      
   }
 
   // 旋转函数(可选多线程)
@@ -424,14 +463,29 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
     
   }
 
-    // 等待底盘运动完成
+  // 等待底盘运动完成
   void ChassisControl::WaitMoveFinish(){
-      while(Moveing){
+      while(this->IsMoving()){
           wait(10, msec);
       }
   }
 
-    // 使用坐标-移动到某一坐标位置
+  // 获取当前是否在运动
+  bool ChassisControl::IsMoving(){
+      return (Moveing == true) || (MoveEnd == false);
+  }
+
+  // 立即停止当前运动(并等待)
+  void ChassisControl::StopMoving(){
+      // 多线程阻断等待
+      while (this->MoveEnd == false){
+          wait(10, msec);
+          this->Moveing = false;
+      }
+      this->WaitMoveFinish();
+  }
+
+  // 使用坐标-移动到某一坐标位置
   void ChassisControl::MoveTo(double x, double y, double v, bool task){
     PositioningSTS.TurnOFF();
     double target_angle = PositioningSTS.GetAngle(x - PositioningSTS.x, y - PositioningSTS.y);
@@ -532,7 +586,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
         wait(dt * 1000.0, msec);
     }  
 
-    ChassisStoppingHold();
+    ChassisStop();
     Moveing = false;  // 运动停止了
     MoveEnd = true; // 运动完成
 
@@ -540,7 +594,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
 
   }
 
-  // 直线运动函数
+  // 使用距离传感器移动
   void ChassisControl::MoveToDistance(double v, double val, std::string DistanceChioce){
       // 最大速度
       // 运动距离
@@ -630,18 +684,18 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
           wait(dt * 1000.0, msec);
       }  
 
-      ChassisStoppingHold();
+      ChassisStop();
       Moveing = false;  // 运动停止了
       MoveEnd = true; // 运动完成
 
       std::cout << "ans: " << GetDistance(DistanceChioce) << std::endl;
   }
 
-  // 直线运动函数(可选多线程)
+  // 使用距离传感器移动(可选多线程)
   void ChassisControl::MoveToDistance(double v, double val, std::string DistanceChioce, bool task){
-
+    
   }
-
+  
   // 直线运动函数（使用定位轮）
   void ChassisControl::MoveBySmallWheel(double v, double val, double yaw, char direction){
       // 最大速度
@@ -650,6 +704,10 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       // 方向
       // 多线程
       // ChassisRsetPosition();  // 电机初始化
+
+      PrintAt(1, "MoveBSW %f", val);
+      PrintAt(2, "Moving...");
+
       Rotation_x.resetPosition();       // 定位轮初始化
 
       double dt = 0.01;
@@ -727,19 +785,19 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
 
           // 检查目标是否达到  
           if (fabs(current_position - val) <= 10 && output <= Stuck_threshold * 20) {
-              std::cout << "OVER" << std::endl;
+              PrintAt(2, " ->到位");
               break;  
           }  
 
           // 多线程保护
           if (Moveing == false){
-              std::cout << "Moveing STOP" << std::endl;
+              PrintAt(2, " ->打断");
               break;
           }
 
           // 算法收敛保护
           if (abs(output) <= Stuck_threshold){
-            std::cout << "output MININUM" << std::endl;
+            PrintAt(2, " ->收敛");
             break;
           }
 
@@ -747,7 +805,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
           if (GetVelocity_mean() <= Stuck_threshold){
               stuck_time_count += dt * 1000.0;  // 计算抱死时间
               if (stuck_time_count >= Stuck_time_out){
-                std::cout << "stuck_time_count" << std::endl;
+                PrintAt(2, " ->抱死");
                 break;
               }
           }
@@ -758,27 +816,45 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
           // 超时保护
           double now_time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count();// 当前时间
           if (now_time - start_time >= move_time_out / 1000){
-              std::cout << "timeout" << std::endl;
+              PrintAt(2, " ->超时");
               break;
           }
 
           wait(dt * 1000.0, msec);
       }  
 
-      ChassisStoppingHold();
+      ChassisStop();
+      PrintAt(3, "%f",  Rotation_x.position(deg));
       Moveing = false;  // 运动停止了
       MoveEnd = true; // 运动完成
 
-      // std::cout << "ans: " << Rotation_x.position(deg) << std::endl;
-      Brain.Screen.printAt( 10, 150, "end %f", Rotation_x.position(deg));
+      
   }
 
-  // 追随某个目标
+  // 直线运动函数（使用定位轮）
+  void ChassisControl::MoveBySmallWheel(double v, double val, double yaw, char direction, bool task){
+    if (task == true){
+        ChassisMoveParams* Params = new ChassisMoveParams();
+        Params->self = this;
+        Params->v = v;
+        Params->val = val;
+        Params->yaw = yaw;
+        Params->direction = direction;
+
+        void* p = Params;
+        vex::task Task(MoveBySmallWheelTask, p);
+    }
+    else{
+        MoveBySmallWheel(v, val, yaw, direction);    
+    }
+  }
+
+  // 追随某个目标(多线程)
   void ChassisControl::FollowTarget(double v, double val, aivision::colordesc Color, bool task){
 
   }
 
-  // 追随某个目标(多线程)
+  // 追随某个目标
   void ChassisControl::FollowTarget(double v, double val, aivision::colordesc Color){
     // 最大速度
       // 运动距离
@@ -786,6 +862,9 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       // 方向
       // 多线程
       // ChassisRsetPosition();  // 电机初始化
+      PrintAt(1, "FollowT %f", val);
+      PrintAt(2, "Moving...");
+
       Rotation_x.resetPosition();       // 定位轮初始化
 
       double dt = 0.01;
@@ -842,19 +921,19 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
 
           // 检查目标是否达到  
           if (fabs(current_position - val) <= 10 && GetVelocity_mean() <= Stuck_threshold) {
-              std::cout << "OVER" << std::endl;
+              PrintAt(2, " ->到位");
               break;  
           }  
 
           // 多线程保护
           if (Moveing == false){
-              std::cout << "Moveing STOP" << std::endl;
+              PrintAt(2, " ->打断");
               break;
           }
 
           // 算法收敛保护
           if (abs(output) <= Stuck_threshold){
-            std::cout << "output MININUM" << std::endl;
+            PrintAt(2, " ->收敛");
             break;
           }
 
@@ -862,7 +941,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
           if (GetVelocity_mean() <= Stuck_threshold){
               stuck_time_count += dt * 1000.0;  // 计算抱死时间
               if (stuck_time_count >= Stuck_time_out){
-                std::cout << "stuck_time_count" << std::endl;
+                PrintAt(2, " ->抱死");
                 break;
               }
           }
@@ -873,19 +952,19 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
           // 超时保护
           double now_time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count();// 当前时间
           if (now_time - start_time >= move_time_out / 1000){
-              std::cout << "timeout" << std::endl;
+              PrintAt(2, " ->超时");
               break;
           }
 
           wait(dt * 1000.0, msec);
       }  
 
-      ChassisStoppingHold();
+      ChassisStop();
+      PrintAt(3, "%f", abs(ChassisInertial.rotation()));
       Moveing = false;  // 运动停止了
       MoveEnd = true; // 运动完成
 
-      std::cout << "ans: " << Rotation_x.position(deg) << std::endl;
-      Brain.Screen.printAt( 10, 90, "end %f", ChassisInertial.rotation());
+      
   }
 
 //  多线程运动（直线）友元函数
@@ -897,6 +976,20 @@ int MoveTask(void* args){
     char direction      = params->direction;  // 运动方向
     double yaw          = params->yaw;        // 偏转
     self->Move(v, val, yaw, direction);
+
+    // delete args;
+    return 0;
+}
+
+//  多线程运动（直线定位轮）友元函数
+int MoveBySmallWheelTask(void* args){
+    ChassisMoveParams* params = (ChassisMoveParams*)args;
+    ChassisControl* self= params->self;       // 当前类
+    double v            = params->v;          // 速度
+    double val          = params->val;        // 路径长度
+    char direction      = params->direction;  // 运动方向
+    double yaw          = params->yaw;        // 偏转
+    self->MoveBySmallWheel(v, val, yaw, direction);
 
     // delete args;
     return 0;

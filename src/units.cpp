@@ -34,6 +34,30 @@ void PrintInLine(int line){
       Controller.Screen.setCursor(line, 0);
 }
 
+// 输出到某一行并且打印文字
+void PrintAt(int line, char* str){
+    PrintInLine(line);
+    Controller.Screen.print(str);
+}
+
+// 输出到某一行并且打印文字
+void PrintAt(int line, char* str, int num){
+    PrintInLine(line);
+    Controller.Screen.print(str, num);
+}
+
+// 输出到某一行并且打印文字
+void PrintAt(int line, char* str, float num){
+    PrintInLine(line);
+    Controller.Screen.print(str, num);
+}
+
+// 输出到某一行并且打印文字
+void PrintAt(int line, char* str, double num){
+    PrintInLine(line);
+    Controller.Screen.print(str, num);
+}
+
 // 获得字母序列
 std::vector<char*> generateAlphabetStrings(char start, char end) {  
     std::vector<char*> vec;  
