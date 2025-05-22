@@ -16,7 +16,7 @@ class AiTarget{
   std::vector<int>  Limit_h = {0, aiVision_h};
   std::vector<int>  Limit_x = {0, aiVision_w};
   std::vector<int>  Limit_y = {0, aiVision_h};
-  aivision::colordesc Color = Red;  // 目标颜色
+  aivision::colordesc *Color = &Red;  // 目标颜色
   std::vector<double>  Limit_proportion = {0, 100};
   double Align = 0; // 对齐位置
 
@@ -25,7 +25,9 @@ class AiTarget{
   int Target_Width   = -1;
   int Target_Height = -1;
 
-  AiTarget(aivision::colordesc color) : Color(color){}
+  AiTarget(){}
+
+  AiTarget(aivision::colordesc color) : Color(&color){}
 
   AiTarget(std::vector<int> limit_w, std::vector<int>  limit_h, std::vector<int>  limit_x, std::vector<int>  limit_y, double align, aivision::colordesc color):
   Limit_w(limit_w),
@@ -33,7 +35,7 @@ class AiTarget{
   Limit_x(limit_x),
   Limit_y(limit_y),
   Align(align),
-  Color(color){}
+  Color(&color){}
 
   // 检测是否符合限制要求
   bool IsGood(aivision::object obj){
@@ -56,11 +58,12 @@ class AiTarget{
   }
 
   bool SetTarget(){
-    aiVision.takeSnapshot(this->Color);  // 当前视觉传感器的数据
+    aiVision.takeSnapshot(*(this->Color));  // 当前视觉传感器的数据
     int size = 0;
     for (int i=0; i<aiVision.objectCount; i++){
       if (this->IsGood(aiVision.objects[i])){
         if (aiVision.objects[i].width * aiVision.objects[i].height > size)
+          size = aiVision.objects[i].width * aiVision.objects[i].height;
           Target_CenterX = aiVision.objects[i].centerX;
           Target_CenterY = aiVision.objects[i].centerY;
           Target_Width   = aiVision.objects[i].width;
@@ -93,6 +96,19 @@ class AiTarget{
     Target_Height   = aiVision.objects[ans].height;
 
     return aiVision.objects[ans].centerX;
+  }
+
+  // 添加赋值运算符重载
+  AiTarget& operator=(const AiTarget& other) {
+      if (this != &other) {
+          Limit_w = other.Limit_w;
+          Limit_h = other.Limit_h;
+          Limit_x = other.Limit_x;
+          Limit_y = other.Limit_y;
+          Color = other.Color;
+          Align = other.Align;
+      }
+      return *this;
   }
 
 };
@@ -211,14 +227,24 @@ int MoveTask(void* args);
 int MoveBySmallWheelTask(void* args);
 //  多线程旋转友元函数
 int TurnTask(void* args);
+//  多线程目标追踪友元函数
+int FollowTargetTask(void* args);
 
 // 多线程准备的结构体函数
 struct ChassisMoveParams{
     ChassisControl* self;
     double v = 0.0;        // 速度
-    double val = 0.0;      // 加速度
-    double yaw = 0.0;      // 减速度
+    double val = 0.0;      // 距离
+    double yaw = 0.0;      // 角度
     char direction;  // 运动方向
+};
+
+// 目标追踪结构体函数
+struct FollowTargetParams{
+    ChassisControl* self;
+    double   v;    // 速度
+    double   val;  // 加速度
+    AiTarget Target;  // 目标
 };
 
 extern ChassisControl ChassisControlSTS;  // sts底盘控制

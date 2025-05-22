@@ -851,7 +851,19 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
 
   // 追随某个目标(多线程)
   void ChassisControl::FollowTarget(double v, double val, AiTarget Target, bool task){
+    if (task == true){
+        FollowTargetParams* Params = new FollowTargetParams();
+        Params->self = this;
+        Params->v = v;
+        Params->val = val;
+        Params->Target = Target;
 
+        void* p = Params;
+        vex::task Task(FollowTargetTask, p);
+    }
+    else{
+        FollowTarget(v, val, Target);    
+    }
   }
 
   // 追随某个目标
@@ -898,7 +910,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
           double output = pid.calculate(current_position, dt);  // 前进补偿
           
           // 视觉传感器
-          aiVision.takeSnapshot(Target.Color);  // 当前视觉传感器的数据
+          aiVision.takeSnapshot(*(Target.Color));  // 当前视觉传感器的数据
           double output_target = 0.0;
 
           std::cout << current_position << " " << output << std::endl;
@@ -1014,3 +1026,15 @@ int TurnTask(void* args){
     return 0;
 }
 
+//  多线程目标追踪友元函数
+int FollowTargetTask(void* args){
+    FollowTargetParams* params = (FollowTargetParams*)args;
+    ChassisControl* self= params->self;       // 当前类
+    double v            = params->v;          // 速度
+    double val          = params->val;        // 路径长度
+    AiTarget Target     = params->Target;     // 目标
+    self->FollowTarget(v, val, Target);
+
+    // delete args;
+    return 0;
+}
