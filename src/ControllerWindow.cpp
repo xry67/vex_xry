@@ -207,7 +207,7 @@ BaseWindow* RemoteControlWindow_CompeteFun(){
 
 //  自动测试模式
 BaseWindow* AutoWindowFun(){
-    int index = 0;
+    int index = -1;
     // 获取各个自动程序的名称和内容
     std::vector<char*> options;
 
@@ -223,14 +223,14 @@ BaseWindow* AutoWindowFun(){
     // 获取用户操作
     int n   = options.size();
     bool print_flag = true;
-
+    int index_i = 0;
     while (true){
         if (print_flag){
             PrintInLine(2);
 
             char formattedString[50]; // 创建字符数组来存储格式化字符串  
             // 使用 snprintf 生成格式化字符串  
-            snprintf(formattedString, 50, "-> %s <-", options[index]); 
+            snprintf(formattedString, 50, "-> %s <-", options[index_i]); 
             // 使字符串居中
             CenterStr(formattedString);
 
@@ -241,15 +241,15 @@ BaseWindow* AutoWindowFun(){
 
         // 选项加一
         if (Controller.ButtonRight.pressing()  || Controller.Axis4.position() > 50  || Controller.Axis1.position() > 50){
-            index = (index + 1) % n;
+            index_i = (index_i + 1) % n;
             print_flag = true;
         }
 
         // 选项减一
         if (Controller.ButtonLeft.pressing()  || Controller.Axis4.position() < -50  || Controller.Axis1.position() < -50){
-            index = index - 1;
-            if (index == -1){
-                index = n - 1;
+            index_i = index_i - 1;
+            if (index_i == -1){
+                index_i = n - 1;
             }
             print_flag = true;
         }
@@ -266,11 +266,13 @@ BaseWindow* AutoWindowFun(){
 
         // 选项确认 
         if (Controller.ButtonA.pressing()){
+            index = index_i;
              break;
         }
 
         // 退出选择
         if (Controller.ButtonB.pressing()){
+            index = -1;
           break;
         }
 

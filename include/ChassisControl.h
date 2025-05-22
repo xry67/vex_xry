@@ -17,10 +17,13 @@ class AiTarget{
   std::vector<int>  Limit_x = {0, aiVision_w};
   std::vector<int>  Limit_y = {0, aiVision_h};
   aivision::colordesc Color = Red;  // 目标颜色
+  std::vector<double>  Limit_proportion = {0, 100};
   double Align = 0; // 对齐位置
 
   int Target_CenterX = -1;
   int Target_CenterY = -1;
+  int Target_Width   = -1;
+  int Target_Height = -1;
 
   AiTarget(aivision::colordesc color) : Color(color){}
 
@@ -46,31 +49,50 @@ class AiTarget{
     if (obj.height < Limit_h[0] || obj.height > Limit_h[1] ){
       return false;
     }
+    if (obj.width / obj.height < Limit_proportion[0] || obj.width / obj.height > Limit_proportion[1] ){
+      return false;
+    }
     return true;
   }
 
-  void SetTarget(){
+  bool SetTarget(){
+    aiVision.takeSnapshot(this->Color);  // 当前视觉传感器的数据
     int size = 0;
     for (int i=0; i<aiVision.objectCount; i++){
       if (this->IsGood(aiVision.objects[i])){
         if (aiVision.objects[i].width * aiVision.objects[i].height > size)
           Target_CenterX = aiVision.objects[i].centerX;
           Target_CenterY = aiVision.objects[i].centerY;
+          Target_Width   = aiVision.objects[i].width;
+          Target_Height   = aiVision.objects[i].height;
       }
     }
+    return Target_CenterX != -1;
   }
 
   // 从序列中得到最合理的一个中心x返回
   int GetTargetCenterX(){
-    int num = aiVision_w * aiVision_h;
+    int num = aiVision_w * aiVision_h * aiVision_w * aiVision_h;
     int ans = -1;
+    std::cout << "----" << std::endl;
     for (int i=0; i<aiVision.objectCount; i++){
-      int disparity = abs(aiVision.objects[i].centerX - Target_CenterX) + abs(aiVision.objects[i].centerY - Target_CenterY);
+      int disparity = abs(aiVision.objects[i].centerX - Target_CenterX) * 10 + 
+                      abs(aiVision.objects[i].centerY - Target_CenterY) + 
+                      abs(aiVision.objects[i].width - Target_Width) +
+                      abs(aiVision.objects[i].height - Target_Height);
+      std::cout << disparity << std::endl;
       if (disparity < num){
-        ans = aiVision.objects[i].centerX;
+        num = disparity;
+        ans = i;
       }
     }
-    return ans;
+    std::cout << "ans " << ans << std::endl;
+    Target_CenterX = aiVision.objects[ans].centerX;
+    Target_CenterY = aiVision.objects[ans].centerY;
+    Target_Width   = aiVision.objects[ans].width;
+    Target_Height   = aiVision.objects[ans].height;
+
+    return aiVision.objects[ans].centerX;
   }
 
 };
@@ -144,10 +166,10 @@ class ChassisControl{
   void TurnTo(double v, double val, bool task);
 
   // 追随某个目标
-  void FollowTarget(double v, double val, aivision::colordesc Color);
+  void FollowTarget(double v, double val, AiTarget Target);
 
   // 追随某个目标(多线程)
-  void FollowTarget(double v, double val, aivision::colordesc Color, bool task);
+  void FollowTarget(double v, double val, AiTarget Target, bool task);
 
   // 等待底盘运动完成
   void WaitMoveFinish();

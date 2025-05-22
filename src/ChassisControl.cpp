@@ -850,12 +850,12 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
   }
 
   // 追随某个目标(多线程)
-  void ChassisControl::FollowTarget(double v, double val, aivision::colordesc Color, bool task){
+  void ChassisControl::FollowTarget(double v, double val, AiTarget Target, bool task){
 
   }
 
   // 追随某个目标
-  void ChassisControl::FollowTarget(double v, double val, aivision::colordesc Color){
+  void ChassisControl::FollowTarget(double v, double val, AiTarget Target){
     // 最大速度
       // 运动距离
       // 偏转
@@ -889,20 +889,26 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       Moveing = true;  // 当前在运动
       MoveEnd = false; // 运动没有完成
 
+      // 设置目标位置
+      bool have_target = false;
+      have_target = Target.SetTarget();
+
       while (true) {  
           double current_position = Rotation_x.position(deg);  // 当前位置
           double output = pid.calculate(current_position, dt);  // 前进补偿
           
           // 视觉传感器
-          aiVision.takeSnapshot(Color);  // 当前视觉传感器的数据
+          aiVision.takeSnapshot(Target.Color);  // 当前视觉传感器的数据
           double output_target = 0.0;
 
           std::cout << current_position << " " << output << std::endl;
           
           // 获取相机元素
-          if (aiVision.objectCount > 0){
-            output_target = pid_target.calculate(aiVision.largestObject.centerX, dt) * -1;  // 前进补偿
+          if (aiVision.objectCount > 0 && have_target){
+            int TargetCenterX = Target.GetTargetCenterX();
+            output_target = pid_target.calculate(TargetCenterX, dt) * -1;  // 前进补偿
             Brain.Screen.printAt( 10, 10, "target %d, %d", aiVision.largestObject.centerX, 5);
+            
             if (output_target > 0){
               output_target = std::min(v / 2, output_target);
             }else{
