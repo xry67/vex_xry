@@ -10,7 +10,7 @@ int PowerLimit            = 25;   // 电量低警示
 double blindCA            = 2;    // 摇杆死区
 char stance               = 'r';  // 站位选择
 int aiVision_w            = 316;  // ai相机的宽度 
-int aiVision_h            = 211;  // ai相机的宽度
+int aiVision_h            = 211;  // ai相机的高度
 
 // 自动程序加入
 std::vector<AutoFun> AutoFunctions;
@@ -36,7 +36,7 @@ rotation Rotation_x = rotation(PORT14, true);  // 底盘定位轮x
 rotation Rotation_y = rotation(PORT1, false);  // 底盘定位轮y
 
 // 视觉传感器
-aivision::colordesc Red = aivision::colordesc(1, 222, 44, 76, 10.00, 0.42);
+aivision::colordesc Red = aivision::colordesc(1, 219, 21, 65, 10.00, 0.2);
 aivision aiVision = aivision(PORT13, Red);
 
 // 距离传感器

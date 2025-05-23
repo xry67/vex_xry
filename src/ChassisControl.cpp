@@ -1028,11 +1028,13 @@ int TurnTask(void* args){
 
 //  多线程目标追踪友元函数
 int FollowTargetTask(void* args){
+    wait(500, msec);
     FollowTargetParams* params = (FollowTargetParams*)args;
     ChassisControl* self= params->self;       // 当前类
     double v            = params->v;          // 速度
     double val          = params->val;        // 路径长度
     AiTarget Target     = params->Target;     // 目标
+
     self->FollowTarget(v, val, Target);
 
     // delete args;

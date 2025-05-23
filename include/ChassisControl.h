@@ -16,7 +16,7 @@ class AiTarget{
   std::vector<int>  Limit_h = {0, aiVision_h};
   std::vector<int>  Limit_x = {0, aiVision_w};
   std::vector<int>  Limit_y = {0, aiVision_h};
-  aivision::colordesc *Color = &Red;  // 目标颜色
+  aivision::colordesc *Color;  // 目标颜色
   std::vector<double>  Limit_proportion = {0, 100};
   double Align = 0; // 对齐位置
 
@@ -60,16 +60,24 @@ class AiTarget{
   bool SetTarget(){
     aiVision.takeSnapshot(*(this->Color));  // 当前视觉传感器的数据
     int size = 0;
+    int k = 100;
     for (int i=0; i<aiVision.objectCount; i++){
       if (this->IsGood(aiVision.objects[i])){
+        Brain.Screen.printAt( 10, k, "w %d. h %d. s. %d" , Target_Width, Target_Height, aiVision.objects[i].width * aiVision.objects[i].height);
+        k += 20;
         if (aiVision.objects[i].width * aiVision.objects[i].height > size)
-          size = aiVision.objects[i].width * aiVision.objects[i].height;
-          Target_CenterX = aiVision.objects[i].centerX;
-          Target_CenterY = aiVision.objects[i].centerY;
-          Target_Width   = aiVision.objects[i].width;
-          Target_Height   = aiVision.objects[i].height;
+          {
+            size = aiVision.objects[i].width * aiVision.objects[i].height;
+            Target_CenterX = aiVision.objects[i].centerX;
+            Target_CenterY = aiVision.objects[i].centerY;
+            Target_Width   = aiVision.objects[i].width;
+            Target_Height   = aiVision.objects[i].height;
+            Brain.Screen.printAt( 10, k, "x %d. w %d. h %d. s. %d" ,Target_CenterX, Target_Width, Target_Height, size);
+            k += 20;
+        }
       }
     }
+    Brain.Screen.printAt( 10, k, "x %d. w %d. h %d. s. %d" ,Target_CenterX, Target_Width, Target_Height, size);
     return Target_CenterX != -1;
   }
 
@@ -78,6 +86,8 @@ class AiTarget{
     int num = aiVision_w * aiVision_h * aiVision_w * aiVision_h;
     int ans = -1;
     std::cout << "----" << std::endl;
+    Brain.Screen.printAt( 10, 50, "s. %d" ,aiVision.objectCount);
+
     for (int i=0; i<aiVision.objectCount; i++){
       int disparity = abs(aiVision.objects[i].centerX - Target_CenterX) * 10 + 
                       abs(aiVision.objects[i].centerY - Target_CenterY) + 
@@ -100,14 +110,19 @@ class AiTarget{
 
   // 添加赋值运算符重载
   AiTarget& operator=(const AiTarget& other) {
-      if (this != &other) {
-          Limit_w = other.Limit_w;
-          Limit_h = other.Limit_h;
-          Limit_x = other.Limit_x;
-          Limit_y = other.Limit_y;
-          Color = other.Color;
-          Align = other.Align;
-      }
+
+      Limit_w = other.Limit_w;
+      Limit_h = other.Limit_h;
+      Limit_x = other.Limit_x;
+      Limit_y = other.Limit_y;
+      // Color = new aivision::colordesc(10, other.Color->red, other.Color->green, other.Color->blue, other.Color->hangle, other.Color->hdsat);
+      Color = &Red;
+      Align = other.Align;
+      Target_CenterX = other.Target_CenterX;
+      Target_CenterY = other.Target_CenterY;
+      Target_Width = other.Target_Width;
+      Target_Height = other.Target_Height;
+
       return *this;
   }
 
@@ -244,7 +259,7 @@ struct FollowTargetParams{
     ChassisControl* self;
     double   v;    // 速度
     double   val;  // 加速度
-    AiTarget Target;  // 目标
+    AiTarget Target = AiTarget();  // 目标
 };
 
 extern ChassisControl ChassisControlSTS;  // sts底盘控制
