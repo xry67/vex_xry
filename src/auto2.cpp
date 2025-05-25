@@ -3,20 +3,21 @@
 #include "ChassisControl.h"
 
 void auto2(){
-    AiTarget Target = AiTarget(Red);
-    // Target.Limit_x = {0, aiVision_w/2};
-    ChassisControlSTS.FollowTarget(1000, 3000, Target, true);
+    ChassisControlSTS.Target.SetColor(Red);
+    ChassisControlSTS.FollowTarget(100, 3000, true);
     // wait(8000, msec);
     Brain.Screen.printAt( 10, 150, "start");
-    while(true){
-        if (Target.Target_CenterY > 170){
+    while(ChassisControlSTS.IsMoving()){
+        if (ChassisControlSTS.Target.Target_CenterY > 170){
             ChassisControlSTS.StopMoving();
-            ChassisControlSTS.Turn(8000, 180, 'l');
+            ChassisControlSTS.Turn(500, 180, 'l');
             
             break;
         }
-        Brain.Screen.printAt( 10, 150, "h %d" , Target.Target_CenterY);
+        Brain.Screen.printAt( 10, 150, "h %d" , ChassisControlSTS.Target.Target_CenterY);
         wait(10, msec);
     }
+    Brain.Screen.printAt( 10, 150, "end");
+    ChassisControlSTS.StopMoving();
     wait(2000, msec);
 }

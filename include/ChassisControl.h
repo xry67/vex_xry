@@ -37,6 +37,10 @@ class AiTarget{
   Align(align),
   Color(&color){}
 
+  void SetColor(aivision::colordesc color){
+    Color = &color;
+  }
+
   // 检测是否符合限制要求
   bool IsGood(aivision::object obj){
     if (obj.centerX < Limit_x[0] || obj.centerX > Limit_x[1] ){
@@ -72,12 +76,12 @@ class AiTarget{
             Target_CenterY = aiVision.objects[i].centerY;
             Target_Width   = aiVision.objects[i].width;
             Target_Height   = aiVision.objects[i].height;
-            Brain.Screen.printAt( 10, k, "x %d. w %d. h %d. s. %d" ,Target_CenterX, Target_Width, Target_Height, size);
+            // Brain.Screen.printAt( 10, k, "x %d. w %d. h %d. s. %d" ,Target_CenterX, Target_Width, Target_Height, size);
             k += 20;
         }
       }
     }
-    Brain.Screen.printAt( 10, k, "x %d. w %d. h %d. s. %d" ,Target_CenterX, Target_Width, Target_Height, size);
+    // Brain.Screen.printAt( 10, k, "x %d. w %d. h %d. s. %d" ,Target_CenterX, Target_Width, Target_Height, size);
     return Target_CenterX != -1;
   }
 
@@ -86,7 +90,7 @@ class AiTarget{
     int num = aiVision_w * aiVision_h * aiVision_w * aiVision_h;
     int ans = -1;
     std::cout << "----" << std::endl;
-    Brain.Screen.printAt( 10, 50, "s. %d" ,aiVision.objectCount);
+    // Brain.Screen.printAt( 10, 50, "s. %d" ,aiVision.objectCount);
 
     for (int i=0; i<aiVision.objectCount; i++){
       int disparity = abs(aiVision.objects[i].centerX - Target_CenterX) * 10 + 
@@ -197,10 +201,10 @@ class ChassisControl{
   void TurnTo(double v, double val, bool task);
 
   // 追随某个目标
-  void FollowTarget(double v, double val, AiTarget Target);
+  void FollowTarget(double v, double val);
 
   // 追随某个目标(多线程)
-  void FollowTarget(double v, double val, AiTarget Target, bool task);
+  void FollowTarget(double v, double val, bool task);
 
   // 等待底盘运动完成
   void WaitMoveFinish();
@@ -233,7 +237,9 @@ class ChassisControl{
     int Target_CenterY       = 0;    // 目标物体的中心y
     int Target_Width         = 0;    // 目标物体的宽度
     int Target_Height        = 0;    // 目标物体的高度
-
+    
+    public: 
+    AiTarget Target = AiTarget();
 };
 
 //  多线程运动友元函数
@@ -259,7 +265,6 @@ struct FollowTargetParams{
     ChassisControl* self;
     double   v;    // 速度
     double   val;  // 加速度
-    AiTarget Target = AiTarget();  // 目标
 };
 
 extern ChassisControl ChassisControlSTS;  // sts底盘控制

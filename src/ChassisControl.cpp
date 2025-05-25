@@ -850,24 +850,23 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
   }
 
   // 追随某个目标(多线程)
-  void ChassisControl::FollowTarget(double v, double val, AiTarget Target, bool task){
+  void ChassisControl::FollowTarget(double v, double val, bool task){
     if (task == true){
         FollowTargetParams* Params = new FollowTargetParams();
         Params->self = this;
         Params->v = v;
         Params->val = val;
-        Params->Target = Target;
 
         void* p = Params;
         vex::task Task(FollowTargetTask, p);
     }
     else{
-        FollowTarget(v, val, Target);    
+        FollowTarget(v, val);    
     }
   }
 
   // 追随某个目标
-  void ChassisControl::FollowTarget(double v, double val, AiTarget Target){
+  void ChassisControl::FollowTarget(double v, double val){
     // 最大速度
       // 运动距离
       // 偏转
@@ -1033,9 +1032,8 @@ int FollowTargetTask(void* args){
     ChassisControl* self= params->self;       // 当前类
     double v            = params->v;          // 速度
     double val          = params->val;        // 路径长度
-    AiTarget Target     = params->Target;     // 目标
 
-    self->FollowTarget(v, val, Target);
+    self->FollowTarget(v, val);
 
     // delete args;
     return 0;
