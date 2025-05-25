@@ -57,6 +57,11 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       ChassisInertial.resetRotation();  // 陀螺仪归零
       Moveing         = true; // 记录是否在运动
       MoveEnd         = true;  // 记录运动是否完成
+
+      Target.Target_CenterX = -1;
+      Target.Target_CenterY = -1;
+      Target.Target_Width   = -1;
+      Target.Target_Height = -1;
   }
 
   // 底盘停止（抱死）
@@ -856,7 +861,6 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
         Params->self = this;
         Params->v = v;
         Params->val = val;
-
         void* p = Params;
         vex::task Task(FollowTargetTask, p);
     }
@@ -889,7 +893,8 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       pid.setSetpoint(val); // 设置目标位置
 
       PID pid_target(5, 0.1, 0.1); // 创建PID控制器实例 
-      pid_target.setSetpoint(aiVision_w / 2); // 设置目标位置
+      pid_target.setSetpoint(aiVision_w / 2 + (Target.Align * aiVision_w / 2)); // 设置目标位置
+
 
       // 多线程阻断等待
       while (MoveEnd == false){
@@ -982,6 +987,163 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       MoveEnd = true; // 运动完成
 
       
+  }
+
+  // 旋转到指定对象
+  void ChassisControl::TurnToTarget(double v, double val, char direction){
+      // 最大速度
+      // 运动距离
+      // 方向
+      // ChassisInertial.resetRotation();  // 陀螺仪初始化
+
+      PrintAt(1, "Turn %f", val);
+      PrintAt(2, "Moving...");
+  
+      double taget_angle = 0.0;
+      double start_angle   = ChassisInertial.rotation();
+      double dt = 0.01;
+      double stuck_time_count = 0;  // 电机卡死时间统计
+      double start_time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count();  // 运动开始时间
+      double move_time_out = Move_time_out + (val / v * 1000) * 1000;
+      int yaw_negative= 1;   // 负偏指示器
+
+      //  方向指示器
+      if (direction == 'q' || direction == 'b' || direction == 'l'){
+          yaw_negative = -1;
+          taget_angle  = start_angle - val;
+      }
+      else if (direction == 'p' || direction == 'd' || direction == 'r'){
+          yaw_negative = 1;
+          taget_angle  = start_angle + val;
+      }
+
+
+      PID pid(20, 1, 0.5); // 创建PID控制器实例 
+      pid.setSetpoint(taget_angle); // 设置目标位置
+
+      // 多线程阻断等待
+      while (MoveEnd == false){
+          wait(10, msec);
+          Moveing = false;
+      }
+
+      Moveing = true;  // 当前在运动
+      MoveEnd = false; // 运动没有完成
+
+      bool use_taget = false;
+
+      while (true) {  
+          double current_position = ChassisInertial.rotation();  // 当前位置
+          double output = pid.calculate(current_position, dt) * yaw_negative;  // 补偿
+
+          // 控制小车运动 
+          ChassisForward(std::min(v, output), yaw_negative);   //  控制移动
+
+          // 目标角度附近找到了目标物体
+          if (abs(current_position - taget_angle) <= 30 and Target.SetTarget()){
+            break;
+          }
+          
+
+          // 检查目标是否达到  
+          if (abs(current_position - taget_angle) <= 2 && abs(output) < 50) {
+            PrintAt(2, " ->到位");
+            break;  
+          }  
+
+          // 多线程保护
+          if (Moveing == false){
+              PrintAt(2, " ->打断");
+              break;
+          }
+
+          // 算法收敛保护
+          if (abs(output) <= Stuck_threshold){
+            PrintAt(2, " ->收敛");
+            break;
+          }
+
+          // 电机抱死保护
+          if (GetVelocity_mean() <= Stuck_threshold){
+              stuck_time_count += dt * 1000.0;  // 计算抱死时间
+              if (stuck_time_count >= Stuck_time_out){
+                PrintAt(2, " ->抱死");
+                break;
+              }
+          }
+          else{
+            stuck_time_count = 0; // 不抱死则刷新计数
+          }
+
+          // 超时保护
+          double now_time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count();// 当前时间
+          if (now_time - start_time >= move_time_out / 1000){
+              PrintAt(2, " ->超时");
+              break;
+          }
+
+          wait(dt * 1000.0, msec);
+      }  
+      
+      PID pid_target(5, 0.001, 0.1); // 创建PID控制器实例 
+      int tagetX = aiVision_w / 2 + (Target.Align * aiVision_w / 2);
+      tagetX = aiVision_w / 2;
+      pid_target.setSetpoint(tagetX); // 设置目标位置
+
+      while (true) {  
+          aiVision.takeSnapshot(*(Target.Color));  // 当前视觉传感器的数据
+          int TargetCenterX = Target.GetTargetCenterX();
+          double output= pid_target.calculate(TargetCenterX, dt) * -1;  // 前进补偿
+
+          // 控制小车运动 
+          ChassisLeftControl(output);
+          ChassisRightControl(-1 * output);
+          Brain.Screen.printAt( 10, 100, "output: %f X %d" , output, TargetCenterX);
+
+          // 检查目标是否达到  
+          if (abs(TargetCenterX - tagetX) <= 1 && abs(output) < 50) {
+            PrintAt(2, " ->到位");
+            break;  
+          }  
+
+          // 多线程保护
+          if (Moveing == false){
+              PrintAt(2, " ->打断");
+              break;
+          }
+
+          // 算法收敛保护
+          if (abs(output) <= Stuck_threshold){
+            PrintAt(2, " ->收敛");
+            break;
+          }
+
+          // 电机抱死保护
+          if (GetVelocity_mean() <= Stuck_threshold){
+              stuck_time_count += dt * 1000.0;  // 计算抱死时间
+              if (stuck_time_count >= Stuck_time_out){
+                PrintAt(2, " ->抱死");
+                break;
+              }
+          }
+          else{
+            stuck_time_count = 0; // 不抱死则刷新计数
+          }
+
+          // 超时保护
+          double now_time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count();// 当前时间
+          if (now_time - start_time >= move_time_out / 1000){
+              PrintAt(2, " ->超时");
+              break;
+          }
+
+          wait(dt * 1000.0, msec);
+      }  
+
+      ChassisStop();
+      PrintAt(3, " %d", (int)ChassisInertial.rotation());
+      Moveing = false;  // 运动停止了
+      MoveEnd = true; // 运动完成
   }
 
 //  多线程运动（直线）友元函数

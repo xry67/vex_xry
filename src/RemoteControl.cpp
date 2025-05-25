@@ -56,10 +56,21 @@ void ChassisControlFun(){
     int axis3 = Controller.Axis3.position();
     int axis4 = Controller.Axis4.position();
 
+
+    float Sensitivity_1 = Sensitivity_Straight;
+    float Sensitivity_2 = Sensitivity_Turn;
+
+    // 精准操控模式
+    if (Controller.ButtonR2.pressing()){
+        Sensitivity_2 = Sensitivity_Straight * Sensitivity_Precision;
+    }
+
+    if (Controller.ButtonL2.pressing()){
+        Sensitivity_1 = Sensitivity_Turn     * Sensitivity_Precision;
+    }
+
     //  1：双 2：左 3：右 4：坦克
     if (RemoteControlMod == 2){
-        float Sensitivity_1 = 1;
-        float Sensitivity_2 = 0.9;
         if (abs(axis3) > blindCA || abs(axis4) > blindCA ){
             LeftMotorControl(axis3 * Sensitivity_1 + axis4 * Sensitivity_2);
             RightMotorControl(axis3 * Sensitivity_1 - axis4 * Sensitivity_2);
@@ -71,8 +82,6 @@ void ChassisControlFun(){
     }
 
     if (RemoteControlMod == 3){
-        float Sensitivity_1 = 1;
-        float Sensitivity_2 = 0.9;
         if (abs(axis2) > blindCA || abs(axis1) > blindCA ){
             LeftMotorControl(axis2 * Sensitivity_1 + axis1 * Sensitivity_2);
             RightMotorControl(axis2 * Sensitivity_1 - axis1 * Sensitivity_2);
@@ -83,8 +92,6 @@ void ChassisControlFun(){
     }
 
     if (RemoteControlMod == 1){
-        float Sensitivity_1 = 1;
-        float Sensitivity_2 = 0.9;
         // 死区判定
         if (abs(axis3) > blindCA || abs(axis1) > blindCA ){
             LeftMotorControl(axis3 * Sensitivity_1 + axis1 * Sensitivity_2);
@@ -96,8 +103,6 @@ void ChassisControlFun(){
     }
 
     if (RemoteControlMod == 4){
-        float Sensitivity_1 = 1;
-        // float Sensitivity_2 = 1;
         if (abs(axis3) > blindCA || abs(axis2) > blindCA ){
             LeftMotorControl(axis3 * Sensitivity_1);
             RightMotorControl(axis2 * Sensitivity_1);

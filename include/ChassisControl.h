@@ -206,6 +206,9 @@ class ChassisControl{
   // 追随某个目标(多线程)
   void FollowTarget(double v, double val, bool task);
 
+  // 旋转到指定对象
+  void TurnToTarget(double v, double val, char direction);
+
   // 等待底盘运动完成
   void WaitMoveFinish();
 

@@ -18,6 +18,10 @@ extern char stance;                // 站位选择
 extern int aiVision_w;             // ai相机的宽度 
 extern int aiVision_h;             // ai相机的宽度
 
+extern double Sensitivity_Turn;           // 转向灵敏度
+extern double Sensitivity_Straight;       // 直行灵敏度
+extern double Sensitivity_Precision;      // 精密遥控比例
+
 
 //  硬件定义
 extern brain Brain;

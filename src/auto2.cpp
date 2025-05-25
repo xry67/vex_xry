@@ -4,20 +4,20 @@
 
 void auto2(){
     ChassisControlSTS.Target.SetColor(Red);
-    ChassisControlSTS.FollowTarget(100, 3000, true);
-    // wait(8000, msec);
-    Brain.Screen.printAt( 10, 150, "start");
+    // ChassisControlSTS.Target.Align = 0.5;
+    ChassisControlSTS.FollowTarget(1000, 3000, true);
+    int i=0;
     while(ChassisControlSTS.IsMoving()){
-        if (ChassisControlSTS.Target.Target_CenterY > 170){
+        if (ChassisControlSTS.Target.Target_CenterY > 200){
             ChassisControlSTS.StopMoving();
-            ChassisControlSTS.Turn(500, 180, 'l');
+            ChassisControlSTS.SetStopMod("c");
+            ChassisControlSTS.MoveBySmallWheel(2000, 100, 0, 'u');
             
             break;
         }
-        Brain.Screen.printAt( 10, 150, "h %d" , ChassisControlSTS.Target.Target_CenterY);
+        i += 1;
         wait(10, msec);
     }
-    Brain.Screen.printAt( 10, 150, "end");
     ChassisControlSTS.StopMoving();
-    wait(2000, msec);
+    Brain.Screen.clearScreen();
 }

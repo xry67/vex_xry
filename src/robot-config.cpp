@@ -12,6 +12,10 @@ char stance               = 'r';  // 站位选择
 int aiVision_w            = 316;  // ai相机的宽度 
 int aiVision_h            = 211;  // ai相机的高度
 
+double Sensitivity_Turn       = 0.9;  // 转向灵敏度
+double Sensitivity_Straight   = 1;    // 直行灵敏度
+double Sensitivity_Precision  = 0.1;  // 精密遥控比例
+
 // 自动程序加入
 std::vector<AutoFun> AutoFunctions;
 

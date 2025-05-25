@@ -4,21 +4,8 @@
 
 void auto1(){
     
-    ChassisInertial.resetRotation();  // 陀螺仪初始化
-    ChassisControlSTS.MoveBySmallWheel(1000, 2000, 0.0, 'n', true);
-    int t=2000;
-    wait(t, msec);
-    ChassisControlSTS.Turn(8000, 90, 'l');
-    ChassisControlSTS.MoveBySmallWheel(1000, 1000, 0.0, 'n', true);
-    wait(t, msec);
-    ChassisControlSTS.Turn(8000, 45, 'r');
-    ChassisControlSTS.MoveBySmallWheel(1000, 1000, 0.0, 'n', true);
-    wait(t, msec);
-    ChassisControlSTS.Turn(8000, 45, 'r');
-    ChassisControlSTS.MoveBySmallWheel(1000, 1000, 0.0, 'n', true);
-    wait(t, msec);
-    ChassisControlSTS.WaitMoveFinish();
+    ChassisControlSTS.Target.SetColor(Red);
+    ChassisControlSTS.TurnToTarget(2000, 90, 'r');
 
-    // ChassisControlSTS.ChassisStoppingCoast();
     wait(2000, msec);
 }
