@@ -19,12 +19,13 @@ BaseWindow* RemoteControlWindow_Auto    = new BaseWindow("自动-遥控选择", 
 
 BaseWindow* TestMotorChoiceWindow       = new BaseWindow("电机测试 选择", TestWindow, TestMotorChoiceWindowFun);      // 电机测试（选择）
 BaseWindow* TestAirpoweredChoiceWindow  = new BaseWindow("活塞测试 选择", TestWindow, TestAirpoweredChoiceWindowFun);      // 活塞测试（选择）
-BaseWindow* TestInertialWindow    = new BaseWindow("陀螺仪测试", TestWindow, TestInertialWindowFun);  // 陀螺仪测试（选择）
+BaseWindow* TestInertialWindow          = new BaseWindow("陀螺仪测试", TestWindow, TestInertialWindowFun);  // 陀螺仪测试（选择）
+BaseWindow* TestDistanceChoiceWindow    = new BaseWindow("距离传感器测试 选择", TestWindow, TestDistanceChoiceWindowFun);  // 距离传感器测试（选择）
 
 BaseWindow* TestMotorWindow             = new BaseWindow("电机测试", TestMotorChoiceWindow, TestMotorWindowFun);        // 电机测试
 BaseWindow* TestAirpoweredWindow        = new BaseWindow("活塞测试", TestAirpoweredChoiceWindow, TestAirpoweredWindowFun);   // 活塞测试
-BaseWindow* TestDistanceWindow          = new BaseWindow("距离测试", TestMotorChoiceWindow, TestMotorWindowFun);;     // 距离传感器测试
-BaseWindow* TestRssssssotationWindow    = new BaseWindow("小轮测试", TestMotorChoiceWindow, TestMotorWindowFun);;     // 定位轮测试
+BaseWindow* TestDistanceWindow          = new BaseWindow("距离测试", TestDistanceChoiceWindow, TestDistanceWindowFun);;     // 距离传感器测试
+BaseWindow* TestRotationWindow          = new BaseWindow("定位轮测试", TestMotorChoiceWindow, TestRotationWindowFun);;     // 定位轮测试
 
 // 各个函数实现------------------------------------------
 
@@ -316,7 +317,7 @@ BaseWindow* AutoWindowFun(){
 //  测试模式
 BaseWindow* TestWindowFun(){
     int index = -1;
-    std::vector<char*> options = {"电机测试", "陀螺仪测试", "距离测试", "活塞测试"};
+    std::vector<char*> options = {"电机测试", "陀螺仪测试", "距离测试", "活塞测试", "定位轮测试"};
     PrintInLine(1);
     Controller.Screen.print("测试>测试选择");
     PrintInLine(3);
@@ -334,11 +335,15 @@ BaseWindow* TestWindowFun(){
     }
 
     if (index == 2){
-        return TestInertialWindow;
+        return TestDistanceChoiceWindow;
     }
 
     if (index == 3){
         return TestAirpoweredChoiceWindow;
+    }
+
+    if (index == 4){
+        return TestRotationWindow;
     }
 
     // 退出选择
@@ -456,6 +461,25 @@ BaseWindow* TestInertialChoiceWindowFun(){
     return TestInertialWindow;
 }  
 
+// 距离传感器测试（选择）
+BaseWindow* TestDistanceChoiceWindowFun(){
+    int index = -1;
+    std::vector<char*> options = DistanceNames;
+    PrintInLine(1);
+    Controller.Screen.print("测试>选择记录传感器");
+    PrintInLine(3);
+    Controller.Screen.print("      确定(A)   返回(B)");
+
+    index = ChoiceIndex(options);  // 获取用户操作
+
+    if (index == -1){
+      return TestDistanceChoiceWindow->Back();
+    }
+
+    std::cout << options[index] << std::endl;
+    TestDistanceWindow->num = index;
+    return TestDistanceWindow;
+}
 
 // 电机测试
 BaseWindow* TestMotorWindowFun(){
@@ -540,10 +564,56 @@ BaseWindow* TestInertialWindowFun(){
           return TestInertialWindow->Back();
         }
 
-        wait(100, msec);
+        wait(10, msec);
     }
 }
 
+// 距离传感器测试
+BaseWindow* TestDistanceWindowFun(){
+    distance distance_new = Distances[TestDistanceWindow->num];
+
+    PrintInLine(1);
+    Controller.Screen.print("距离传感器测试");
+    PrintInLine(3);
+    Controller.Screen.print("                返回(B)");
+
+    while (true){
+        PrintInLine(2);
+        Controller.Screen.print("速度：%f           ", distance_new.objectDistance(mm));
+        if (Controller.ButtonB.pressing()){
+          return TestMotorWindow->Back();
+        }
+
+        wait(10, msec);
+    }
+}
+
+// 定位轮测试
+BaseWindow* TestRotationWindowFun(){
+
+    PrintInLine(1);
+    Controller.Screen.print("定位轮测试");
+    PrintInLine(3);
+    Controller.Screen.print("       重置(X)   返回(B)");
+
+    while (true){
+        PrintInLine(2);
+        Controller.Screen.print("位置：%f           ", Rotation_x.position(deg));
+
+        if (Controller.ButtonX.pressing()){
+          Rotation_x.resetPosition();
+          PrintInLine(2);
+          Controller.Screen.print("位置： 重置中");
+          wait(500, msec);
+        }
+
+        if (Controller.ButtonB.pressing()){
+          return TestMotorWindow->Back();
+        }
+
+        wait(10, msec);
+    }
+}
 
 // 主窗口类
 void MainWindow::Run(){

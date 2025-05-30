@@ -387,7 +387,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
           
 
           // 检查目标是否达到  
-          if (abs(current_position - taget_angle) <= 2 && abs(output) < 50) {
+          if (abs(current_position - taget_angle) <= 0.5 && abs(output) < 50) {
             PrintAt(2, " ->到位");
             break;  
           }  
