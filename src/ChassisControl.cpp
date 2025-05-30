@@ -607,6 +607,8 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       // 方向
       // 多线程
       ChassisRsetPosition();  // 电机初始化
+      PrintAt(1, "MoveTD %f", val);
+      PrintAt(2, "Moving...");
 
       double start_val = GetDistance(DistanceChioce);
       double dt = 0.01;
@@ -614,7 +616,6 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       double start_time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count();  // 运动开始时间
       double move_time_out = Move_time_out + ((start_val - val) / v * 1000);
       int    negative = 1;   // 负方向指示器
-      
 
       //  方向指示器
       if (DistanceChioce == "front"){
@@ -633,14 +634,17 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
           Moveing = false;
       }
 
+      // 直线修正指示器
+      ChassisControl::ChassisStraight(negative);
+
+
       Moveing = true;  // 当前在运动
       MoveEnd = false; // 运动没有完成
 
       while (true) {  
           double current_position = GetDistance(DistanceChioce);  // 当前位置
           double output = pid.calculate(current_position, dt) * negative;  // 补偿
-          std::cout << "->"  << current_position << " " << output << std::endl;
-
+          // std::cout << "->"  << current_position << " " << output << std::endl;
           // 控制小车运动 
           if (output > 0){
             ChassisForward(std::min(v, output), 0);   //  控制移动
@@ -648,22 +652,21 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
           else{
             ChassisForward(std::max(v * -1, output), 0);   //  控制移动
           }
-
           // 检查目标是否达到  
           if (fabs(current_position - val) <= 1) {
-              std::cout << "OVER" << std::endl;
+              PrintAt(2, " ->到位");
               break;  
           }  
 
           // 多线程保护
           if (Moveing == false){
-              std::cout << "Moveing STOP" << std::endl;
+              PrintAt(2, " ->打断");
               break;
           }
 
           // 算法收敛保护
           if (abs(output) <= Stuck_threshold){
-            std::cout << "output MININUM" << std::endl;
+            PrintAt(2, " ->收敛");
             break;
           }
 
@@ -671,7 +674,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
           if (GetVelocity_mean() <= Stuck_threshold){
               stuck_time_count += dt * 1000.0;  // 计算抱死时间
               if (stuck_time_count >= Stuck_time_out){
-                std::cout << "stuck_time_count" << std::endl;
+                PrintAt(2, " ->抱死");
                 break;
               }
           }
@@ -682,7 +685,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
           // 超时保护
           double now_time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count();// 当前时间
           if (now_time - start_time >= move_time_out / 1000){
-              std::cout << "timeout" << std::endl;
+              PrintAt(2, " ->超时");
               break;
           }
 
@@ -692,13 +695,25 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       ChassisStop();
       Moveing = false;  // 运动停止了
       MoveEnd = true; // 运动完成
-
+      PrintAt(3, "%f",  Rotation_x.position(deg));
       std::cout << "ans: " << GetDistance(DistanceChioce) << std::endl;
   }
 
   // 使用距离传感器移动(可选多线程)
   void ChassisControl::MoveToDistance(double v, double val, std::string DistanceChioce, bool task){
-    
+      if (task == true){
+          MoveToDistanceParams* Params = new MoveToDistanceParams();
+          Params->self = this;
+          Params->v = v;
+          Params->val = val;
+          Params->DistanceChioce = DistanceChioce;
+
+          void* p = Params;
+          vex::task Task(MoveToDistancetTask, p);
+      }
+      else{
+          MoveToDistance(v, val, DistanceChioce);    
+      }
   }
   
   // 直线运动函数（使用定位轮）
@@ -1189,13 +1204,26 @@ int TurnTask(void* args){
 
 //  多线程目标追踪友元函数
 int FollowTargetTask(void* args){
-    wait(500, msec);
     FollowTargetParams* params = (FollowTargetParams*)args;
     ChassisControl* self= params->self;       // 当前类
     double v            = params->v;          // 速度
     double val          = params->val;        // 路径长度
 
     self->FollowTarget(v, val);
+
+    // delete args;
+    return 0;
+}
+
+//  多线程距离传感器友元函数 
+int MoveToDistancetTask(void* args){
+    MoveToDistanceParams* params = (MoveToDistanceParams*)args;
+    ChassisControl* self= params->self;       // 当前类
+    double v            = params->v;          // 速度
+    double val          = params->val;        // 路径长度
+    std::string DistanceChioce = params->DistanceChioce; // 前后距离传感器选择
+
+    self->MoveToDistance(v, val, DistanceChioce);
 
     // delete args;
     return 0;

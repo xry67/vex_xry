@@ -22,6 +22,9 @@ extern double Sensitivity_Turn;           // 转向灵敏度
 extern double Sensitivity_Straight;       // 直行灵敏度
 extern double Sensitivity_Precision;      // 精密遥控比例
 
+// 遥控期间自动追踪的灵敏度
+extern double Auto_Turn_To_Target_Speed;
+
 
 //  硬件定义
 extern brain Brain;
@@ -56,5 +59,11 @@ extern aivision::colordesc Red;
 extern aivision aiVision;
 
 extern std::vector<AutoFun> AutoFunctions;  // 自动路径储存
+
+extern std::vector<char*> MotorNames;
+extern std::vector<motor> Motors;
+
+extern std::vector<char*> DistanceNames;
+extern std::vector<distance> Distances;
 
 #endif

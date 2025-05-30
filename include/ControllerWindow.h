@@ -59,6 +59,8 @@ extern BaseWindow* TestInertialChoiceWindow;     // 陀螺仪测试（选择）
 extern BaseWindow* TestMotorWindow;        // 电机测试
 extern BaseWindow* TestAirpoweredWindow;   // 活塞测试
 extern BaseWindow* TestInertialWindow;     // 陀螺仪测试
+extern BaseWindow* TestDistanceWindow;     // 距离传感器测试
+extern BaseWindow* TestRotationWindow;     // 定位轮测试
 
 // 各个函数实现------------------------------------------
 

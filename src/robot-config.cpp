@@ -16,6 +16,9 @@ double Sensitivity_Turn       = 0.9;  // 转向灵敏度
 double Sensitivity_Straight   = 1;    // 直行灵敏度
 double Sensitivity_Precision  = 0.1;  // 精密遥控比例
 
+// 遥控期间自动追踪的灵敏度
+double Auto_Turn_To_Target_Speed = 50;
+
 // 自动程序加入
 std::vector<AutoFun> AutoFunctions;
 
@@ -50,3 +53,12 @@ distance Distance_bl = distance(PORT7);  // 左后
 distance Distance_br = distance(PORT17);  // 右后
 distance Distance_l = distance(PORT1);  // 左后
 distance Distance_r = distance(PORT11);  // 右后
+
+// 设别列表
+std::vector<char*> MotorNames = {"L1", "L2", "L3", "R1", "R2", "R3"};
+std::vector<motor> Motors = {LeftMotor1, LeftMotor2, LeftMotor3, 
+                                RightMotor1, RightMotor2, RightMotor3};
+
+std::vector<char*> DistanceNames = {"Fl", "Fr", "Bl", "Nr", "L", "R"};
+std::vector<distance> Distances = {Distance_fl, Distance_fr, Distance_bl, 
+                                Distance_br, Distance_l, Distance_r};

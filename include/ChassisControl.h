@@ -65,6 +65,7 @@ class AiTarget{
     aiVision.takeSnapshot(*(this->Color));  // 当前视觉传感器的数据
     int size = 0;
     int k = 100;
+    Brain.Screen.printAt( 100, 140, "count %d" , aiVision.objectCount);
     for (int i=0; i<aiVision.objectCount; i++){
       if (this->IsGood(aiVision.objects[i])){
         Brain.Screen.printAt( 10, k, "w %d. h %d. s. %d" , Target_Width, Target_Height, aiVision.objects[i].width * aiVision.objects[i].height);
@@ -253,6 +254,8 @@ int MoveBySmallWheelTask(void* args);
 int TurnTask(void* args);
 //  多线程目标追踪友元函数
 int FollowTargetTask(void* args);
+//  多线程距离传感器友元函数 
+int MoveToDistancetTask(void* args);
 
 // 多线程准备的结构体函数
 struct ChassisMoveParams{
@@ -268,6 +271,14 @@ struct FollowTargetParams{
     ChassisControl* self;
     double   v;    // 速度
     double   val;  // 加速度
+};
+
+// 多线程距离传感器结构体函数
+struct MoveToDistanceParams{
+    ChassisControl* self;
+    double v;
+    double val;
+    std::string DistanceChioce;
 };
 
 extern ChassisControl ChassisControlSTS;  // sts底盘控制

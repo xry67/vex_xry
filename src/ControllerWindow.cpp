@@ -19,11 +19,12 @@ BaseWindow* RemoteControlWindow_Auto    = new BaseWindow("自动-遥控选择", 
 
 BaseWindow* TestMotorChoiceWindow       = new BaseWindow("电机测试 选择", TestWindow, TestMotorChoiceWindowFun);      // 电机测试（选择）
 BaseWindow* TestAirpoweredChoiceWindow  = new BaseWindow("活塞测试 选择", TestWindow, TestAirpoweredChoiceWindowFun);      // 活塞测试（选择）
-BaseWindow* TestInertialChoiceWindow    = new BaseWindow("陀螺仪测试 选择", TestWindow, TestInertialChoiceWindowFun);  // 陀螺仪测试（选择）
+BaseWindow* TestInertialWindow    = new BaseWindow("陀螺仪测试", TestWindow, TestInertialWindowFun);  // 陀螺仪测试（选择）
 
 BaseWindow* TestMotorWindow             = new BaseWindow("电机测试", TestMotorChoiceWindow, TestMotorWindowFun);        // 电机测试
 BaseWindow* TestAirpoweredWindow        = new BaseWindow("活塞测试", TestAirpoweredChoiceWindow, TestAirpoweredWindowFun);   // 活塞测试
-BaseWindow* TestInertialWindow          = new BaseWindow("陀螺仪测试", TestInertialChoiceWindow, TestInertialWindowFun);     // 陀螺仪测试
+BaseWindow* TestDistanceWindow          = new BaseWindow("距离测试", TestMotorChoiceWindow, TestMotorWindowFun);;     // 距离传感器测试
+BaseWindow* TestRssssssotationWindow    = new BaseWindow("小轮测试", TestMotorChoiceWindow, TestMotorWindowFun);;     // 定位轮测试
 
 // 各个函数实现------------------------------------------
 
@@ -135,7 +136,7 @@ BaseWindow* RemoteControlWindowFun(){
 BaseWindow* ModWindowFun(){
 
     int index = -1;
-    std::vector<char*> options = {"遥控模式", "比赛模式", "自动模式", "测试模式"};
+    std::vector<char*> options = {"遥控模式", "自动模式", "测试模式", "比赛模式"};
     PrintInLine(1);
     Controller.Screen.print("选择你的操作");
     PrintInLine(3);
@@ -155,7 +156,7 @@ BaseWindow* ModWindowFun(){
 
     std::cout << options[index] << std::endl;
 
-    std::vector<BaseWindow*> ChildWindow{RemoteControlWindow_Mod, RemoteControlWindow_Compete, AutoWindow, TestWindow};
+    std::vector<BaseWindow*> ChildWindow{RemoteControlWindow_Mod, AutoWindow, TestWindow, RemoteControlWindow_Compete};
 
 
     return ChildWindow[index];
@@ -315,7 +316,7 @@ BaseWindow* AutoWindowFun(){
 //  测试模式
 BaseWindow* TestWindowFun(){
     int index = -1;
-    std::vector<char*> options = {"电机测试", "陀螺仪测试", "活塞测试"};
+    std::vector<char*> options = {"电机测试", "陀螺仪测试", "距离测试", "活塞测试"};
     PrintInLine(1);
     Controller.Screen.print("测试>测试选择");
     PrintInLine(3);
@@ -329,10 +330,14 @@ BaseWindow* TestWindowFun(){
     }
 
     if (index == 1){
-        return TestInertialChoiceWindow;
+        return TestInertialWindow;
     }
 
     if (index == 2){
+        return TestInertialWindow;
+    }
+
+    if (index == 3){
         return TestAirpoweredChoiceWindow;
     }
 
@@ -394,9 +399,9 @@ BaseWindow* RemoteControlWindow_AutoFun(){
 // 电机测试（选择）
 BaseWindow* TestMotorChoiceWindowFun(){
     int index = -1;
-    std::vector<char*> options = generateNumberStrings(1, 20);
+    std::vector<char*> options = MotorNames;
     PrintInLine(1);
-    Controller.Screen.print("测试>选择电机端口");
+    Controller.Screen.print("测试>选择电机");
     PrintInLine(3);
     Controller.Screen.print("      确定(A)   返回(B)");
 
@@ -454,11 +459,7 @@ BaseWindow* TestInertialChoiceWindowFun(){
 
 // 电机测试
 BaseWindow* TestMotorWindowFun(){
-    std::vector<int32_t> PORT_vector = {PORT1,  PORT2,  PORT3,  PORT4,  PORT5, 
-                                        PORT6,  PORT7,  PORT8,  PORT9,  PORT10, 
-                                        PORT11, PORT12, PORT13, PORT14, PORT15, 
-                                        PORT16, PORT17, PORT18, PORT19, PORT20};
-    motor motor_new = motor(PORT_vector[TestMotorWindow->num]);
+    motor motor_new = Motors[TestMotorWindow->num];
 
     PrintInLine(3);
     Controller.Screen.print("                返回(B)");
@@ -516,20 +517,24 @@ BaseWindow* TestAirpoweredWindowFun(){
 
 // 陀螺仪测试
 BaseWindow* TestInertialWindowFun(){
-    std::vector<int32_t> PORT_vector = {PORT1,  PORT2,  PORT3,  PORT4,  PORT5, 
-                                        PORT6,  PORT7,  PORT8,  PORT9,  PORT10, 
-                                        PORT11, PORT12, PORT13, PORT14, PORT15, 
-                                        PORT16, PORT17, PORT18, PORT19, PORT20};
-    inertial Gyro_new = inertial(PORT_vector[TestInertialWindow->num]);
+
+    inertial Gyro_new = ChassisInertial;
 
     PrintInLine(1);
     Controller.Screen.print("测试>陀螺仪测试");
     PrintInLine(3);
-    Controller.Screen.print("                返回(B)");
+    Controller.Screen.print("       重置(X)   返回(B)");
 
     while (true){
         PrintInLine(2);
         Controller.Screen.print("位置：%f           ", Gyro_new.rotation());
+
+        if (Controller.ButtonX.pressing()){
+          Gyro_new.resetRotation();
+          PrintInLine(2);
+          Controller.Screen.print("位置： 重置中");
+          wait(500, msec);
+        }
 
         if (Controller.ButtonB.pressing()){
           return TestInertialWindow->Back();

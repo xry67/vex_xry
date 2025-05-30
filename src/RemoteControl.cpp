@@ -4,6 +4,9 @@
 #include "ChassisControl.h"
 #include "units.h"
 
+AiTarget ai_target =  AiTarget();
+
+
 // 左电机控制
 void LeftMotorControl(int val){
     LeftMotor1.spin(vex::forward, 0.128*val, voltageUnits::volt);
@@ -59,6 +62,7 @@ void ChassisControlFun(){
 
     float Sensitivity_1 = Sensitivity_Straight;
     float Sensitivity_2 = Sensitivity_Turn;
+    float auto_target_yaw = 0.0;  // 智能对齐偏转
 
     // 精准操控模式
     if (Controller.ButtonR2.pressing()){
@@ -69,11 +73,35 @@ void ChassisControlFun(){
         Sensitivity_1 = Sensitivity_Turn     * Sensitivity_Precision;
     }
 
+    //  自动对齐功能
+    if (Controller.ButtonR1.pressing()){
+        if (ai_target.SetTarget()){
+            auto_target_yaw = (ai_target.Target_CenterX - aiVision_w / 2) * 0.2;
+            ai_target.Target_CenterX = -1;
+        }
+
+        if (auto_target_yaw > Auto_Turn_To_Target_Speed){
+            auto_target_yaw = Auto_Turn_To_Target_Speed;
+        }
+        if (auto_target_yaw < Auto_Turn_To_Target_Speed * -1){
+            auto_target_yaw = Auto_Turn_To_Target_Speed * -1;
+        }
+    }
+
+    Brain.Screen.printAt( 100, 50, "%f" , auto_target_yaw);
+
+    // 自动对齐判断
+    if (abs(axis1) < blindCA && abs(axis2) < blindCA && abs(axis3) < blindCA && abs(axis4) < blindCA){
+        LeftMotorControl(auto_target_yaw);
+        RightMotorControl(-1 * auto_target_yaw);
+        return ;
+    }
+
     //  1：双 2：左 3：右 4：坦克
     if (RemoteControlMod == 2){
         if (abs(axis3) > blindCA || abs(axis4) > blindCA ){
-            LeftMotorControl(axis3 * Sensitivity_1 + axis4 * Sensitivity_2);
-            RightMotorControl(axis3 * Sensitivity_1 - axis4 * Sensitivity_2);
+            LeftMotorControl(axis3 * Sensitivity_1 + axis4 * Sensitivity_2 + auto_target_yaw);
+            RightMotorControl(axis3 * Sensitivity_1 - axis4 * Sensitivity_2 - auto_target_yaw);
         }
         else{
             BaseMotorStop(0);
@@ -83,8 +111,8 @@ void ChassisControlFun(){
 
     if (RemoteControlMod == 3){
         if (abs(axis2) > blindCA || abs(axis1) > blindCA ){
-            LeftMotorControl(axis2 * Sensitivity_1 + axis1 * Sensitivity_2);
-            RightMotorControl(axis2 * Sensitivity_1 - axis1 * Sensitivity_2);
+            LeftMotorControl(axis2 * Sensitivity_1 + axis1 * Sensitivity_2 + auto_target_yaw);
+            RightMotorControl(axis2 * Sensitivity_1 - axis1 * Sensitivity_2 - auto_target_yaw);
         }
         else{
             BaseMotorStop(0);
@@ -94,8 +122,8 @@ void ChassisControlFun(){
     if (RemoteControlMod == 1){
         // 死区判定
         if (abs(axis3) > blindCA || abs(axis1) > blindCA ){
-            LeftMotorControl(axis3 * Sensitivity_1 + axis1 * Sensitivity_2);
-            RightMotorControl(axis3 * Sensitivity_1 - axis1 * Sensitivity_2);
+            LeftMotorControl(axis3 * Sensitivity_1 + axis1 * Sensitivity_2 + auto_target_yaw);
+            RightMotorControl(axis3 * Sensitivity_1 - axis1 * Sensitivity_2 - auto_target_yaw);
         }
         else{
             BaseMotorStop(0);
@@ -104,8 +132,8 @@ void ChassisControlFun(){
 
     if (RemoteControlMod == 4){
         if (abs(axis3) > blindCA || abs(axis2) > blindCA ){
-            LeftMotorControl(axis3 * Sensitivity_1);
-            RightMotorControl(axis2 * Sensitivity_1);
+            LeftMotorControl(axis3 * Sensitivity_1 + auto_target_yaw);
+            RightMotorControl(axis2 * Sensitivity_1 - auto_target_yaw);
         }
         else{
             BaseMotorStop(0);
@@ -173,6 +201,8 @@ void RemoteControl(){
 
     PrintInLine(1);
     Controller.Screen.print("遥控模式");
+
+    ai_target.SetColor(Red);
 
     PrintInLine(2);
     while (true){    
