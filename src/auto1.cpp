@@ -8,7 +8,7 @@ void auto1(){
    
     ChassisControlSTS.TurnTo(2000, 90, false);
 
-    ChassisControlSTS.SetStopMod("cs");
+    ChassisControlSTS.SetStopModCoast();
     ChassisControlSTS.MoveBySmallWheel(1000, 500, 0, 'n', true);
     wait(500, msec);
     while (ChassisControlSTS.IsMoving()){
@@ -19,7 +19,7 @@ void auto1(){
     // ChassisControlSTS.StopMoving();
     // ChassisControlSTS.MoveBySmallWheel(500, 350, 0, 'n');
 
-    ChassisControlSTS.SetStopMod("Hold");
+    ChassisControlSTS.SetStopModHold();
     ChassisControlSTS.MoveBySmallWheel(2000, 1350, 0, 'u');
     ChassisControlSTS.MoveBySmallWheel(1000, 850, 0, 'n');
 

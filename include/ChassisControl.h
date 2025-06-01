@@ -144,6 +144,12 @@ class ChassisControl{
   // 设置停止方式
   void SetStopMod(std::string str);
 
+  // 设置停止模式为hold
+  void SetStopModHold();
+
+  // 设置停止模式为Coasst
+  void SetStopModCoast();
+
   // 底盘停止
   void ChassisStop();
 

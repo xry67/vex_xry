@@ -111,6 +111,15 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       this->StopMod = str;
   }
 
+  // 设置停止模式为hold
+  void ChassisControl::SetStopModHold(){
+    this->SetStopMod("Hold");
+  }
+  // 设置停止模式为Coasst
+  void ChassisControl::SetStopModCoast(){
+    this->SetStopMod("Coast");
+  }
+
   // 底盘直行初始化
   void ChassisControl::ChassisStraight(int negative = 1){
       this->StraightPid     = new PID(15, 0.1, 0.1);
