@@ -17,6 +17,7 @@ extern double blindCA;             // 摇杆死区
 extern char stance;                // 站位选择
 extern int aiVision_w;             // ai相机的宽度 
 extern int aiVision_h;             // ai相机的宽度
+extern double StraightCorrectionSpeed;   // 执行修正pid最大速度
 
 extern double Sensitivity_Turn;           // 转向灵敏度
 extern double Sensitivity_Straight;       // 直行灵敏度

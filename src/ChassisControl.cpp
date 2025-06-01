@@ -112,8 +112,8 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
   }
 
   // 底盘直行初始化
-  void ChassisControl::ChassisStraight(int negative){
-      this->StraightPid     = new PID(20, 0.1, 0.1);
+  void ChassisControl::ChassisStraight(int negative = 1){
+      this->StraightPid     = new PID(15, 0.1, 0.1);
       this->StraightAngle    = ChassisInertial.rotation();
       this->StraightPid->setSetpoint(this->StraightAngle);
       this->StraightNegative = negative;
@@ -121,14 +121,14 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
 
   // 底盘前进
   void ChassisControl::ChassisForward(double v, double yaw = 0){
-      if (yaw == 0){
+      if (abs(yaw) < 0.1){
         double now_rotation = ChassisInertial.rotation();
 
         double output = this->StraightPid->calculate(now_rotation, 0.01) * -1;  // 补偿
         if (output < 0){
-          output = std::max(output, -10.0);
+          output = std::max(output, -1 * StraightCorrectionSpeed);
         }else{
-          output = std::min(output, 10.0);
+          output = std::min(output, 1 * StraightCorrectionSpeed);
         }
         std::cout << "s-> " << now_rotation << " " << output << std::endl;
 
@@ -635,7 +635,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       }
 
       // 直线修正指示器
-      ChassisControl::ChassisStraight(negative);
+      ChassisControl::ChassisStraight();
 
 
       Moveing = true;  // 当前在运动
@@ -770,7 +770,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
 
       // 直线修正指示器
       if (abs(yaw) < 0.01){
-        ChassisControl::ChassisStraight(negative);
+        ChassisControl::ChassisStraight();
         Brain.Screen.printAt( 10, 50, "start %f", ChassisInertial.rotation());
       }
 

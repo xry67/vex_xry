@@ -11,6 +11,7 @@ double blindCA            = 2;    // 摇杆死区
 char stance               = 'r';  // 站位选择
 int aiVision_w            = 316;  // ai相机的宽度 
 int aiVision_h            = 211;  // ai相机的高度
+double StraightCorrectionSpeed = 500.0;  // 执行修正pid最大速度
 
 double Sensitivity_Turn       = 0.9;  // 转向灵敏度
 double Sensitivity_Straight   = 1;    // 直行灵敏度
