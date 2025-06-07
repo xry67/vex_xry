@@ -65,16 +65,13 @@ void ChassisControlFun(){
     float auto_target_yaw = 0.0;  // 智能对齐偏转
 
     // 精准操控模式
-    if (Controller.ButtonR2.pressing()){
+    if (Controller.ButtonDown.pressing()){
         Sensitivity_2 = Sensitivity_Straight * Sensitivity_Precision;
-    }
-
-    if (Controller.ButtonL2.pressing()){
         Sensitivity_1 = Sensitivity_Turn     * Sensitivity_Precision;
     }
 
     //  自动对齐功能
-    if (Controller.ButtonR1.pressing()){
+    if (false){
         if (ai_target.SetTarget()){
             auto_target_yaw = (ai_target.Target_CenterX - aiVision_w / 2) * 0.2;
             ai_target.Target_CenterX = -1;
@@ -212,8 +209,52 @@ void RemoteControl(){
         // 底盘控制
         ChassisControlFun();
 
+        if (Controller.ButtonL1.pressing() || Controller.ButtonL2.pressing() || Controller.ButtonR1.pressing() || Controller.ButtonR2.pressing()){
+
+            // 发射-上
+            if (Controller.ButtonL1.pressing() || Controller.ButtonR1.pressing() ){
+                TrackLeft.spin(forward, TrackSpeed, rpm);
+                TrackRight.spin(forward, TrackSpeed, rpm);
+
+                if (Controller.ButtonL1.pressing() ){
+                    Flywheel.spin(forward, TrackSpeed, rpm);
+                }
+                else{
+                    Flywheel.spin(forward, 0, rpm);
+                }
+            }
+
+            // 发射-下
+            if (Controller.ButtonL2.pressing() || Controller.ButtonR2.pressing() ){
+                TrackLeft.spin(forward, -1 * TrackSpeed, rpm);
+                TrackRight.spin(forward, -1 * TrackSpeed, rpm);
+
+                if (Controller.ButtonL2.pressing() ){
+                    Flywheel.spin(forward, -1 * TrackSpeed, rpm);
+                }
+                else{
+                    Flywheel.spin(forward, 0, rpm);
+                }
+            }
+        }
+        else{
+            TrackLeft.spin(forward, 0, rpm);
+            TrackRight.spin(forward, 0, rpm);
+            Flywheel.spin(forward, 0, rpm);
+        }
+
+        // 抬升上
+        if (Controller.ButtonY.pressing()){
+            Uplift.set(1);
+        }
+
+        // 抬升下
+        if (Controller.ButtonB.pressing()){
+            Uplift.set(0);
+        }
+
         // 退出
-        if (HoldButtonB(&RemoteControlData_list, 5)){
+        if (HoldButtonB(&RemoteControlData_list, 50)){
             return ;
         }
 

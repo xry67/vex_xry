@@ -23,6 +23,8 @@ extern double Sensitivity_Turn;           // 转向灵敏度
 extern double Sensitivity_Straight;       // 直行灵敏度
 extern double Sensitivity_Precision;      // 精密遥控比例
 
+extern double TrackSpeed;  // 履带速度
+
 // 遥控期间自动追踪的灵敏度
 extern double Auto_Turn_To_Target_Speed;
 
@@ -41,9 +43,14 @@ extern motor RightMotor2;//20
 extern motor RightMotor3;//19
 extern motor_group RightMotorGroup;  // 右电机组
 
+extern motor TrackLeft;    // 左履带
+extern motor TrackRight;  // 右履带
+extern motor Flywheel;  // 尾部飞轮
+extern digital_out Uplift; // 抬升
+
 extern inertial ChassisInertial;  // 底盘陀螺仪
 extern smartdrive Smartdrive;  // 官方底盘驱动
-
+ 
 extern rotation Rotation_x;  // 底盘定位轮x
 extern rotation Rotation_y;  // 底盘定位轮y
 

@@ -17,6 +17,8 @@ double Sensitivity_Turn       = 0.9;  // 转向灵敏度
 double Sensitivity_Straight   = 1;    // 直行灵敏度
 double Sensitivity_Precision  = 0.1;  // 精密遥控比例
 
+double TrackSpeed   = 300000000;  // 履带速度
+
 // 遥控期间自动追踪的灵敏度
 double Auto_Turn_To_Target_Speed = 50;
 
@@ -37,6 +39,11 @@ motor RightMotor1 = motor(PORT18, ratio6_1, 1);//18
 motor RightMotor2 = motor(PORT19, ratio6_1, 0);//20
 motor RightMotor3 = motor(PORT20, ratio6_1, 0);//19
 motor_group RightMotorGroup = motor_group(RightMotor1, RightMotor2, RightMotor3);  // 右边边电机组
+
+motor TrackLeft   = motor(PORT13, ratio6_1, 1);  // 左履带
+motor TrackRight  = motor(PORT12, ratio6_1, 1);  // 右履带
+motor Flywheel    = motor(PORT14, ratio6_1, 1);  // 尾部飞轮
+digital_out Uplift = digital_out(Brain.ThreeWirePort.A);  // 抬升
 
 inertial ChassisInertial = inertial(PORT16);  // 底盘陀螺仪
 
