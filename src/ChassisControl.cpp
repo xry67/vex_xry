@@ -374,8 +374,9 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
           taget_angle  = start_angle + val;
       }
 
+      // Brain.Screen.printAt( 10, 50, "taget_angle %f", taget_angle);
 
-      PID pid(20, 1, 0.5); // 创建PID控制器实例 
+      PID pid(33, 0, 0.5); // 创建PID控制器实例 
       pid.setSetpoint(taget_angle); // 设置目标位置
 
       // 多线程阻断等待
@@ -391,12 +392,8 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
           double current_position = ChassisInertial.rotation();  // 当前位置
           double output = pid.calculate(current_position, dt) * yaw_negative;  // 补偿
 
-          // 控制小车运动 
-          ChassisForward(std::min(v, output), yaw_negative);   //  控制移动
-          
-
           // 检查目标是否达到  
-          if (abs(current_position - taget_angle) <= 0.5 && abs(output) < 50) {
+          if (abs(current_position - taget_angle) <= 0.5 && abs(output) < 10) {
             PrintAt(2, " ->到位");
             break;  
           }  
@@ -430,6 +427,15 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
           if (now_time - start_time >= move_time_out / 1000){
               PrintAt(2, " ->超时");
               break;
+          }
+
+          if (output < 0){
+              // 控制小车运动 
+              ChassisForward(std::max(-1 * v, output), yaw_negative);   //  控制移动
+          }
+          else{
+              // 控制小车运动 
+              ChassisForward(std::min(v, output), yaw_negative);   //  控制移动
           }
 
           wait(dt * 1000.0, msec);
