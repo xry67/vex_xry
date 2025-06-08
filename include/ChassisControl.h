@@ -104,7 +104,7 @@ class AiTarget{
         ans = i;
       }
     }
-    std::cout << "ans " << ans << std::endl;
+
     Target_CenterX = aiVision.objects[ans].centerX;
     Target_CenterY = aiVision.objects[ans].centerY;
     Target_Width   = aiVision.objects[ans].width;

@@ -21,8 +21,10 @@ void auto12();
 // 自动函数增加
 void AddAutoFun(){
     AutoFunctions.push_back(AutoFun("自动程序1", auto1));
+    AutoFunctions.push_back(AutoFun("自动程序1.1", auto4));
     AutoFunctions.push_back(AutoFun("自动程序2", auto2));
     AutoFunctions.push_back(AutoFun("测试", auto3));
+
 }
 
 #endif 
