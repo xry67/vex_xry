@@ -122,9 +122,9 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
 
   // 底盘直行初始化
   void ChassisControl::ChassisStraight(int negative = 1){
-      this->StraightPid->reset(200, 0.0, 0);
+      this->StraightPid->reset(20, 0.0, 0);
       this->StraightAngle = ChassisInertial.rotation();
-      this->StraightPid->setSetpoint(this->StraightAngle);
+      this->StraightPid->setSetpoint(ChassisInertial.rotation());
       this->StraightNegative = negative;
   }
 
@@ -135,7 +135,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
 
         double output = this->StraightPid->calculate(now_rotation, 0.01) * -1;  // 补偿
         Brain.Screen.printAt( 10, 100, "output %f", output);
-        Brain.Screen.printAt( 10, 150, "this->StraightAngle %f", this->StraightAngle);
+        Brain.Screen.printAt( 10, 150, "this->StraightAngle %f", this->StraightPid->getsetpoint());
         if (output < 0){
           output = std::max(output, -1 * StraightCorrectionSpeed);
         }else{
@@ -778,6 +778,10 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       int    negative = 1;   // 负方向指示器
       int yaw_negative= 1;   // 负偏指示器
 
+      // 加速度测试
+      double now_speed = 0;
+      double maxinum_speed_acceleration = 50;
+
       //  方向指示器
       if (direction == 'u'){
           negative = -1;
@@ -816,7 +820,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       }
 
 
-      PID pid(3, 0.01, 0.01); // 创建PID控制器实例 
+      PID pid(2, 0.01, 0.01); // 创建PID控制器实例 
       pid.setSetpoint(val); // 设置目标位置
 
       // 多线程阻断等待
@@ -831,17 +835,39 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       while (true) {  
           double current_position = Rotation_x.position(deg);  // 当前位置
           double output = pid.calculate(current_position, dt);  // 补偿
+
+          if (negative == 1){
+            if (output > now_speed){
+              now_speed = std::min(output, now_speed + maxinum_speed_acceleration);
+            }else{
+              now_speed = output;
+            }
+          }else{
+            if (output < now_speed){
+              now_speed = std::max(output, now_speed - maxinum_speed_acceleration);
+            }else{
+              now_speed = output;
+            }
+          }
+
           // Brain.Screen.printAt( 10, 120, "out %f", output);
 
           // std::cout << current_position << " " << output << std::endl;
           Brain.Screen.printAt( 10, 80, "out %f", output);
 
           // 控制小车运动 
-          if (output < 0){
-            ChassisForward(std::max(v * -1, output), yaw * yaw_negative);   //  控制移动
+          // if (output < 0){
+          //   ChassisForward(std::max(v * -1, output), yaw * yaw_negative);   //  控制移动
+          // }
+          // else{
+          //   ChassisForward(std::min(v, output), yaw * yaw_negative);   //  控制移动
+          // }
+
+          if (now_speed < 0){
+            ChassisForward(std::max(v * -1, now_speed), yaw * yaw_negative);   //  控制移动
           }
           else{
-            ChassisForward(std::min(v, output), yaw * yaw_negative);   //  控制移动
+            ChassisForward(std::min(v, now_speed), yaw * yaw_negative);   //  控制移动
           }
 
           // 检查目标是否达到  

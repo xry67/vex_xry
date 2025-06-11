@@ -23,6 +23,10 @@ public:
         integral   = 0.0;
     }
 
+    double getsetpoint(){
+        return setpoint;
+    }
+
     double calculate(double measured, double dt) {  
         double error = setpoint - measured;  
         integral += error * dt;  
