@@ -239,7 +239,7 @@ class ChassisControl{
     bool    MoveEnd         = true;  // 记录运动是否完成
     int     MoveId          = 0;     // 运动id记录（计数）
 
-    PID     *StraightPid;            // 创建PID控制器实例 
+    PID     *StraightPid = new PID(5, 0.0, 0.1);            // 创建PID控制器实例 
     double  StraightAngle   = 0.0;   // 记录直行的角度
     int     StraightNegative = 1;    // 记录执行方向
 

@@ -122,8 +122,8 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
 
   // 底盘直行初始化
   void ChassisControl::ChassisStraight(int negative = 1){
-      this->StraightPid     = new PID(15, 0.1, 0.1);
-      this->StraightAngle    = ChassisInertial.rotation();
+      this->StraightPid->reset(200, 0.0, 0);
+      this->StraightAngle = ChassisInertial.rotation();
       this->StraightPid->setSetpoint(this->StraightAngle);
       this->StraightNegative = negative;
   }
@@ -134,6 +134,8 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
         double now_rotation = ChassisInertial.rotation();
 
         double output = this->StraightPid->calculate(now_rotation, 0.01) * -1;  // 补偿
+        Brain.Screen.printAt( 10, 100, "output %f", output);
+        Brain.Screen.printAt( 10, 150, "this->StraightAngle %f", this->StraightAngle);
         if (output < 0){
           output = std::max(output, -1 * StraightCorrectionSpeed);
         }else{
@@ -292,6 +294,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       while (true) {  
           double current_position = GetPositions_mean();  // 当前位置
           Brain.Screen.printAt( 10, 50, "current_position %f", current_position);
+         
           double output = pid.calculate(current_position, dt);  // 补偿
 
           // 控制小车运动 
