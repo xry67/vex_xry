@@ -120,9 +120,27 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
     this->SetStopMod("Coast");
   }
 
+  // 获得缓冲后的速度
+  double ChassisControl::GetBufferSpeed(double nowspeed, double output, int negative){
+    if (negative == 1){
+      if (output > nowspeed){
+        nowspeed = std::min(output, nowspeed + maxinum_speed_acceleration + GetVelocity_mean() * 0.4);
+      }else{
+        nowspeed = output;
+      }
+    }else{
+      if (output < nowspeed){
+        nowspeed = std::max(output, nowspeed - maxinum_speed_acceleration - GetVelocity_mean() * 0.4);
+      }else{
+        nowspeed = output;
+      }
+    }
+    return nowspeed;
+  }
+
   // 底盘直行初始化
   void ChassisControl::ChassisStraight(int negative = 1){
-      this->StraightPid->reset(20, 0.0, 0);
+      this->StraightPid->reset(0.1, 0.0, 0);
       this->StraightAngle = ChassisInertial.rotation();
       this->StraightPid->setSetpoint(ChassisInertial.rotation());
       this->StraightNegative = negative;
@@ -143,12 +161,12 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
         }
         std::cout << "s-> " << now_rotation << " " << output << std::endl;
 
-        LeftMotor1.spin(vex::forward,  v - (output * this->StraightNegative), dps);
-        LeftMotor2.spin(vex::forward,  v - (output * this->StraightNegative), dps);
-        LeftMotor3.spin(vex::forward,  v - (output * this->StraightNegative), dps);
-        RightMotor1.spin(vex::forward, v + (output * this->StraightNegative), dps);
-        RightMotor2.spin(vex::forward, v + (output * this->StraightNegative), dps);
-        RightMotor3.spin(vex::forward, v + (output * this->StraightNegative), dps);
+        LeftMotor1.spin(vex::forward,  v - (output * this->StraightNegative), voltageUnits::volt);
+        LeftMotor2.spin(vex::forward,  v - (output * this->StraightNegative), voltageUnits::volt);
+        LeftMotor3.spin(vex::forward,  v - (output * this->StraightNegative), voltageUnits::volt);
+        RightMotor1.spin(vex::forward, v + (output * this->StraightNegative), voltageUnits::volt);
+        RightMotor2.spin(vex::forward, v + (output * this->StraightNegative), voltageUnits::volt);
+        RightMotor3.spin(vex::forward, v + (output * this->StraightNegative), voltageUnits::volt);
         return ;
       }
       
@@ -165,26 +183,26 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       }
 
 
-      LeftMotor1.spin(vex::forward, v * left_yaw, dps);
-      LeftMotor2.spin(vex::forward, v * left_yaw, dps);
-      LeftMotor3.spin(vex::forward, v * left_yaw, dps);
-      RightMotor1.spin(vex::forward, v * right_yaw, dps);
-      RightMotor2.spin(vex::forward, v * right_yaw, dps);
-      RightMotor3.spin(vex::forward, v * right_yaw, dps);
+      LeftMotor1.spin(vex::forward, v * left_yaw, voltageUnits::volt);
+      LeftMotor2.spin(vex::forward, v * left_yaw, voltageUnits::volt);
+      LeftMotor3.spin(vex::forward, v * left_yaw, voltageUnits::volt);
+      RightMotor1.spin(vex::forward, v * right_yaw, voltageUnits::volt);
+      RightMotor2.spin(vex::forward, v * right_yaw, voltageUnits::volt);
+      RightMotor3.spin(vex::forward, v * right_yaw, voltageUnits::volt);
   }
 
   // 底盘左轮控制
   void ChassisControl::ChassisLeftControl(double v){
-    LeftMotor1.spin(vex::forward,  v, dps);
-    LeftMotor2.spin(vex::forward,  v, dps);
-    LeftMotor3.spin(vex::forward,  v, dps);
+    LeftMotor1.spin(vex::forward,  v, voltageUnits::volt);
+    LeftMotor2.spin(vex::forward,  v, voltageUnits::volt);
+    LeftMotor3.spin(vex::forward,  v, voltageUnits::volt);
   }
 
   // 底盘左轮控制
   void ChassisControl::ChassisRightControl(double v){
-    RightMotor1.spin(vex::forward, v, dps);
-    RightMotor2.spin(vex::forward, v, dps);
-    RightMotor3.spin(vex::forward, v, dps);
+    RightMotor1.spin(vex::forward, v, voltageUnits::volt);
+    RightMotor2.spin(vex::forward, v, voltageUnits::volt);
+    RightMotor3.spin(vex::forward, v, voltageUnits::volt);
   }
 
   // 获取当前的位置
@@ -386,7 +404,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       double dt = 0.01;
       double stuck_time_count = 0;  // 电机卡死时间统计
       double start_time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count();  // 运动开始时间
-      double move_time_out = Move_time_out + (val / v * 1000) * 1000;
+      double move_time_out = Move_time_out + (val / v * 10) * 1000;
       int yaw_negative= 1;   // 负偏指示器
 
       //  方向指示器
@@ -401,7 +419,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
 
       // Brain.Screen.printAt( 10, 50, "taget_angle %f", taget_angle);
 
-      PID pid(25, 0, 0.5); // 创建PID控制器实例 
+      PID pid(0.3, 0.05, 0); // 创建PID控制器实例 
       pid.setSetpoint(taget_angle); // 设置目标位置
 
       // 多线程阻断等待
@@ -418,7 +436,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
           double output = pid.calculate(current_position, dt) * yaw_negative;  // 补偿
 
           // 检查目标是否达到  
-          if (abs(current_position - taget_angle) <= 0.5 && abs(output) < 10) {
+          if (std::abs(current_position - taget_angle) <= 1 && std::abs(output) < Stuck_threshold) {
             PrintAt(2, " ->到位");
             break;  
           }  
@@ -430,7 +448,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
           }
 
           // 算法收敛保护
-          if (abs(output) <= Stuck_threshold){
+          if (std::abs(output) <= Stuck_threshold / 2){
             PrintAt(2, " ->收敛");
             break;
           }
@@ -774,13 +792,13 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       double dt = 0.01;
       double stuck_time_count = 0;  // 电机卡死时间统计
       double start_time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count();  // 运动开始时间
-      double move_time_out = Move_time_out + (val / v * 1000);
+      double move_time_out = Move_time_out + (val / v * 10);
       int    negative = 1;   // 负方向指示器
       int yaw_negative= 1;   // 负偏指示器
 
       // 加速度测试
       double now_speed = 0;
-      double maxinum_speed_acceleration = 50;
+      // double maxinum_speed_acceleration = 50;
 
       //  方向指示器
       if (direction == 'u'){
@@ -820,7 +838,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       }
 
 
-      PID pid(2, 0.01, 0.01); // 创建PID控制器实例 
+      PID pid(0.00999, 0.0000, 0.000); // 创建PID控制器实例 
       pid.setSetpoint(val); // 设置目标位置
 
       // 多线程阻断等待
@@ -836,32 +854,8 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
           double current_position = Rotation_x.position(deg);  // 当前位置
           double output = pid.calculate(current_position, dt);  // 补偿
 
-          if (negative == 1){
-            if (output > now_speed){
-              now_speed = std::min(output, now_speed + maxinum_speed_acceleration);
-            }else{
-              now_speed = output;
-            }
-          }else{
-            if (output < now_speed){
-              now_speed = std::max(output, now_speed - maxinum_speed_acceleration);
-            }else{
-              now_speed = output;
-            }
-          }
-
-          // Brain.Screen.printAt( 10, 120, "out %f", output);
-
-          // std::cout << current_position << " " << output << std::endl;
-          Brain.Screen.printAt( 10, 80, "out %f", output);
-
-          // 控制小车运动 
-          // if (output < 0){
-          //   ChassisForward(std::max(v * -1, output), yaw * yaw_negative);   //  控制移动
-          // }
-          // else{
-          //   ChassisForward(std::min(v, output), yaw * yaw_negative);   //  控制移动
-          // }
+          now_speed = GetBufferSpeed(now_speed, output, negative);
+          std::cout << "output----" << output << std::endl;
 
           if (now_speed < 0){
             ChassisForward(std::max(v * -1, now_speed), yaw * yaw_negative);   //  控制移动
@@ -871,7 +865,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
           }
 
           // 检查目标是否达到  
-          if (fabs(current_position - val) <= 10 && output <= Stuck_threshold * 20) {
+          if (std::abs(current_position - val) <= 10 && std::abs(output) <= Stuck_threshold*5) {
               PrintAt(2, " ->到位");
               break;  
           }  
@@ -883,7 +877,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
           }
 
           // 算法收敛保护
-          if (abs(output) <= Stuck_threshold){
+          if (std::abs(output) <= Stuck_threshold){
             PrintAt(2, " ->收敛");
             break;
           }

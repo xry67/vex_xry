@@ -8,7 +8,23 @@ void auto3(){
     //     wait(1000, msec);
     // }
 
-    ChassisControlSTS.MoveBySmallWheel(2000, 2000, 0.0, 'n', false);
-    wait(500, msec);
-    ChassisControlSTS.MoveBySmallWheel(2000, 2000, 0.0, 'u', false);
+    ChassisControlSTS.MoveBySmallWheel(8, 2000, 0.0, 'n', false);
+    // wait(500, msec);
+    ChassisControlSTS.MoveBySmallWheel(8, 2000, 0.0, 'u', false);
+    // wait(500, msec);
+    ChassisControlSTS.MoveBySmallWheel(8, 1500, 0.0, 'n', false);
+    // wait(500, msec);
+    ChassisControlSTS.MoveBySmallWheel(8, 1500, 0.0, 'u', false);
+       //  wait(500, msec);
+    ChassisControlSTS.MoveBySmallWheel(8, 1000, 0.0, 'n', false);
+    // wait(500, msec);
+    ChassisControlSTS.MoveBySmallWheel(8, 1000, 0.0, 'u', false);
+       //  wait(500, msec);
+    ChassisControlSTS.MoveBySmallWheel(8, 500, 0.0, 'n', false);
+    // wait(500, msec);
+    ChassisControlSTS.MoveBySmallWheel(8, 500, 0.0, 'u', false);
+       //      wait(500, msec);
+    ChassisControlSTS.MoveBySmallWheel(8, 200, 0.0, 'n', false);
+    // wait(500, msec);
+    ChassisControlSTS.MoveBySmallWheel(8, 200, 0.0, 'u', false);
 }

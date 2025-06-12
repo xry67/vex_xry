@@ -150,6 +150,9 @@ class ChassisControl{
   // 设置停止模式为Coasst
   void SetStopModCoast();
 
+  // 获得缓冲后的速度
+  double GetBufferSpeed(double nowspeed, double output, int negative);
+
   // 底盘停止
   void ChassisStop();
 
@@ -234,10 +237,12 @@ class ChassisControl{
 
     double  Move_time_out   = 3000;  // 超时保护，默认3000毫秒
     double  Stuck_time_out  = 1000;  // 电机卡死保护，默认1000毫秒
-    double  Stuck_threshold = 2;     // 电机卡死认定阈值，单位dps
+    double  Stuck_threshold = 0.25;     // 电机卡死认定阈值，单位dps
     bool    Moveing         = true; // 记录是否在运动
     bool    MoveEnd         = true;  // 记录运动是否完成
     int     MoveId          = 0;     // 运动id记录（计数）
+
+    double maxinum_speed_acceleration = 2;
 
     PID     *StraightPid = new PID(5, 0.0, 0.1);            // 创建PID控制器实例 
     double  StraightAngle   = 0.0;   // 记录直行的角度

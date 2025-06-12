@@ -4,8 +4,13 @@
 
 void auto4(){
 
-    ChassisControlSTS.Move(2000, 2000, 0.0, 'n', false);
+    ChassisControlSTS.TurnTo(7, 90, 0);
     wait(500, msec);
-    ChassisControlSTS.Move(2000, 2000, 0.0, 'u', false);
-
+    ChassisControlSTS.TurnTo(7, 150, 0);
+    wait(500, msec);
+    ChassisControlSTS.TurnTo(7, 180, 0);
+    wait(500, msec);
+    ChassisControlSTS.TurnTo(7, 225, 0);
+    wait(500, msec);
+    ChassisControlSTS.TurnTo(7, 270, 0);
 }
