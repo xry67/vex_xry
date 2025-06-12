@@ -214,13 +214,13 @@ void RemoteControl(){
             // 吸球1
             if (Controller.ButtonR1.pressing() ){
                 TrackLeft.spin(forward, TrackSpeed, rpm);
-                TrackRight.spin(forward, -1 * TrackSpeed, rpm);
+                TrackRight.spin(forward, TrackSpeed, rpm);
             }
             
             // 吸球2
             if (Controller.ButtonR2.pressing()){
                 TrackLeft.spin(forward, -1 * TrackSpeed, rpm);
-                TrackRight.spin(forward, TrackSpeed, rpm);
+                TrackRight.spin(forward, -1 * TrackSpeed, rpm);
             }
 
             // 2-3层
