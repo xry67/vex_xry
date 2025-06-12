@@ -474,14 +474,21 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
 
           if (output < 0){
               // 控制小车运动 
-              if (output < -1){
-                
+              if (output > -1){
+                ChassisForward(-1, yaw_negative);
+              }else{
+                ChassisForward(std::max(-1 * v, output), yaw_negative);   //  控制移动
               }
-              ChassisForward(std::max(-1 * v, output), yaw_negative);   //  控制移动
+              
           }
           else{
               // 控制小车运动 
-              ChassisForward(std::min(v, output), yaw_negative);   //  控制移动
+              if (output < 1){
+                ChassisForward(1, yaw_negative);   //  控制移动
+              }else{
+                ChassisForward(std::min(v, output), yaw_negative);   //  控制移动
+              }
+              
           }
 
           wait(dt * 1000.0, msec);
