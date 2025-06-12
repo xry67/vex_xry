@@ -436,7 +436,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
           double output = pid.calculate(current_position, dt) * yaw_negative;  // 补偿
 
           // 检查目标是否达到  
-          if (std::abs(current_position - taget_angle) <= 1 && std::abs(output) < Stuck_threshold) {
+          if (std::abs(current_position - taget_angle) <= 1 && std::abs(output) < Stuck_threshold * 10) {
             PrintAt(2, " ->到位");
             break;  
           }  
@@ -474,6 +474,9 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
 
           if (output < 0){
               // 控制小车运动 
+              if (output < -1){
+                
+              }
               ChassisForward(std::max(-1 * v, output), yaw_negative);   //  控制移动
           }
           else{
