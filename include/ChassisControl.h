@@ -241,12 +241,13 @@ class ChassisControl{
     bool    Moveing         = true; // 记录是否在运动
     bool    MoveEnd         = true;  // 记录运动是否完成
     int     MoveId          = 0;     // 运动id记录（计数）
+    double  min_speed       = 1;  // 电机的最小速度
 
-    double maxinum_speed_acceleration = 2;
+    double maxinum_speed_acceleration = 0.1;
 
     PID     *StraightPid = new PID(5, 0.0, 0.1);            // 创建PID控制器实例 
     double  StraightAngle   = 0.0;   // 记录直行的角度
-    int     StraightNegative = 1;    // 记录执行方向
+    int     StraightNegative = 1.05;    // 记录执行方向
 
     int Target_CenterX       = 0;    // 目标物体的中心x
     int Target_CenterY       = 0;    // 目标物体的中心y

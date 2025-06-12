@@ -47,4 +47,7 @@ class WaitStr
 
 };
 
+// 将数字规范到这个区间
+double NumInterval(double num, double mininum, double maxinum);
+
 #endif

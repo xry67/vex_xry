@@ -77,3 +77,24 @@ std::vector<char*> generateAlphabetStrings(char start, char end) {
 double NormsAngle(double val){
   return val - ((int)val / 360) * 360;
 }
+
+
+// 将数字规范到这个区间
+double NumInterval(double num, double mininum, double maxinum){
+    if (num < 0){
+        // 控制小车运动 
+        if (num > -1 * mininum){
+            return -1 * mininum;
+        }else{
+            return std::max(-1 * maxinum, num);
+        }
+    }
+    else{
+        // 控制小车运动 
+        if (num < mininum){
+            return mininum;
+        }else{
+            return std::min(maxinum, num);
+        }
+    }
+}

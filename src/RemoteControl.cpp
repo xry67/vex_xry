@@ -9,7 +9,7 @@ AiTarget ai_target =  AiTarget();
 
 // 左电机控制
 void LeftMotorControl(int val){
-    // Brain.Screen.printAt( 100, 50, "%f" , 0.128*val);
+    Brain.Screen.printAt( 100, 50, "%f" , 0.128*val);
     LeftMotor1.spin(vex::forward, 0.128*val, voltageUnits::volt);
     LeftMotor2.spin(vex::forward, 0.128*val, voltageUnits::volt);
     LeftMotor3.spin(vex::forward, 0.128*val , voltageUnits::volt);
