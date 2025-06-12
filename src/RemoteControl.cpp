@@ -224,12 +224,15 @@ void RemoteControl(){
             }
 
             // 2-3层
-            if (Controller.ButtonL1.pressing() || Controller.ButtonL2.pressing() ){
-                TrackLeft.spin(forward, TrackSpeed, rpm);
+            if (Controller.ButtonL1.pressing()){
+                TrackLeft.spin(forward, -1 * TrackSpeed, rpm);
                 TrackRight.spin(forward, TrackSpeed, rpm);
             }
 
-
+            if (Controller.ButtonL2.pressing()){
+                TrackLeft.spin(forward, -1 * TrackSpeed, rpm);
+                TrackRight.spin(forward, TrackSpeed, rpm);
+            }
         }
         else{
             TrackLeft.spin(forward, 0, rpm);
