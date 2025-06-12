@@ -210,36 +210,36 @@ void RemoteControl(){
         ChassisControlFun();
 
         if (Controller.ButtonL1.pressing() || Controller.ButtonL2.pressing() || Controller.ButtonR1.pressing() || Controller.ButtonR2.pressing()){
+            
+            // 吸球1
+            if (Controller.ButtonR1.pressing() ){
+                TrackLeft.spin(forward, TrackSpeed, rpm);
+                TrackRight.spin(forward, -1 * TrackSpeed, rpm);
+            }
+            
+            // 吸球2
+            if (Controller.ButtonR2.pressing()){
+                TrackLeft.spin(forward, -1 * TrackSpeed, rpm);
+                TrackRight.spin(forward, TrackSpeed, rpm);
+            }
 
-            // 发射-上
-            if (Controller.ButtonL1.pressing() || Controller.ButtonR1.pressing() ){
+            // 2-3层
+            if (Controller.ButtonL1.pressing() || Controller.ButtonL2.pressing() ){
                 TrackLeft.spin(forward, TrackSpeed, rpm);
                 TrackRight.spin(forward, TrackSpeed, rpm);
-
-                if (Controller.ButtonL1.pressing() ){
-                    Flywheel.spin(forward, TrackSpeed, rpm);
-                }
-                else{
-                    Flywheel.spin(forward, 0, rpm);
-                }
             }
 
-            // 发射-下
-            if (Controller.ButtonL2.pressing() || Controller.ButtonR2.pressing() ){
-                TrackLeft.spin(forward, -1 * TrackSpeed, rpm);
-                TrackRight.spin(forward, -1 * TrackSpeed, rpm);
 
-                if (Controller.ButtonL2.pressing() ){
-                    Flywheel.spin(forward, -1 * TrackSpeed, rpm);
-                }
-                else{
-                    Flywheel.spin(forward, 0, rpm);
-                }
-            }
         }
         else{
             TrackLeft.spin(forward, 0, rpm);
             TrackRight.spin(forward, 0, rpm);
+        }
+
+        if (Controller.ButtonL2.pressing()){
+            Flywheel.spin(forward, TrackSpeed, rpm);
+        }
+        else{
             Flywheel.spin(forward, 0, rpm);
         }
 

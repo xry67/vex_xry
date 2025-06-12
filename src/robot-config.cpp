@@ -40,9 +40,9 @@ motor RightMotor2 = motor(PORT19, ratio6_1, 0);//20
 motor RightMotor3 = motor(PORT20, ratio6_1, 0);//19
 motor_group RightMotorGroup = motor_group(RightMotor1, RightMotor2, RightMotor3);  // 右边边电机组
 
-motor TrackLeft   = motor(PORT13, ratio6_1, 1);  // 左履带
-motor TrackRight  = motor(PORT12, ratio6_1, 1);  // 右履带
-motor Flywheel    = motor(PORT14, ratio6_1, 1);  // 尾部飞轮
+motor TrackLeft   = motor(PORT13, ratio6_1, 0);  // 左履带
+motor TrackRight  = motor(PORT12, ratio6_1, 0);  // 右履带
+motor Flywheel    = motor(PORT14, ratio6_1, 0);  // 尾部飞轮
 digital_out Uplift = digital_out(Brain.ThreeWirePort.A);  // 抬升
 
 inertial ChassisInertial = inertial(PORT16);  // 底盘陀螺仪
