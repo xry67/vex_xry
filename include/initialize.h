@@ -35,6 +35,7 @@ int LowBatteryMonitor(){
     while (true) {
         if (Brain.Battery.capacity(pct) <= PowerLimit) {
             Controller.rumble(". .");
+            wait(500, msec);
         }
         Brain.Screen.printAt( 200, 200, "Angle %f", ChassisInertial.rotation());
         vex::task::sleep(1000);

@@ -24,6 +24,9 @@ void AddAutoFun(){
     AutoFunctions.push_back(AutoFun("自动程序2", auto2));
     AutoFunctions.push_back(AutoFun("自动程序3", auto3));
     AutoFunctions.push_back(AutoFun("自动程序4", auto4));
+    AutoFunctions.push_back(AutoFun("自动程序5", auto5));
+    AutoFunctions.push_back(AutoFun("自动程序6", auto6));
+    AutoFunctions.push_back(AutoFun("自动程序7", auto7));
 
 }
 

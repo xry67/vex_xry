@@ -10,13 +10,13 @@
 
 double GetDistance_front(){
   double value1 = Distance_fl.objectDistance(mm);
-  double value2 = Distance_fl.objectDistance(mm);
+  double value2 = Distance_fr.objectDistance(mm);
   return (value1 + value2) / 2.0;
 }
 
 double GetDistance_back(){
   double value1 = Distance_bl.objectDistance(mm);
-  double value2 = Distance_bl.objectDistance(mm);
+  double value2 = Distance_br.objectDistance(mm);
   return (value1 + value2) / 2.0;
 }
 
@@ -259,6 +259,9 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       int    negative = 1;   // 负方向指示器
       int yaw_negative= 1;   // 负偏指示器
 
+      // 加速度测试
+      double now_speed = 0;
+
       //  方向指示器
       if (direction == 'u'){
           negative = -1;
@@ -297,7 +300,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       }
 
 
-      PID pid(8, 0.03, 0.1); // 创建PID控制器实例 
+      PID pid(0.00900, 0.0000, 0.000); // 创建PID控制器实例 
       pid.setSetpoint(val); // 设置目标位置
 
       // 多线程阻断等待
@@ -308,26 +311,24 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
 
       Moveing = true;  // 当前在运动
       MoveEnd = false; // 运动没有完成
+      int overcount = 0;  // 成功到位计数器
 
       while (true) {  
           double current_position = GetPositions_mean();  // 当前位置
-          Brain.Screen.printAt( 10, 50, "current_position %f", current_position);
+          // Brain.Screen.printAt( 10, 50, "current_position %f", current_position);
          
           double output = pid.calculate(current_position, dt);  // 补偿
 
-          // 控制小车运动 
-          if (output < 0){
-            ChassisForward(std::max(v * -1, output), yaw * yaw_negative);   //  控制移动
-          }
-          else{
-            ChassisForward(std::min(v, output), yaw * yaw_negative);   //  控制移动
-          }
-
-          // 检查目标是否达到  
-          if (fabs(current_position - val) <= 1) {
+          if (std::abs(current_position - val) <= 5 && std::abs(output) <= Stuck_threshold) {
+            overcount += 1;
+            if (overcount == 10){
               PrintAt(2, " ->到位");
+              std::cout <<"daowei" <<std::endl;
               break;  
-          }  
+            }
+          }else{
+            overcount = 0;
+          } 
 
           // 多线程保护
           if (Moveing == false){
@@ -336,10 +337,10 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
           }
 
           // 算法收敛保护
-          if (std::abs(output) <= Stuck_threshold){
-            PrintAt(2, " ->收敛");
-            break;
-          }
+          // if (std::abs(output) <= Stuck_threshold){
+          //   PrintAt(2, " ->收敛");
+          //   break;
+          // }
 
           // 电机抱死保护
           if (GetVelocity_mean() <= Stuck_threshold){
@@ -359,6 +360,11 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
               PrintAt(2, " ->超时");
               break;
           }
+
+          now_speed = GetBufferSpeed(now_speed, output, negative);
+          // std::cout << "output----" << output << std::endl;
+          now_speed = NumInterval(now_speed, min_move_speed, v);
+          ChassisForward(now_speed, yaw * yaw_negative);  //  控制移动
 
           wait(dt * 1000.0, msec);
       }  
@@ -483,7 +489,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
               break;
           }
 
-          output = NumInterval(output, min_speed, v);
+          output = NumInterval(output, min_turn_speed, v);
           ChassisForward(std::max(-1 * v, output), yaw_negative);  //  控制移动
           wait(dt * 1000.0, msec);
       }  
@@ -676,8 +682,11 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       double dt = 0.01;
       double stuck_time_count = 0;  // 电机卡死时间统计
       double start_time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count();  // 运动开始时间
-      double move_time_out = Move_time_out + ((start_val - val) / v * 1000);
+      double move_time_out = Move_time_out + (std::abs(start_val - val) / v * 1000);
       int    negative = 1;   // 负方向指示器
+
+      // 加速度测试
+      double now_speed = 0;
 
       //  方向指示器
       if (DistanceChioce == "front"){
@@ -687,7 +696,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
           negative = 1;
       }
 
-      PID pid(5, 0.1, 0.1); // 创建PID控制器实例。 
+      PID pid(0.020, 0.0, 0.0); // 创建PID控制器实例。 
       pid.setSetpoint(val); // 设置目标位置
 
       // 多线程阻断等待
@@ -702,23 +711,23 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
 
       Moveing = true;  // 当前在运动
       MoveEnd = false; // 运动没有完成
+      int overcount = 0;  // 成功到位计数器
 
       while (true) {  
           double current_position = GetDistance(DistanceChioce);  // 当前位置
           double output = pid.calculate(current_position, dt) * negative;  // 补偿
-          // std::cout << "->"  << current_position << " " << output << std::endl;
-          // 控制小车运动 
-          if (output > 0){
-            ChassisForward(std::min(v, output), 0);   //  控制移动
-          }
-          else{
-            ChassisForward(std::max(v * -1, output), 0);   //  控制移动
-          }
+
           // 检查目标是否达到  
-          if (fabs(current_position - val) <= 1) {
+          if (std::abs(current_position - val) <= 4 && std::abs(output) <= Stuck_threshold) {
+            overcount += 1;
+            if (overcount == 10){
               PrintAt(2, " ->到位");
+              std::cout <<"daowei" <<std::endl;
               break;  
-          }  
+            }
+          }else{
+            overcount = 0;
+          }
 
           // 多线程保护
           if (Moveing == false){
@@ -726,11 +735,11 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
               break;
           }
 
-          // 算法收敛保护
-          if (abs(output) <= Stuck_threshold){
-            PrintAt(2, " ->收敛");
-            break;
-          }
+          // // 算法收敛保护
+          // if (abs(output) <= Stuck_threshold){
+          //   PrintAt(2, " ->收敛");
+          //   break;
+          // }
 
           // 电机抱死保护
           if (GetVelocity_mean() <= Stuck_threshold){
@@ -751,14 +760,18 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
               break;
           }
 
+          now_speed = GetBufferSpeed(now_speed, output, negative);
+          // std::cout << "output----" << output << std::endl;
+          now_speed = NumInterval(now_speed, min_move_speed, v);
+          ChassisForward(now_speed, 0);  //  控制移动
+
           wait(dt * 1000.0, msec);
       }  
 
       ChassisStop();
       Moveing = false;  // 运动停止了
       MoveEnd = true; // 运动完成
-      PrintAt(3, "%f",  Rotation_x.position(deg));
-      std::cout << "ans: " << GetDistance(DistanceChioce) << std::endl;
+      PrintAt(3, "%f", GetDistance(DistanceChioce));
   }
 
   // 使用距离传感器移动(可选多线程)
@@ -861,7 +874,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
           double output = pid.calculate(current_position, dt);  // 补偿
 
           // 检查目标是否达到  
-          if (std::abs(current_position - val) <= 10 && std::abs(output) <= Stuck_threshold) {
+          if (std::abs(current_position - val) <= 7.5 && std::abs(output) <= Stuck_threshold) {
             overcount += 1;
             if (overcount == 10){
               PrintAt(2, " ->到位");
@@ -905,7 +918,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
 
           now_speed = GetBufferSpeed(now_speed, output, negative);
           // std::cout << "output----" << output << std::endl;
-          now_speed = NumInterval(now_speed, min_speed, v);
+          now_speed = NumInterval(now_speed, min_move_speed, v);
           ChassisForward(now_speed, yaw * yaw_negative);  //  控制移动
 
           wait(dt * 1000.0, msec);
@@ -916,7 +929,6 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       Moveing = false;  // 运动停止了
       MoveEnd = true; // 运动完成
 
-      
   }
 
   // 直线运动函数（使用定位轮）
@@ -974,10 +986,10 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       int    negative = 1;   // 负方向指示器
       int yaw_negative= 1;   // 负偏指示器
 
-      PID pid(4.1, 0.01, 0.01); // 创建PID控制器实例 
+      PID pid(0.00900, 0.0, 0.0); // 创建PID控制器实例 
       pid.setSetpoint(val); // 设置目标位置
 
-      PID pid_target(5, 0.1, 0.1); // 创建PID控制器实例 
+      PID pid_target(0.1, 0.0, 0.0); // 创建PID控制器实例 
       pid_target.setSetpoint(aiVision_w / 2 + (Target.Align * aiVision_w / 2)); // 设置目标位置
 
 
@@ -994,6 +1006,11 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       bool have_target = false;
       have_target = Target.SetTarget();
 
+      // 加速度测试
+      double now_left_speed = 0;
+      double now_right_speed = 0;
+      int overcount = 0;  // 成功到位计数器
+
       while (true) {  
           double current_position = Rotation_x.position(deg);  // 当前位置
           double output = pid.calculate(current_position, dt);  // 前进补偿
@@ -1001,13 +1018,10 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
           // 视觉传感器
           aiVision.takeSnapshot(*(Target.Color));  // 当前视觉传感器的数据
           double output_target = 0.0;
-
-          std::cout << "current_position" << current_position << " " << output << std::endl;
           
           // 获取相机元素
           if (aiVision.objectCount > 0 && have_target){
             int TargetCenterX = Target.GetTargetCenterX();
-            std::cout << "TargetCenterX" << TargetCenterX << std::endl;
 
             output_target = pid_target.calculate(TargetCenterX, dt) * -1;  // 前进补偿
             Brain.Screen.printAt( 10, 10, "target %d, %d", aiVision.largestObject.centerX, 5);
@@ -1025,14 +1039,18 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
           }else{
             output = std::max(v * -1, output);
           }
-          ChassisLeftControl(output + output_target);
-          ChassisRightControl(output - output_target);
 
           // 检查目标是否达到  
-          if (fabs(current_position - val) <= 10 && GetVelocity_mean() <= Stuck_threshold) {
+          if (std::abs(current_position - val) <= 7.5 && std::abs(output) <= Stuck_threshold) {
+            overcount += 1;
+            if (overcount == 10){
               PrintAt(2, " ->到位");
+              std::cout <<"daowei" <<std::endl;
               break;  
-          }  
+            }
+          }else{
+            overcount = 0;
+          }
 
           // 多线程保护
           if (Moveing == false){
@@ -1040,11 +1058,11 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
               break;
           }
 
-          // 算法收敛保护
-          if (abs(output) <= Stuck_threshold){
-            PrintAt(2, " ->收敛");
-            break;
-          }
+          // // 算法收敛保护
+          // if (abs(output) <= Stuck_threshold){
+          //   PrintAt(2, " ->收敛");
+          //   break;
+          // }
 
           // 电机抱死保护
           if (GetVelocity_mean() <= Stuck_threshold){
@@ -1064,6 +1082,14 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
               PrintAt(2, " ->超时");
               break;
           }
+          
+          now_left_speed = GetBufferSpeed(now_left_speed, output + output_target, negative);
+          now_left_speed = NumInterval(now_left_speed, min_move_speed, v);
+          ChassisLeftControl(now_left_speed);
+
+          now_right_speed = GetBufferSpeed(now_right_speed, output + output_target, negative);
+          now_right_speed = NumInterval(now_right_speed, min_move_speed, v);
+          ChassisRightControl(now_right_speed);
 
           wait(dt * 1000.0, msec);
       }  
