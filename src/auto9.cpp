@@ -3,7 +3,7 @@
 #include "ChassisControl.h"
 
 void auto9(){
-    ChassisControlSTS.Over_count = 3;
+    ChassisControlSTS.Over_count = 4;
     double speed = 100;
     ChassisControlSTS.MoveToDistance(speed, 400, "front");
    
