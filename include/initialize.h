@@ -9,7 +9,7 @@
 
 // 陀螺仪初始化
 void ChassisInertialInit(){
-    ChassisInertial.calibrate();  // 陀螺仪校准
+    ChassisInertial.calibrate(5);  // 陀螺仪校准
 
     Controller.Screen.clearScreen();  // 清除屏幕
 
@@ -34,8 +34,10 @@ vex::task LowBatteryMonitor_task;
 int LowBatteryMonitor(){
     while (true) {
         if (Brain.Battery.capacity(pct) <= PowerLimit) {
-            Controller.rumble(". .");
+            Controller.rumble("..");
+            wait(500, msec);
         }
+        Brain.Screen.printAt( 200, 200, "Angle %f", ChassisInertial.rotation());
         vex::task::sleep(1000);
     }
 }

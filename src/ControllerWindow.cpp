@@ -291,7 +291,7 @@ BaseWindow* AutoWindowFun(){
     double start_time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count();
     AutoFunctions[index].fun();
     double end_time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count();
-
+    ChassisControlSTS.ChassisStoppingCoast();  // 底盘停止抱死
     PrintInLine(1);
     Controller.Screen.print("运行完成");
     PrintInLine(2);

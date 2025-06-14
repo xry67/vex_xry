@@ -104,7 +104,7 @@ class AiTarget{
         ans = i;
       }
     }
-    std::cout << "ans " << ans << std::endl;
+
     Target_CenterX = aiVision.objects[ans].centerX;
     Target_CenterY = aiVision.objects[ans].centerY;
     Target_Width   = aiVision.objects[ans].width;
@@ -149,6 +149,9 @@ class ChassisControl{
 
   // 设置停止模式为Coasst
   void SetStopModCoast();
+
+  // 获得缓冲后的速度
+  double GetBufferSpeed(double nowspeed, double output, int negative);
 
   // 底盘停止
   void ChassisStop();
@@ -229,19 +232,24 @@ class ChassisControl{
   void MoveTo(double x, double y, double v, bool task);
 
 
-  private: 
+  public: 
     std::string StopMod = "Hold";    // 设置停止方式
 
     double  Move_time_out   = 3000;  // 超时保护，默认3000毫秒
     double  Stuck_time_out  = 1000;  // 电机卡死保护，默认1000毫秒
-    double  Stuck_threshold = 2;     // 电机卡死认定阈值，单位dps
-    bool    Moveing         = true; // 记录是否在运动
+    double  Stuck_threshold = 0.25;  // 电机卡死认定阈值，单位dps
+    int     Over_count      = 10;    // 到位计数当前次数后，才会退出
+    bool    Moveing         = true;  // 记录是否在运动
     bool    MoveEnd         = true;  // 记录运动是否完成
     int     MoveId          = 0;     // 运动id记录（计数）
+    double  min_move_speed       = 0.825;  // 直行电机的最小速度
+    double  min_turn_speed       = 1.075;  // 自转的最小速度
 
-    PID     *StraightPid;            // 创建PID控制器实例 
+    double maxinum_speed_acceleration = 2;
+
+    PID     *StraightPid = new PID(5, 0.0, 0.1);            // 创建PID控制器实例 
     double  StraightAngle   = 0.0;   // 记录直行的角度
-    int     StraightNegative = 1;    // 记录执行方向
+    int     StraightNegative = 1.05;    // 记录执行方向
 
     int Target_CenterX       = 0;    // 目标物体的中心x
     int Target_CenterY       = 0;    // 目标物体的中心y

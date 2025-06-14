@@ -4,14 +4,14 @@
 
 void auto2(){
     ChassisControlSTS.Target.SetColor(Red);
-    ChassisControlSTS.Target.Limit_x = {0, aiVision_w / 2};
-    ChassisControlSTS.FollowTarget(1000, 3000, true);
+    // ChassisControlSTS.Target.Limit_x = {0, aiVision_w / 2};
+    ChassisControlSTS.FollowTarget(5, 3000, true);
 
     while(ChassisControlSTS.IsMoving()){
         if (ChassisControlSTS.Target.Target_CenterY > 180){
             ChassisControlSTS.StopMoving();
             ChassisControlSTS.SetStopMod("c");
-            ChassisControlSTS.MoveBySmallWheel(2000, 100, 0, 'u');
+            ChassisControlSTS.MoveBySmallWheel(7, 100, 0, 'u');
             
             break;
         }

@@ -7,11 +7,11 @@ int ControllerScreenWidth = 210;  // 屏幕宽度
 int RemoteControlMod      = 0;    // 遥控模式  1：双 2：左 3：右 4：坦克
 bool RemoteControlModLock = false ;// ture: 不再选择遥控模式，以RemoteControlMod初始值为准，false:需要选择
 int PowerLimit            = 25;   // 电量低警示
-double blindCA            = 2;    // 摇杆死区
+double blindCA            = 0;    // 摇杆死区
 char stance               = 'r';  // 站位选择
 int aiVision_w            = 316;  // ai相机的宽度 
 int aiVision_h            = 211;  // ai相机的高度
-double StraightCorrectionSpeed = 500.0;  // 执行修正pid最大速度
+double StraightCorrectionSpeed = 500;  // 执行修正pid最大速度
 
 double Sensitivity_Turn       = 0.9;  // 转向灵敏度
 double Sensitivity_Straight   = 1;    // 直行灵敏度
@@ -53,8 +53,9 @@ rotation Rotation_x = rotation(PORT21, true);  // 底盘定位轮x
 rotation Rotation_y = rotation(PORT21, false);  // 底盘定位轮y
 
 // 视觉传感器
-aivision::colordesc Red = aivision::colordesc(1, 219, 21, 65, 10.00, 0.2);
-aivision aiVision = aivision(PORT21, Red);
+aivision::colordesc Bule = aivision::colordesc(2, 65, 160, 213, 12.00, 0.36);
+aivision::colordesc Orange = aivision::colordesc(3, 198, 102, 6, 15.00, 0.14);
+aivision aiVision = aivision(PORT13, Red, Bule, Orange);
 
 // 距离传感器
 distance Distance_fl = distance(PORT21);  // 左前

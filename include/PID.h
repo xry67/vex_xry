@@ -15,6 +15,18 @@ public:
       setpoint = val;
     }
 
+    void reset(double kp_, double ki_, double kd_){
+        kp = kp_;
+        ki = ki_;
+        kd = kd_;
+        prev_error = 0.0;
+        integral   = 0.0;
+    }
+
+    double getsetpoint(){
+        return setpoint;
+    }
+
     double calculate(double measured, double dt) {  
         double error = setpoint - measured;  
         integral += error * dt;  

@@ -9,6 +9,7 @@ AiTarget ai_target =  AiTarget();
 
 // 左电机控制
 void LeftMotorControl(int val){
+    Brain.Screen.printAt( 100, 50, "%f" , 0.128*val);
     LeftMotor1.spin(vex::forward, 0.128*val, voltageUnits::volt);
     LeftMotor2.spin(vex::forward, 0.128*val, voltageUnits::volt);
     LeftMotor3.spin(vex::forward, 0.128*val , voltageUnits::volt);
@@ -84,8 +85,6 @@ void ChassisControlFun(){
             auto_target_yaw = Auto_Turn_To_Target_Speed * -1;
         }
     }
-
-    Brain.Screen.printAt( 100, 50, "%f" , auto_target_yaw);
 
     // 自动对齐判断
     if (abs(axis1) < blindCA && abs(axis2) < blindCA && abs(axis3) < blindCA && abs(axis4) < blindCA){
