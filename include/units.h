@@ -47,4 +47,10 @@ class WaitStr
 
 };
 
+// 颜色传感器有一个红色物体？
+bool OpticalHaveRed();
+
+// 颜色传感器有一个蓝色物体？
+bool OpticalHaveBlue();
+
 #endif

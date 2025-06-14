@@ -45,22 +45,24 @@ motor TrackRight  = motor(PORT12, ratio6_1, 0);  // 右履带
 motor Flywheel    = motor(PORT14, ratio6_1, 1);  // 尾部飞轮
 digital_out Uplift = digital_out(Brain.ThreeWirePort.A);  // 抬升
 
+optical Optical = optical(PORT7);  // 颜色传感器
+
 inertial ChassisInertial = inertial(PORT16);  // 底盘陀螺仪
 
-rotation Rotation_x = rotation(PORT14, true);  // 底盘定位轮x
-rotation Rotation_y = rotation(PORT1, false);  // 底盘定位轮y
+rotation Rotation_x = rotation(PORT21, true);  // 底盘定位轮x
+rotation Rotation_y = rotation(PORT21, false);  // 底盘定位轮y
 
 // 视觉传感器
 aivision::colordesc Red = aivision::colordesc(1, 219, 21, 65, 10.00, 0.2);
-aivision aiVision = aivision(PORT13, Red);
+aivision aiVision = aivision(PORT21, Red);
 
 // 距离传感器
-distance Distance_fl = distance(PORT2);  // 左前
-distance Distance_fr = distance(PORT12);  // 右前
-distance Distance_bl = distance(PORT7);  // 左后
-distance Distance_br = distance(PORT17);  // 右后
-distance Distance_l = distance(PORT1);  // 左后
-distance Distance_r = distance(PORT11);  // 右后
+distance Distance_fl = distance(PORT21);  // 左前
+distance Distance_fr = distance(PORT21);  // 右前
+distance Distance_bl = distance(PORT21);  // 左后
+distance Distance_br = distance(PORT21);  // 右后
+distance Distance_l = distance(PORT21);  // 左后
+distance Distance_r = distance(PORT21);  // 右后
 
 // 设别列表
 std::vector<char*> MotorNames = {"L1", "L2", "L3", "R1", "R2", "R3"};

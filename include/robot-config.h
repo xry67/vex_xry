@@ -54,6 +54,8 @@ extern smartdrive Smartdrive;  // 官方底盘驱动
 extern rotation Rotation_x;  // 底盘定位轮x
 extern rotation Rotation_y;  // 底盘定位轮y
 
+extern optical Optical;      // 颜色传感器
+
 // 距离传感器
 extern distance Distance_fl;  // 左前
 extern distance Distance_fr;  // 右前

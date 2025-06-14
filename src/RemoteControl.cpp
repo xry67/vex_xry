@@ -202,12 +202,24 @@ void RemoteControl(){
     ai_target.SetColor(Red);
 
     PrintInLine(2);
+
+    // 吐球反转计数器
+    int reverse = 0; 
+
     while (true){    
         // 输入更新
         UpdataRemoteControlDataList(&RemoteControlData_list);
 
         // 底盘控制
         ChassisControlFun();
+
+        // 红色
+        if (OpticalHaveRed()){
+            Brain.Screen.printAt( 10, 150, "OOOOOOOO");
+            reverse = 5;
+        }else{
+            Brain.Screen.printAt( 10, 150, "             ");
+        }
 
         if (Controller.ButtonL1.pressing() || Controller.ButtonL2.pressing() || Controller.ButtonR1.pressing() || Controller.ButtonR2.pressing()){
             
@@ -230,7 +242,12 @@ void RemoteControl(){
             }
 
             if (Controller.ButtonL2.pressing()){
-                TrackLeft.spin(forward, -1 * TrackSpeed, rpm);
+                if (reverse > 0){
+                    TrackLeft.spin(forward, TrackSpeed, rpm);
+                }else{
+                    TrackLeft.spin(forward, -1 * TrackSpeed, rpm);
+                }
+                
                 TrackRight.spin(forward, TrackSpeed, rpm);
             }
         }
@@ -239,8 +256,26 @@ void RemoteControl(){
             TrackRight.spin(forward, 0, rpm);
         }
 
-        if (Controller.ButtonL2.pressing()){
-            Flywheel.spin(forward, TrackSpeed, rpm);
+        if (Controller.ButtonR1.pressing() ||Controller.ButtonL2.pressing() || Controller.ButtonL1.pressing()){
+            if (Controller.ButtonL2.pressing()){
+                Flywheel.spin(forward, TrackSpeed, rpm);
+            }
+            if (Controller.ButtonL1.pressing()){
+                // Flywheel.spin(forward, -1 * TrackSpeed, rpm);
+                int now_angle = (int)Flywheel.position(deg);
+                int move_angle = now_angle % 180;
+                if (move_angle < 90){
+                    Flywheel.spinToPosition(now_angle - move_angle, deg, -1000000, dps, false);
+                }
+                else{
+                    Flywheel.spinToPosition(now_angle - move_angle + 180, deg, 1000000, dps, false);
+                }
+
+                
+            }
+            if (Controller.ButtonR1.pressing()){
+                Flywheel.spin(forward,  TrackSpeed, rpm);
+            }
         }
         else{
             Flywheel.spin(forward, 0, rpm);
@@ -260,6 +295,9 @@ void RemoteControl(){
         if (HoldButtonB(&RemoteControlData_list, 50)){
             return ;
         }
+
+        reverse = std::max(reverse - 1, 0);  // 反转计数器减小
+
 
         wait(10, msec);
     }

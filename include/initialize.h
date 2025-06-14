@@ -45,6 +45,7 @@ void vexcodeInit(void) {
     LowBatteryMonitor_task = vex::task(LowBatteryMonitor);  // 电量监控开启
     ChassisInertialInit();  // 底盘陀螺仪初始化
     AddAutoFun();           // 自动函数初始化
+    // Flywheel.setVelocity(100, dps);
     // PositioningSTS.Reset(); // 底盘定位初始化
     // PositioningSTS.TurnOn(); // 底盘定位开启
 }
