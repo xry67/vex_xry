@@ -5,7 +5,7 @@
 void auto2(){
     ChassisControlSTS.Target.SetColor(Red);
     // ChassisControlSTS.Target.Limit_x = {0, aiVision_w / 2};
-    ChassisControlSTS.FollowTarget(7, 3000, true);
+    ChassisControlSTS.FollowTarget(5, 3000, true);
 
     while(ChassisControlSTS.IsMoving()){
         if (ChassisControlSTS.Target.Target_CenterY > 180){

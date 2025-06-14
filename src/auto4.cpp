@@ -4,13 +4,7 @@
 
 void auto4(){
 
-    ChassisControlSTS.TurnTo(10, 90, 0);
-    // wait(500, msec);
-    ChassisControlSTS.TurnTo(10, 150, 0);
-    // wait(500, msec);
-    ChassisControlSTS.TurnTo(10, 180, 0);
-    // wait(500, msec);
-    ChassisControlSTS.TurnTo(10, 225, 0);
-    // wait(500, msec);
-    ChassisControlSTS.TurnTo(10, 270, 0);
+    for (int i=0; i<=360; i+=30){
+        ChassisControlSTS.Turn(7, i, 'l');
+    }
 }

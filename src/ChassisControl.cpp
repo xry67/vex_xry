@@ -321,7 +321,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
 
           if (std::abs(current_position - val) <= 5 && std::abs(output) <= Stuck_threshold) {
             overcount += 1;
-            if (overcount == 10){
+            if (overcount == Over_count){
               PrintAt(2, " ->到位");
               std::cout <<"daowei" <<std::endl;
               break;  
@@ -425,7 +425,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
 
       // Brain.Screen.printAt( 10, 50, "taget_angle %f", taget_angle);
 
-      PID pid(0.100, 0.0, 0); // 创建PID控制器实例 
+      PID pid(0.065, 0.0, 0); // 创建PID控制器实例 
       pid.setSetpoint(taget_angle); // 设置目标位置
 
       // 多线程阻断等待
@@ -448,7 +448,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
 
           if (std::abs(current_position - taget_angle) <= 1 && std::abs(output) < Stuck_threshold) {
             overcount += 1;
-            if (overcount == 10){
+            if (overcount == Over_count){
               PrintAt(2, " ->到位");
               std::cout <<"daowei" <<std::endl;
               break;  
@@ -490,7 +490,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
           }
 
           output = NumInterval(output, min_turn_speed, v);
-          ChassisForward(std::max(-1 * v, output), yaw_negative);  //  控制移动
+          ChassisForward(output, yaw_negative);  //  控制移动
           wait(dt * 1000.0, msec);
       }  
 
@@ -696,7 +696,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
           negative = 1;
       }
 
-      PID pid(0.020, 0.0, 0.0); // 创建PID控制器实例。 
+      PID pid(0.015, 0.0, 0.0); // 创建PID控制器实例。 
       pid.setSetpoint(val); // 设置目标位置
 
       // 多线程阻断等待
@@ -720,7 +720,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
           // 检查目标是否达到  
           if (std::abs(current_position - val) <= 4 && std::abs(output) <= Stuck_threshold) {
             overcount += 1;
-            if (overcount == 10){
+            if (overcount == Over_count){
               PrintAt(2, " ->到位");
               std::cout <<"daowei" <<std::endl;
               break;  
@@ -876,7 +876,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
           // 检查目标是否达到  
           if (std::abs(current_position - val) <= 7.5 && std::abs(output) <= Stuck_threshold) {
             overcount += 1;
-            if (overcount == 10){
+            if (overcount == Over_count){
               PrintAt(2, " ->到位");
               std::cout <<"daowei" <<std::endl;
               break;  
@@ -989,7 +989,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       PID pid(0.00900, 0.0, 0.0); // 创建PID控制器实例 
       pid.setSetpoint(val); // 设置目标位置
 
-      PID pid_target(0.1, 0.0, 0.0); // 创建PID控制器实例 
+      PID pid_target(0.05, 0.0, 0.0); // 创建PID控制器实例 
       pid_target.setSetpoint(aiVision_w / 2 + (Target.Align * aiVision_w / 2)); // 设置目标位置
 
 
@@ -1007,8 +1007,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       have_target = Target.SetTarget();
 
       // 加速度测试
-      double now_left_speed = 0;
-      double now_right_speed = 0;
+      double now_speed = 0.0;
       int overcount = 0;  // 成功到位计数器
 
       while (true) {  
@@ -1034,16 +1033,10 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
             Brain.Screen.printAt( 10, 90, "output_target %f", output_target);
           }
 
-          if (output > 0){
-            output = std::min(v, output);
-          }else{
-            output = std::max(v * -1, output);
-          }
-
           // 检查目标是否达到  
           if (std::abs(current_position - val) <= 7.5 && std::abs(output) <= Stuck_threshold) {
             overcount += 1;
-            if (overcount == 10){
+            if (overcount == Over_count){
               PrintAt(2, " ->到位");
               std::cout <<"daowei" <<std::endl;
               break;  
@@ -1082,14 +1075,16 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
               PrintAt(2, " ->超时");
               break;
           }
-          
-          now_left_speed = GetBufferSpeed(now_left_speed, output + output_target, negative);
-          now_left_speed = NumInterval(now_left_speed, min_move_speed, v);
-          ChassisLeftControl(now_left_speed);
 
-          now_right_speed = GetBufferSpeed(now_right_speed, output + output_target, negative);
-          now_right_speed = NumInterval(now_right_speed, min_move_speed, v);
-          ChassisRightControl(now_right_speed);
+          // if (std::abs(output_target) < 0.5){
+          //   output_target = 0.0;
+          // }
+          
+          now_speed = GetBufferSpeed(now_speed, output, negative);
+          now_speed = NumInterval(now_speed, min_move_speed, v);
+      
+          ChassisLeftControl(NumInterval(now_speed + output_target, 0, v * 2));
+          ChassisRightControl(NumInterval(now_speed - output_target, 0, v * 2));
 
           wait(dt * 1000.0, msec);
       }  
@@ -1131,7 +1126,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       }
 
 
-      PID pid(20, 1, 0.5); // 创建PID控制器实例 
+      PID pid(0.1, 0, 0); // 创建PID控制器实例 
       pid.setSetpoint(taget_angle); // 设置目标位置
 
       // 多线程阻断等待
@@ -1144,25 +1139,29 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       MoveEnd = false; // 运动没有完成
 
       bool use_taget = false;
-
+      int overcount = 0;
+      
       while (true) {  
           double current_position = ChassisInertial.rotation();  // 当前位置
           double output = pid.calculate(current_position, dt) * yaw_negative;  // 补偿
-
-          // 控制小车运动 
-          ChassisForward(std::min(v, output), yaw_negative);   //  控制移动
 
           // 目标角度附近找到了目标物体
           if (abs(current_position - taget_angle) <= 30 and Target.SetTarget()){
             break;
           }
           
-
-          // 检查目标是否达到  
-          if (abs(current_position - taget_angle) <= 2 && abs(output) < 50) {
-            PrintAt(2, " ->到位");
-            break;  
+          // 检查目标是否达到 
+          if (std::abs(current_position - taget_angle) <= 1 && std::abs(output) < Stuck_threshold) {
+            overcount += 1;
+            if (overcount == Over_count){
+              PrintAt(2, " ->到位");
+              std::cout <<"daowei" <<std::endl;
+              break;  
+            }
           }  
+          else{
+            overcount = 0;
+          }
 
           // 多线程保护
           if (Moveing == false){
@@ -1171,10 +1170,10 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
           }
 
           // 算法收敛保护
-          if (abs(output) <= Stuck_threshold){
-            PrintAt(2, " ->收敛");
-            break;
-          }
+          // if (abs(output) <= Stuck_threshold){
+          //   PrintAt(2, " ->收敛");
+          //   break;
+          // }
 
           // 电机抱死保护
           if (GetVelocity_mean() <= Stuck_threshold){
@@ -1194,67 +1193,79 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
               PrintAt(2, " ->超时");
               break;
           }
+
+          output = NumInterval(output, min_turn_speed, v);
+          ChassisForward(output, yaw_negative);  //  控制移动
+
 
           wait(dt * 1000.0, msec);
       }  
       
-      PID pid_target(5, 0.001, 0.1); // 创建PID控制器实例 
-      int tagetX = aiVision_w / 2 + (Target.Align * aiVision_w / 2);
-      tagetX = aiVision_w / 2;
-      pid_target.setSetpoint(tagetX); // 设置目标位置
+      if (Target.SetTarget()){
+        PID pid_target(0.04, 0.0, 0.0); // 创建PID控制器实例 
+        int tagetX = aiVision_w / 2 + (Target.Align * aiVision_w / 2);
+        tagetX = aiVision_w / 2;
+        pid_target.setSetpoint(tagetX); // 设置目标位置
 
-      while (true) {  
-          aiVision.takeSnapshot(*(Target.Color));  // 当前视觉传感器的数据
-          int TargetCenterX = Target.GetTargetCenterX();
-          double output= pid_target.calculate(TargetCenterX, dt) * -1;  // 前进补偿
+        overcount = 0;
+        while (true) {  
+            aiVision.takeSnapshot(*(Target.Color));  // 当前视觉传感器的数据
+            int TargetCenterX = Target.GetTargetCenterX();
+            double output= pid_target.calculate(TargetCenterX, dt) * -1;  // 前进补偿
 
-          // 控制小车运动 
-          ChassisLeftControl(output);
-          ChassisRightControl(-1 * output);
-          Brain.Screen.printAt( 10, 100, "output: %f X %d" , output, TargetCenterX);
-
-          // 检查目标是否达到  
-          if (abs(TargetCenterX - tagetX) <= 1 && abs(output) < 50) {
-            PrintAt(2, " ->到位");
-            break;  
-          }  
-
-          // 多线程保护
-          if (Moveing == false){
-              PrintAt(2, " ->打断");
-              break;
-          }
-
-          // 算法收敛保护
-          if (abs(output) <= Stuck_threshold){
-            PrintAt(2, " ->收敛");
-            break;
-          }
-
-          // 电机抱死保护
-          if (GetVelocity_mean() <= Stuck_threshold){
-              stuck_time_count += dt * 1000.0;  // 计算抱死时间
-              if (stuck_time_count >= Stuck_time_out){
-                PrintAt(2, " ->抱死");
-                break;
+            // 检查目标是否达到  
+            if (std::abs(TargetCenterX - tagetX) <= 1 && std::abs(output) < Stuck_threshold) {
+              overcount += 1;
+              if (overcount == Over_count){
+                PrintAt(2, " ->到位");
+                std::cout <<"daowei" <<std::endl;
+                break;  
               }
-          }
-          else{
-            stuck_time_count = 0; // 不抱死则刷新计数
-          }
+            }  
 
-          // 超时保护
-          double now_time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count();// 当前时间
-          if (now_time - start_time >= move_time_out / 1000){
-              PrintAt(2, " ->超时");
-              break;
-          }
+            // 多线程保护
+            if (Moveing == false){
+                PrintAt(2, " ->打断");
+                break;
+            }
 
-          wait(dt * 1000.0, msec);
-      }  
+            // 算法收敛保护
+            // if (abs(output) <= Stuck_threshold){
+            //   PrintAt(2, " ->收敛");
+            //   break;
+            // }
+
+            // 电机抱死保护
+            if (GetVelocity_mean() <= Stuck_threshold){
+                stuck_time_count += dt * 1000.0;  // 计算抱死时间
+                if (stuck_time_count >= Stuck_time_out){
+                  PrintAt(2, " ->抱死");
+                  break;
+                }
+            }
+            else{
+              stuck_time_count = 0; // 不抱死则刷新计数
+            }
+
+            // 超时保护
+            double now_time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count();// 当前时间
+            if (now_time - start_time >= move_time_out / 1000){
+                PrintAt(2, " ->超时");
+                break;
+            }
+
+            // 控制小车运动 
+            output = NumInterval(output, min_turn_speed, v);
+            ChassisLeftControl(output);
+            ChassisRightControl(-1 * output);
+
+            wait(dt * 1000.0, msec);
+        }  
+
+      }
 
       ChassisStop();
-      PrintAt(3, " %d", (int)ChassisInertial.rotation());
+      PrintAt(3, " %f", ChassisInertial.rotation());
       Moveing = false;  // 运动停止了
       MoveEnd = true; // 运动完成
   }

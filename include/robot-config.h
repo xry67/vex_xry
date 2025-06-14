@@ -57,6 +57,8 @@ extern distance Distance_r;  // 右
 
 // 视觉传感器
 extern aivision::colordesc Red;
+extern aivision::colordesc Bule;
+extern aivision::colordesc Orange;
 extern aivision aiVision;
 
 extern std::vector<AutoFun> AutoFunctions;  // 自动路径储存
