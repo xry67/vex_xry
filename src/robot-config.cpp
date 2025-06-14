@@ -53,6 +53,7 @@ rotation Rotation_x = rotation(PORT21, true);  // 底盘定位轮x
 rotation Rotation_y = rotation(PORT21, false);  // 底盘定位轮y
 
 // 视觉传感器
+aivision::colordesc Red = aivision::colordesc(1, 219, 21, 65, 10.00, 0.2);
 aivision::colordesc Bule = aivision::colordesc(2, 65, 160, 213, 12.00, 0.36);
 aivision::colordesc Orange = aivision::colordesc(3, 198, 102, 6, 15.00, 0.14);
 aivision aiVision = aivision(PORT13, Red, Bule, Orange);
