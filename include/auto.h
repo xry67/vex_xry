@@ -4,7 +4,7 @@
 #include "vex.h"
 #include "robot-config.h"
 
-// 自动函数声明
+// 自动函数声明67
 void auto1();
 void auto2();
 void auto3();

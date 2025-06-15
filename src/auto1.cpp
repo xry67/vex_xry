@@ -20,7 +20,7 @@ void auto1(){
     ChassisControlSTS.MoveBySmallWheel(7, 850, 0, 'n');
 
     ChassisControlSTS.Target.SetColor(Red);
-    // ChassisControlSTS.TurnToTarget(2000, 115, 'r');
+    // ChassisControlSTS.TurnToTarget(2000, 115, 'r');56787
     ChassisControlSTS.TurnTo(7, 225, false);
     ChassisControlSTS.MoveBySmallWheel(7, 1850, 0, 'n');
 
