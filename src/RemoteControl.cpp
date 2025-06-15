@@ -166,28 +166,22 @@ void UpdataRemoteControlDataList(RemoteControlDataList *RemoteControlData_list){
 } 
 
 // 长按B检测
-bool HoldButtonB(RemoteControlDataList *RemoteControlData_list, int limit = 100){
-    int count = 0;
-    for (int i=0; i<RemoteControlData_list->size(); i++){
-        // 个数检测
-        if (count >= limit){
-            return true;
-        }
-        if (RemoteControlData_list->get(i).ButtonB == 0){
-            // 屏幕更新
-            PrintInLine(3);
-            Controller.Screen.print("             退出(B: %2d)", count);
-
-            // 震动
-            if (count == limit * 0.9){
-                std::cout << "---" << std::endl;
-                Controller.rumble("..");
-            }
-            return false;
-        }
-        count += 1;
+bool HoldButtonB(int count, int limit = 100){
+    // 个数检测
+    if (count >= limit){
+        return true;
     }
-    return true;
+
+    PrintInLine(3);
+    Controller.Screen.print("             退出(B: %2d)", count);
+
+    // 震动
+    if (count == limit * 0.9){
+        std::cout << "---" << std::endl;
+        Controller.rumble("..");
+    }
+    return false;
+
 }
 
 // 整体遥控
@@ -204,20 +198,21 @@ void RemoteControl(){
 
     // 吐球反转计数器
     int reverse = 0; 
+    // 分球暂停计数器
+    int stopcount = 0;
+    // 退出计数
+    int HoldButtonBCount = 0;
 
     while (true){    
         // 输入更新
-        UpdataRemoteControlDataList(&RemoteControlData_list);
+        // UpdataRemoteControlDataList(&RemoteControlData_list);
 
         // 底盘控制
         ChassisControlFun();
 
         // 红色
-        if (OpticalHaveRed()){
-            Brain.Screen.printAt( 10, 150, "OOOOOOOO");
+        if (OpticalHaveRed() || OpticalHaveBlue()){
             reverse = 5;
-        }else{
-            Brain.Screen.printAt( 10, 150, "             ");
         }
 
         if (Controller.ButtonL1.pressing() || Controller.ButtonL2.pressing() || Controller.ButtonR1.pressing() || Controller.ButtonR2.pressing()){
@@ -230,7 +225,23 @@ void RemoteControl(){
             
             // 吸球2
             if (Controller.ButtonR2.pressing()){
-                TrackLeft.spin(forward, -1 * TrackSpeed, rpm);
+
+                // 分球
+                if (stance == 'r' && OpticalHaveBlue()){
+                    TrackLeft.spin(forward, 0, rpm);
+                    stopcount = 5;
+                }
+                else if (stance == 'b' && OpticalHaveRed()){
+                    TrackLeft.spin(forward, 0, rpm);
+                    stopcount = 5;
+                }
+                else if (stopcount > 0){
+                    TrackLeft.spin(forward, 0, rpm);
+                }
+                else{
+                    TrackLeft.spin(forward, -1 * TrackSpeed, rpm);
+                }
+
                 TrackRight.spin(forward, -1 * TrackSpeed, rpm);
             }
 
@@ -254,6 +265,7 @@ void RemoteControl(){
             TrackLeft.spin(forward, 0, rpm);
             TrackRight.spin(forward, 0, rpm);
         }
+        ChassisControlFun();
 
         if (Controller.ButtonR1.pressing() ||Controller.ButtonL2.pressing() || Controller.ButtonL1.pressing()){
             if (Controller.ButtonL2.pressing()){
@@ -279,26 +291,46 @@ void RemoteControl(){
         else{
             Flywheel.spin(forward, 0, rpm);
         }
+        ChassisControlFun();
 
         // 抬升上
-        if (Controller.ButtonY.pressing()){
-            Uplift.set(1);
+        if (Controller.ButtonL2.pressing()){
+            digitalA.set(1);
         }
 
         // 抬升下
-        if (Controller.ButtonB.pressing()){
-            Uplift.set(0);
+        if (Controller.ButtonR1.pressing()){
+            digitalA.set(0);
         }
+
+        // 抬升上
+        if (Controller.ButtonDown.pressing()){
+            digitalB.set(1);
+        }
+
+        // 抬升下
+        if (Controller.ButtonRight.pressing()){
+            digitalB.set(0);
+        }
+
+        // 底盘控制
+        ChassisControlFun();
 
         // 退出
-        if (HoldButtonB(&RemoteControlData_list, 50)){
-            return ;
+        if (Controller.ButtonB.pressing()){
+            HoldButtonBCount += 1;
+            if (HoldButtonB(HoldButtonBCount, 50)){
+                break;
+            }
+        }
+        else{
+            HoldButtonBCount = 0;
         }
 
-        reverse = std::max(reverse - 1, 0);  // 反转计数器减小
+        reverse   = std::max(reverse - 1, 0);    // 反转计数器减小
+        stopcount = std::max(stopcount - 1, 0);  // 暂停计数器减小
 
-
-        wait(10, msec);
+        wait(5, msec);
     }
 
 }

@@ -46,7 +46,8 @@ extern motor_group RightMotorGroup;  // 右电机组
 extern motor TrackLeft;    // 左履带
 extern motor TrackRight;  // 右履带
 extern motor Flywheel;  // 尾部飞轮
-extern digital_out Uplift; // 抬升
+extern digital_out digitalA; // 抬升
+extern digital_out digitalB;
 
 extern inertial ChassisInertial;  // 底盘陀螺仪
 extern smartdrive Smartdrive;  // 官方底盘驱动
