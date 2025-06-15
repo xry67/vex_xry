@@ -301,7 +301,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       }
 
 
-      PID pid(0.00900, 0.0000, 0.000); // 创建PID控制器实例 
+      PID pid(0.00900, 0.800, 3); // 创建PID控制器实例 
       pid.setSetpoint(val); // 设置目标位置
 
       // 多线程阻断等待
@@ -313,6 +313,9 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       Moveing = true;  // 当前在运动
       MoveEnd = false; // 运动没有完成
       int overcount = 0;  // 成功到位计数器
+      int nearcount = 0; // 贴近计数
+      double now_min_speed = min_move_speed;
+      double last_speed = 0;
 
       while (true) {  
           double current_position = GetPositions_mean();  // 当前位置
@@ -330,6 +333,15 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
           }else{
             overcount = 0;
           } 
+
+          // 贴近
+          if ((output < 0 && last_speed > 0) || (output > 0 && last_speed < 0)){
+            Brain.Screen.printAt(10, 80, "----%d-------", nearcount);
+            nearcount += 1;
+            if (nearcount >= 2){
+              now_min_speed -= 0.1;
+            }
+          }
 
           // 多线程保护
           if (Moveing == false){
@@ -350,6 +362,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
                 PrintAt(2, " ->抱死");
                 break;
               }
+              now_min_speed += 0.1;
           }
           else{
             stuck_time_count = 0; // 不抱死则刷新计数
@@ -362,9 +375,10 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
               break;
           }
 
+          last_speed = output;
           now_speed = GetBufferSpeed(now_speed, output, negative);
           // std::cout << "output----" << output << std::endl;
-          now_speed = NumInterval(now_speed, min_move_speed, v);
+          now_speed = NumInterval(now_speed, now_min_speed, v);
           ChassisForward(now_speed, yaw * yaw_negative);  //  控制移动
 
           wait(dt * 1000.0, msec);
@@ -1051,6 +1065,10 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       double now_speed = 0.0;
       int overcount = 0;  // 成功到位计数器
 
+      int nearcount = 0; // 贴近计数
+      double now_min_speed = min_move_speed;
+      double last_speed = 0;
+
       while (true) {  
           double current_position = Rotation_x.position(deg);  // 当前位置
           double output = pid.calculate(current_position, dt);  // 前进补偿
@@ -1086,6 +1104,15 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
             overcount = 0;
           }
 
+          // 贴近
+          if ((output < 0 && last_speed > 0) || (output > 0 && last_speed < 0)){
+            Brain.Screen.printAt(10, 80, "----%d-------", nearcount);
+            nearcount += 1;
+            if (nearcount >= 2){
+              now_min_speed -= 0.1;
+            }
+          }
+
           // 多线程保护
           if (Moveing == false){
               PrintAt(2, " ->打断");
@@ -1105,6 +1132,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
                 PrintAt(2, " ->抱死");
                 break;
               }
+              now_min_speed += 0.1;
           }
           else{
             stuck_time_count = 0; // 不抱死则刷新计数
@@ -1120,9 +1148,10 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
           // if (std::abs(output_target) < 0.5){
           //   output_target = 0.0;
           // }
-          
+
+          last_speed = output;
           now_speed = GetBufferSpeed(now_speed, output, negative);
-          now_speed = NumInterval(now_speed, min_move_speed, v);
+          now_speed = NumInterval(now_speed, now_min_speed, v);
       
           ChassisLeftControl(NumInterval(now_speed + output_target, 0, v * 2));
           ChassisRightControl(NumInterval(now_speed - output_target, 0, v * 2));
@@ -1179,8 +1208,12 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       Moveing = true;  // 当前在运动
       MoveEnd = false; // 运动没有完成
 
+      int overcount = 0; // 到位计数
+      int nearcount = 0; // 贴近计数
+      double now_min_speed = min_turn_speed;
+      double last_speed = 0;
+
       bool use_taget = false;
-      int overcount = 0;
       
       while (true) {  
           double current_position = ChassisInertial.rotation();  // 当前位置
@@ -1204,6 +1237,15 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
             overcount = 0;
           }
 
+          // 贴近
+          if ((output < 0 && last_speed > 0) || (output > 0 && last_speed < 0)){
+            Brain.Screen.printAt(10, 80, "----%d-------", nearcount);
+            nearcount += 1;
+            if (nearcount >= 2){
+              now_min_speed -= 0.1;
+            }
+          }
+
           // 多线程保护
           if (Moveing == false){
               PrintAt(2, " ->打断");
@@ -1223,6 +1265,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
                 PrintAt(2, " ->抱死");
                 break;
               }
+              now_min_speed += 0.1;
           }
           else{
             stuck_time_count = 0; // 不抱死则刷新计数
@@ -1235,9 +1278,9 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
               break;
           }
 
-          output = NumInterval(output, min_turn_speed, v);
+          output = NumInterval(output, now_min_speed, v);
           ChassisForward(output, yaw_negative);  //  控制移动
-
+          last_speed = output;
 
           wait(dt * 1000.0, msec);
       }  
