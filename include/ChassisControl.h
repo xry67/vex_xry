@@ -242,8 +242,8 @@ class ChassisControl{
     bool    Moveing         = true;  // 记录是否在运动
     bool    MoveEnd         = true;  // 记录运动是否完成
     int     MoveId          = 0;     // 运动id记录（计数）
-    double  min_move_speed       = 0.6;  // 直行电机的最小速度
-    double  min_turn_speed       = 1.075;  // 自转的最小速度
+    double  min_move_speed       = 0.75;  // 直行电机的最小速度
+    double  min_turn_speed       = 1.175;  // 自转的最小速度
 
     double maxinum_speed_acceleration = 2;
 

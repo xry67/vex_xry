@@ -75,26 +75,26 @@ void ChassisControlFun(){
     }
 
     //  自动对齐功能
-    if (Controller.ButtonR1.pressing()){
-        if (ai_target.SetTarget()){
-            auto_target_yaw = (ai_target.Target_CenterX - aiVision_w / 2) * 0.2;
-            ai_target.Target_CenterX = -1;
-        }
+    // if (Controller.ButtonR1.pressing()){
+    //     if (ai_target.SetTarget()){
+    //         auto_target_yaw = (ai_target.Target_CenterX - aiVision_w / 2) * 0.2;
+    //         ai_target.Target_CenterX = -1;
+    //     }
 
-        if (auto_target_yaw > Auto_Turn_To_Target_Speed){
-            auto_target_yaw = Auto_Turn_To_Target_Speed;
-        }
-        if (auto_target_yaw < Auto_Turn_To_Target_Speed * -1){
-            auto_target_yaw = Auto_Turn_To_Target_Speed * -1;
-        }
-    }
+    //     if (auto_target_yaw > Auto_Turn_To_Target_Speed){
+    //         auto_target_yaw = Auto_Turn_To_Target_Speed;
+    //     }
+    //     if (auto_target_yaw < Auto_Turn_To_Target_Speed * -1){
+    //         auto_target_yaw = Auto_Turn_To_Target_Speed * -1;
+    //     }
+    // }
 
     // 自动对齐判断
-    if (abs(axis1) < blindCA && abs(axis2) < blindCA && abs(axis3) < blindCA && abs(axis4) < blindCA){
-        LeftMotorControl(auto_target_yaw);
-        RightMotorControl(-1 * auto_target_yaw);
-        return ;
-    }
+    // if (abs(axis1) < blindCA && abs(axis2) < blindCA && abs(axis3) < blindCA && abs(axis4) < blindCA){
+    //     LeftMotorControl(auto_target_yaw);
+    //     RightMotorControl(-1 * auto_target_yaw);
+    //     return ;
+    // }
 
     //  1：双 2：左 3：右 4：坦克
     if (RemoteControlMod == 2){
@@ -108,7 +108,7 @@ void ChassisControlFun(){
 
     }
 
-    if (RemoteControlMod == 3){
+    else if (RemoteControlMod == 3){
         if (abs(axis2) > blindCA || abs(axis1) > blindCA ){
             LeftMotorControl(axis2 * Sensitivity_1 + axis1 * Sensitivity_2 + auto_target_yaw);
             RightMotorControl(axis2 * Sensitivity_1 - axis1 * Sensitivity_2 - auto_target_yaw);
@@ -118,7 +118,7 @@ void ChassisControlFun(){
         }
     }
 
-    if (RemoteControlMod == 1){
+    else if (RemoteControlMod == 1){
         // 死区判定
         if (abs(axis3) > blindCA || abs(axis1) > blindCA ){
             LeftMotorControl(axis3 * Sensitivity_1 + axis1 * Sensitivity_2 + auto_target_yaw);
@@ -129,7 +129,7 @@ void ChassisControlFun(){
         }
     }
 
-    if (RemoteControlMod == 4){
+    else if (RemoteControlMod == 4){
         if (abs(axis3) > blindCA || abs(axis2) > blindCA ){
             LeftMotorControl(axis3 * Sensitivity_1 + auto_target_yaw);
             RightMotorControl(axis2 * Sensitivity_1 - auto_target_yaw);
@@ -169,28 +169,22 @@ void UpdataRemoteControlDataList(RemoteControlDataList *RemoteControlData_list){
 } 
 
 // 长按B检测
-bool HoldButtonB(RemoteControlDataList *RemoteControlData_list, int limit = 100){
-    int count = 0;
-    for (int i=0; i<RemoteControlData_list->size(); i++){
-        // 个数检测
-        if (count >= limit){
-            return true;
-        }
-        if (RemoteControlData_list->get(i).ButtonB == 0){
-            // 屏幕更新
-            PrintInLine(3);
-            Controller.Screen.print("             退出(B: %2d)", count);
-
-            // 震动
-            if (count == limit * 0.9){
-                std::cout << "---" << std::endl;
-                Controller.rumble("..");
-            }
-            return false;
-        }
-        count += 1;
+bool HoldButtonB(int count, int limit = 100){
+    // 个数检测
+    if (count >= limit){
+        return true;
     }
-    return true;
+
+    PrintInLine(3);
+    Controller.Screen.print("             退出(B: %2d)", count);
+
+    // 震动
+    if (count == limit * 0.9){
+        std::cout << "---" << std::endl;
+        Controller.rumble("..");
+    }
+    return false;
+
 }
 
 // 整体遥控
@@ -204,6 +198,10 @@ void RemoteControl(){
     ai_target.SetColor(Red);
 
     PrintInLine(2);
+
+     // 退出计数
+    int HoldButtonBCount = 0;
+
     while (true){    
         // 输入更新
         UpdataRemoteControlDataList(&RemoteControlData_list);
@@ -212,8 +210,14 @@ void RemoteControl(){
         ChassisControlFun();
 
         // 退出
-        if (HoldButtonB(&RemoteControlData_list, 5)){
-            return ;
+        if (Controller.ButtonB.pressing()){
+            HoldButtonBCount += 1;
+            if (HoldButtonB(HoldButtonBCount, 5)){
+                break;
+            }
+        }
+        else{
+            HoldButtonBCount = 0;
         }
 
         wait(10, msec);

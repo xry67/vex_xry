@@ -135,6 +135,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
         nowspeed = output;
       }
     }
+    nowspeed = output;
     return nowspeed;
   }
 
@@ -425,7 +426,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
 
       // Brain.Screen.printAt( 10, 50, "taget_angle %f", taget_angle);
 
-      PID pid(0.08, 0.0, 0); // 创建PID控制器实例 
+      PID pid(0.065, 0.09, 2); // 创建PID控制器实例 
       pid.setSetpoint(taget_angle); // 设置目标位置
 
       // 多线程阻断等待
@@ -709,9 +710,9 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       else if (DistanceChioce == "back"){
           negative = 1;
       }
-
-      PID pid(0.015, 0.0, 0.0); // 创建PID控制器实例。 
-      pid.setSetpoint(val); // 设置目标位置
+      double start_position = GetDistance(DistanceChioce);  // 当前位置
+      PID pid(0.0165, 0.3, 2.5); // 创建PID控制器实例。 
+      pid.setSetpoint(val - start_position); // 设置目标位置
 
       // 多线程阻断等待
       while (MoveEnd == false){
@@ -726,21 +727,32 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       Moveing = true;  // 当前在运动
       MoveEnd = false; // 运动没有完成
       int overcount = 0;  // 成功到位计数器
+      int nearcount = 0; // 贴近计数
+      double now_min_speed = min_move_speed;
+      double last_speed = 0;
 
       while (true) {  
-          double current_position = GetDistance(DistanceChioce);  // 当前位置
-          double output = pid.calculate(current_position, dt) * negative;  // 补偿
+          double current_position = GetDistance(DistanceChioce) - start_position;  // 当前位置
+          double output = pid.calculate(current_position, dt)  * negative;  // 补偿
 
           // 检查目标是否达到  
-          if (std::abs(current_position - val) <= 4 && std::abs(output) <= Stuck_threshold) {
+          if (std::abs(current_position - val + start_position) <= 4 && std::abs(output) <= Stuck_threshold) {
             overcount += 1;
             if (overcount == Over_count){
               PrintAt(2, " ->到位");
-              std::cout <<"daowei" <<std::endl;
               break;  
             }
           }else{
             overcount = 0;
+          }
+
+          // 贴近
+          if ((output < 0 && last_speed > 0) || (output > 0 && last_speed < 0)){
+            Brain.Screen.printAt(10, 80, "----%d-------", nearcount);
+            nearcount += 1;
+            if (nearcount >= 2){
+              now_min_speed -= 0.1;
+            }
           }
 
           // 多线程保护
@@ -762,6 +774,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
                 PrintAt(2, " ->抱死");
                 break;
               }
+              now_min_speed += 0.1;
           }
           else{
             stuck_time_count = 0; // 不抱死则刷新计数
@@ -774,9 +787,10 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
               break;
           }
 
+          last_speed = output;
           now_speed = GetBufferSpeed(now_speed, output, negative);
           // std::cout << "output----" << output << std::endl;
-          now_speed = NumInterval(now_speed, min_move_speed, v);
+          now_speed = NumInterval(now_speed, now_min_speed, v);
           ChassisForward(now_speed, 0);  //  控制移动
 
           wait(dt * 1000.0, msec);
@@ -869,7 +883,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       }
 
 
-      PID pid(0.010, 0.00, 0.000); // 创建PID控制器实例 
+      PID pid(0.0085, 0.8, 3); // 创建PID控制器实例 
       pid.setSetpoint(val); // 设置目标位置
 
       // 多线程阻断等待
@@ -891,7 +905,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
           double output = pid.calculate(current_position, dt);  // 补偿
 
           // 检查目标是否达到  
-          if (std::abs(current_position - val) <= 10 && std::abs(output) <= Stuck_threshold) {
+          if (std::abs(current_position - val) <= 7.5 && std::abs(output) <= Stuck_threshold) {
             overcount += 1;
             if (overcount == Over_count){
               PrintAt(2, " ->到位");

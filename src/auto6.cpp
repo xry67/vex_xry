@@ -3,10 +3,10 @@
 #include "ChassisControl.h"
 
 void auto6(){
-    for (int l=1500; l>100; l-=500){
-        ChassisControlSTS.MoveToDistance(7, l, "front");
-        ChassisControlSTS.MoveToDistance(7, 1500, "front");
+    for (int l=2000; l>100; l-=500){
+        ChassisControlSTS.MoveToDistance(16, l, "front");
+        ChassisControlSTS.MoveToDistance(16, 2000, "front");
     }
-    ChassisControlSTS.MoveToDistance(7, 200, "front");
-    ChassisControlSTS.MoveToDistance(7, 1500, "front");
+    ChassisControlSTS.MoveToDistance(16, 200, "front");
+    ChassisControlSTS.MoveToDistance(16, 2000, "front");
 }
