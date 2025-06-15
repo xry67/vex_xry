@@ -9,7 +9,7 @@ AiTarget ai_target =  AiTarget();
 
 // 左电机控制
 void LeftMotorControl(int val){
-    Brain.Screen.printAt( 100, 50, "%f" , 0.128*val);
+    // Brain.Screen.printAt( 100, 50, "%f" , 0.128*val);
     LeftMotor1.spin(vex::forward, 0.128*val, voltageUnits::volt);
     LeftMotor2.spin(vex::forward, 0.128*val, voltageUnits::volt);
     LeftMotor3.spin(vex::forward, 0.128*val , voltageUnits::volt);
@@ -197,9 +197,9 @@ void RemoteControl(){
     PrintInLine(2);
 
     // 吐球反转计数器
-    int reverse = 0; 
+    int reverse_L2 = 0; 
     // 分球暂停计数器
-    int stopcount = 0;
+    int reverse_R1 = 0;
     // 退出计数
     int HoldButtonBCount = 0;
 
@@ -212,38 +212,49 @@ void RemoteControl(){
 
         // 红色
         if (OpticalHaveRed() || OpticalHaveBlue()){
-            reverse = 5;
+            reverse_L2 = 5;
+        }
+
+        if(OpticalHaveRed()){
+            Brain.Screen.printAt(100, 80, "red");
+        }
+        else if(OpticalHaveBlue()){
+            Brain.Screen.printAt(100, 80, "blue");
+        }
+        else{
+            Brain.Screen.printAt(100, 80, "           ");
         }
 
         if (Controller.ButtonL1.pressing() || Controller.ButtonL2.pressing() || Controller.ButtonR1.pressing() || Controller.ButtonR2.pressing()){
             
             // 吸球1
-            if (Controller.ButtonR1.pressing() ){
-                TrackLeft.spin(forward, TrackSpeed, rpm);
-                TrackRight.spin(forward, TrackSpeed, rpm);
+            if (Controller.ButtonR2.pressing() ){
+                TrackLeft.spin(forward, -1 * TrackSpeed, rpm);
+                TrackRight.spin(forward, -1 * TrackSpeed, rpm);
             }
             
             // 吸球2
-            if (Controller.ButtonR2.pressing()){
+            if (Controller.ButtonR1.pressing()){
 
                 // 分球
                 if (stance == 'r' && OpticalHaveBlue()){
-                    TrackLeft.spin(forward, 0, rpm);
-                    stopcount = 5;
+                    TrackLeft.spin(forward, -1 * TrackSpeed, rpm);
+                    reverse_R1 = 5;
                 }
                 else if (stance == 'b' && OpticalHaveRed()){
-                    TrackLeft.spin(forward, 0, rpm);
-                    stopcount = 5;
+                    TrackLeft.spin(forward, -1 * TrackSpeed, rpm);
+                    reverse_R1 = 5;
                 }
-                else if (stopcount > 0){
-                    TrackLeft.spin(forward, 0, rpm);
-                }
-                else{
+                else if (reverse_R1 > 0){
                     TrackLeft.spin(forward, -1 * TrackSpeed, rpm);
                 }
+                else{
+                    TrackLeft.spin(forward, TrackSpeed, rpm);
+                }
 
-                TrackRight.spin(forward, -1 * TrackSpeed, rpm);
+                TrackRight.spin(forward, TrackSpeed, rpm);
             }
+            
 
             // 2-3层
             if (Controller.ButtonL1.pressing()){
@@ -252,7 +263,7 @@ void RemoteControl(){
             }
 
             if (Controller.ButtonL2.pressing()){
-                if (reverse > 0){
+                if (reverse_L2 > 0){
                     TrackLeft.spin(forward, TrackSpeed, rpm);
                 }else{
                     TrackLeft.spin(forward, -1 * TrackSpeed, rpm);
@@ -271,6 +282,7 @@ void RemoteControl(){
             if (Controller.ButtonL2.pressing()){
                 Flywheel.spin(forward, TrackSpeed, rpm);
             }
+
             if (Controller.ButtonL1.pressing()){
                 // Flywheel.spin(forward, -1 * TrackSpeed, rpm);
                 int now_angle = (int)Flywheel.position(deg);
@@ -285,7 +297,12 @@ void RemoteControl(){
                 
             }
             if (Controller.ButtonR1.pressing()){
-                Flywheel.spin(forward,  TrackSpeed, rpm);
+                if (reverse_R1 > 0){
+                    Flywheel.spin(forward, -1 * TrackSpeed, rpm);
+                }
+                else{
+                    Flywheel.spin(forward, TrackSpeed, rpm);
+                }
             }
         }
         else{
@@ -327,8 +344,8 @@ void RemoteControl(){
             HoldButtonBCount = 0;
         }
 
-        reverse   = std::max(reverse - 1, 0);    // 反转计数器减小
-        stopcount = std::max(stopcount - 1, 0);  // 暂停计数器减小
+        reverse_R1 = std::max(reverse_R1 - 1, 0);    // 反转计数器减小
+        reverse_L2 = std::max(reverse_L2 - 1, 0);  // 暂停计数器减小
 
         wait(5, msec);
     }
