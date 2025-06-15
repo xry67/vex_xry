@@ -197,9 +197,9 @@ void RemoteControl(){
     PrintInLine(2);
 
     // 吐球反转计数器
-    int reverse_L2 = 0; 
+    int HaveBall = 0; 
     // 分球暂停计数器
-    int reverse_R1 = 0;
+    int ErrorBall = 0;
     // 退出计数
     int HoldButtonBCount = 0;
 
@@ -212,7 +212,11 @@ void RemoteControl(){
 
         // 红色
         if (OpticalHaveRed() || OpticalHaveBlue()){
-            reverse_L2 = 5;
+            HaveBall = 5;
+        }
+
+        if ((stance == 'r' && OpticalHaveBlue()) || (stance == 'b' && OpticalHaveRed())){
+            ErrorBall = 5;
         }
 
         if(OpticalHaveRed()){
@@ -237,15 +241,7 @@ void RemoteControl(){
             if (Controller.ButtonR1.pressing()){
 
                 // 分球
-                if (stance == 'r' && OpticalHaveBlue()){
-                    TrackLeft.spin(forward, -1 * TrackSpeed, rpm);
-                    reverse_R1 = 5;
-                }
-                else if (stance == 'b' && OpticalHaveRed()){
-                    TrackLeft.spin(forward, -1 * TrackSpeed, rpm);
-                    reverse_R1 = 5;
-                }
-                else if (reverse_R1 > 0){
+                if (ErrorBall > 0){
                     TrackLeft.spin(forward, -1 * TrackSpeed, rpm);
                 }
                 else{
@@ -263,7 +259,7 @@ void RemoteControl(){
             }
 
             if (Controller.ButtonL2.pressing()){
-                if (reverse_L2 > 0){
+                if (HaveBall > 0){
                     TrackLeft.spin(forward, TrackSpeed, rpm);
                 }else{
                     TrackLeft.spin(forward, -1 * TrackSpeed, rpm);
@@ -280,7 +276,12 @@ void RemoteControl(){
 
         if (Controller.ButtonR1.pressing() ||Controller.ButtonL2.pressing() || Controller.ButtonL1.pressing()){
             if (Controller.ButtonL2.pressing()){
-                Flywheel.spin(forward, TrackSpeed, rpm);
+                if (ErrorBall > 0){
+                    Flywheel.spin(forward, -1 * TrackSpeed, rpm);
+                }
+                else{
+                    Flywheel.spin(forward, TrackSpeed, rpm);
+                }
             }
 
             if (Controller.ButtonL1.pressing()){
@@ -297,7 +298,7 @@ void RemoteControl(){
                 
             }
             if (Controller.ButtonR1.pressing()){
-                if (reverse_R1 > 0){
+                if (ErrorBall > 0){
                     Flywheel.spin(forward, -1 * TrackSpeed, rpm);
                 }
                 else{
@@ -344,8 +345,8 @@ void RemoteControl(){
             HoldButtonBCount = 0;
         }
 
-        reverse_R1 = std::max(reverse_R1 - 1, 0);    // 反转计数器减小
-        reverse_L2 = std::max(reverse_L2 - 1, 0);  // 暂停计数器减小
+        ErrorBall = std::max(ErrorBall - 1, 0);    // 反转计数器减小
+        HaveBall = std::max(HaveBall - 1, 0);  // 暂停计数器减小
 
         wait(5, msec);
     }
