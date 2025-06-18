@@ -50,6 +50,7 @@ void vexcodeInit(void) {
     // Flywheel.setVelocity(100, dps);
     // PositioningSTS.Reset(); // 底盘定位初始化
     // PositioningSTS.TurnOn(); // 底盘定位开启
+    Optical.setLightPower(50, percent);
 }
 
 #endif 

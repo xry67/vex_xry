@@ -213,10 +213,15 @@ void RemoteControl(){
         // 红色
         if (OpticalHaveRed() || OpticalHaveBlue()){
             HaveBall = 5;
+        }else{
+            HaveBall = 0;
         }
 
         if ((stance == 'r' && OpticalHaveBlue()) || (stance == 'b' && OpticalHaveRed())){
-            ErrorBall = 5;
+            ErrorBall = 20;
+        }
+        else if ((stance == 'b' && OpticalHaveBlue()) || (stance == 'r' && OpticalHaveRed())){
+            ErrorBall = 0;
         }
 
         if(OpticalHaveRed()){
@@ -277,10 +282,10 @@ void RemoteControl(){
         if (Controller.ButtonR1.pressing() ||Controller.ButtonL2.pressing() || Controller.ButtonL1.pressing()){
             if (Controller.ButtonL2.pressing()){
                 if (ErrorBall > 0){
-                    Flywheel.spin(forward, -1 * TrackSpeed, rpm);
+                    Flywheel.spin(forward, TrackSpeed, rpm);
                 }
                 else{
-                    Flywheel.spin(forward, TrackSpeed, rpm);
+                    Flywheel.spin(forward, -1 * TrackSpeed, rpm);
                 }
             }
 
@@ -348,7 +353,7 @@ void RemoteControl(){
         ErrorBall = std::max(ErrorBall - 1, 0);    // 反转计数器减小
         HaveBall = std::max(HaveBall - 1, 0);  // 暂停计数器减小
 
-        wait(5, msec);
+        wait(10, msec);
     }
 
 }
