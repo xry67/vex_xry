@@ -190,7 +190,12 @@ void RemoteControl(){
     RemoteControlDataList RemoteControlData_list(101);
 
     PrintInLine(1);
-    Controller.Screen.print("遥控模式");
+    if (stance == 'r'){
+        Controller.Screen.print("遥控模式-Red");
+    }else{
+        Controller.Screen.print("遥控模式-Blue");
+    }
+   
 
     ai_target.SetColor(Red);
 

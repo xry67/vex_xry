@@ -91,6 +91,13 @@ class DrawMotor{
 
     void Draw(double temperature){
 
+        if (temperature <= 1){
+            Brain.Screen.setPenColor(color(255, 255, 255));
+            Color.rgb(0, 0, 0);
+            Brain.Screen.drawRectangle(x, y, w, h, Color);
+            return;
+        }
+
         if (std::abs(last_temperature - temperature) < 5){
             return ;
         }
