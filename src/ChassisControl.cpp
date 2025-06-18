@@ -153,8 +153,8 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
         double now_rotation = ChassisInertial.rotation();
 
         double output = this->StraightPid->calculate(now_rotation, 0.01) * -1;  // 补偿
-        Brain.Screen.printAt( 10, 100, "output %f", output);
-        Brain.Screen.printAt( 10, 150, "this->StraightAngle %f", this->StraightPid->getsetpoint());
+        // Brain.Screen.printAt( 10, 100, "output %f", output);
+        // Brain.Screen.printAt( 10, 150, "this->StraightAngle %f", this->StraightPid->getsetpoint());
         if (output < 0){
           output = std::max(output, -1 * StraightCorrectionSpeed);
         }else{
@@ -336,7 +336,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
 
           // 贴近
           if ((output < 0 && last_speed > 0) || (output > 0 && last_speed < 0)){
-            Brain.Screen.printAt(10, 80, "----%d-------", nearcount);
+            // Brain.Screen.printAt(10, 80, "----%d-------", nearcount);
             nearcount += 1;
             if (nearcount >= 2){
               now_min_speed -= 0.1;
@@ -478,7 +478,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
 
           // 贴近
           if ((output < 0 && last_speed > 0) || (output > 0 && last_speed < 0)){
-            Brain.Screen.printAt(10, 80, "----%d-------", nearcount);
+            // Brain.Screen.printAt(10, 80, "----%d-------", nearcount);
             nearcount += 1;
             if (nearcount >= 2){
               now_min_speed -= 0.1;
@@ -762,7 +762,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
 
           // 贴近
           if ((output < 0 && last_speed > 0) || (output > 0 && last_speed < 0)){
-            Brain.Screen.printAt(10, 80, "----%d-------", nearcount);
+            // Brain.Screen.printAt(10, 80, "----%d-------", nearcount);
             nearcount += 1;
             if (nearcount >= 2){
               now_min_speed -= 0.1;
@@ -893,7 +893,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       // 直线修正指示器
       if (abs(yaw) < 0.01){
         ChassisControl::ChassisStraight();
-        Brain.Screen.printAt( 10, 50, "start %f", ChassisInertial.rotation());
+        // ( 10, 50, "start %f", ChassisInertial.rotation());
       }
 
 
@@ -932,7 +932,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
 
           // 贴近
           if ((output < 0 && last_speed > 0) || (output > 0 && last_speed < 0)){
-            Brain.Screen.printAt(10, 80, "----%d-------", nearcount);
+            // Brain.Screen.printAt(10, 80, "----%d-------", nearcount);
             nearcount += 1;
             if (nearcount >= 2){
               now_min_speed -= 0.1;
@@ -1082,14 +1082,14 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
             int TargetCenterX = Target.GetTargetCenterX();
 
             output_target = pid_target.calculate(TargetCenterX, dt) * -1;  // 前进补偿
-            Brain.Screen.printAt( 10, 10, "target %d, %d", aiVision.largestObject.centerX, 5);
+            // Brain.Screen.printAt( 10, 10, "target %d, %d", aiVision.largestObject.centerX, 5);
             
             if (output_target > 0){
               output_target = std::min(v / 2, output_target);
             }else{
               output_target = std::max(v / 2 * -1, output_target);
             }
-            Brain.Screen.printAt( 10, 90, "output_target %f", output_target);
+            // Brain.Screen.printAt( 10, 90, "output_target %f", output_target);
           }
 
           // 检查目标是否达到  
@@ -1106,7 +1106,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
 
           // 贴近
           if ((output < 0 && last_speed > 0) || (output > 0 && last_speed < 0)){
-            Brain.Screen.printAt(10, 80, "----%d-------", nearcount);
+            // Brain.Screen.printAt(10, 80, "----%d-------", nearcount);
             nearcount += 1;
             if (nearcount >= 2){
               now_min_speed -= 0.1;
@@ -1239,7 +1239,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
 
           // 贴近
           if ((output < 0 && last_speed > 0) || (output > 0 && last_speed < 0)){
-            Brain.Screen.printAt(10, 80, "----%d-------", nearcount);
+            // Brain.Screen.printAt(10, 80, "----%d-------", nearcount);
             nearcount += 1;
             if (nearcount >= 2){
               now_min_speed -= 0.1;

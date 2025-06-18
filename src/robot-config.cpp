@@ -57,6 +57,9 @@ distance Distance_br = distance(PORT17);  // 右后
 distance Distance_l = distance(PORT1);  // 左后
 distance Distance_r = distance(PORT11);  // 右后
 
+// 颜色传感器
+optical Optical = optical(PORT21);  // 颜色传感器
+
 // 设别列表
 std::vector<char*> MotorNames = {"L1", "L2", "L3", "R1", "R2", "R3"};
 std::vector<motor> Motors = {LeftMotor1, LeftMotor2, LeftMotor3, 
@@ -65,3 +68,5 @@ std::vector<motor> Motors = {LeftMotor1, LeftMotor2, LeftMotor3,
 std::vector<char*> DistanceNames = {"Fl", "Fr", "Bl", "Nr", "L", "R"};
 std::vector<distance> Distances = {Distance_fl, Distance_fr, Distance_bl, 
                                 Distance_br, Distance_l, Distance_r};
+
+// 设备检测绘图

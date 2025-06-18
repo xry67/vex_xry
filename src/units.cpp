@@ -78,6 +78,23 @@ double NormsAngle(double val){
   return val - ((int)val / 360) * 360;
 }
 
+// 颜色传感器有一个红色物体？
+bool OpticalHaveRed(){
+    double H = Optical.hue();
+    if (Optical.isNearObject() && ((H > 0 && H < 30)|| (H > 300 && H < 360))){
+        return true;
+    }
+    return false;
+}
+
+// 颜色传感器有一个蓝色物体？
+bool OpticalHaveBlue(){
+    double H = Optical.hue();
+    if (Optical.isNearObject() && (H > 200 && H < 270)){
+        return true;
+    }
+    return false;
+}
 
 // 将数字规范到这个区间
 double NumInterval(double num, double mininum, double maxinum){

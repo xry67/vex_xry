@@ -45,15 +45,53 @@ int EquipmentMonitor(){
         // 设备监控
         Draw_Equipment_Monitor.Updata();
 
-        // Brain.Screen.printAt( 200, 200, "Angle %f", ChassisInertial.rotation());
+        Brain.Screen.printAt(280, 100, "Angle %f", ChassisInertial.rotation());
         vex::task::sleep(1000);
     }
 }
 
+// 等待按下x
+void WaitForX(){
+    PrintInLine(3);
+    Controller.Screen.print("               忽略(X)");
+    while(true){
+        if (Controller.ButtonX.pressing()){
+            return ;
+        }
+        wait(10, msec);
+    }
+}
+
+// 设备检查
+void CheckEquipment(){
+    // 电机检查
+    PrintInLine(1);
+    Controller.Screen.print("设备检查中...");
+
+    // 电机检查
+    for (int i=0; i < Motors.size(); i++){
+        if (! Motors[i].installed()){
+            PrintInLine(2);
+            Controller.Screen.print("%s电机失联", MotorNames[i]);
+            WaitForX();
+        }
+    }
+
+    // 陀螺仪检查
+    if (! ChassisInertial.installed()){
+        PrintInLine(2);
+        Controller.Screen.print("陀螺仪失联");
+        WaitForX();
+    }
+
+    // 其他检查
+}
+
 // 初始化 
 void vexcodeInit(void) {
+    CheckEquipment();  // 设备检查
     EquipmentMonitor_task = vex::task(EquipmentMonitor);  // 电量监控开启
-    // ChassisInertialInit();  // 底盘陀螺仪初始化
+    ChassisInertialInit();  // 底盘陀螺仪初始化
     AddAutoFun();           // 自动函数初始化
 
 }
