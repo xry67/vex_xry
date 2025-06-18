@@ -40,9 +40,10 @@ motor RightMotor2 = motor(PORT17, ratio6_1, 0);//20
 motor RightMotor3 = motor(PORT18, ratio6_1, 0);//19
 motor_group RightMotorGroup = motor_group(RightMotor1, RightMotor2, RightMotor3);  // 右边边电机组
 
-motor TrackLeft   = motor(PORT2, ratio6_1, 0);  // 左履带
-motor TrackRight  = motor(PORT1, ratio6_1, 0);  // 右履带
-motor Flywheel    = motor(PORT3, ratio6_1, 1);  // 尾部飞轮
+motor ToolMotor1    = motor(PORT3, ratio6_1, 1);  // 上  f
+motor ToolMotor2    = motor(PORT2, ratio6_1, 0);  // 中  l
+motor ToolMotor3    = motor(PORT1, ratio6_1, 0);  // 下  r
+
 digital_out digitalA = digital_out(Brain.ThreeWirePort.A);  // 抬升
 digital_out digitalB = digital_out(Brain.ThreeWirePort.B);  // 抬升
 

@@ -43,9 +43,9 @@ extern motor RightMotor2;//20
 extern motor RightMotor3;//19
 extern motor_group RightMotorGroup;  // 右电机组
 
-extern motor TrackLeft;    // 左履带
-extern motor TrackRight;  // 右履带
-extern motor Flywheel;  // 尾部飞轮
+extern motor ToolMotor1;  // 上
+extern motor ToolMotor2;  // 中
+extern motor ToolMotor3;  // 下
 extern digital_out digitalA; // 抬升
 extern digital_out digitalB;
 

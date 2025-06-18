@@ -82,7 +82,7 @@ class DrawMotor{
     public:
     color Color;
     int x=0, y=0, w=0, h=0;
-    double last_temperature = -1;
+    double last_temperature = -100;
 
     DrawMotor(int x_, int y_, int w_, int h_)
     : x(x_), y(y_), w(w_), h(h_) {
@@ -135,12 +135,12 @@ class DrawChassis{
     }
 
     void Updata(){
-        DrawMotorL1.Draw(LeftMotor1.temperature());
-        DrawMotorL2.Draw(LeftMotor2.temperature());
-        DrawMotorL3.Draw(LeftMotor3.temperature());
-        DrawMotorR1.Draw(RightMotor1.temperature());
-        DrawMotorR2.Draw(RightMotor2.temperature());
-        DrawMotorR3.Draw(RightMotor3.temperature());
+        DrawMotorL1.Draw(LeftMotor1.temperature(celsius));
+        DrawMotorL2.Draw(LeftMotor2.temperature(celsius));
+        DrawMotorL3.Draw(LeftMotor3.temperature(celsius));
+        DrawMotorR1.Draw(RightMotor1.temperature(celsius));
+        DrawMotorR2.Draw(RightMotor2.temperature(celsius));
+        DrawMotorR3.Draw(RightMotor3.temperature(celsius));
     }
 
 };
@@ -190,6 +190,10 @@ class DrawEquipmentMonitor
     DrawBattery Battery = DrawBattery();
     DrawColor   OptColor= DrawColor();
 
+    DrawMotor   ToolM1  = DrawMotor(143, 31, 34, 19);
+    DrawMotor   ToolM2  = DrawMotor(143, 56, 34, 19);
+    DrawMotor   ToolM3  = DrawMotor(143, 81, 34, 19);
+
     DrawEquipmentMonitor(){
 
     }
@@ -204,6 +208,9 @@ class DrawEquipmentMonitor
 
         OptColor.Updata();
         Chassis.StartInit();
+        ToolM1.Draw(ToolMotor1.temperature());
+        ToolM2.Draw(ToolMotor2.temperature());
+        ToolM3.Draw(ToolMotor3.temperature());
         
     }
 
@@ -213,6 +220,10 @@ class DrawEquipmentMonitor
         Battery.Update();
         OptColor.Updata();
         Chassis.Updata();
+        ToolM1.Draw(ToolMotor1.temperature(celsius));
+        ToolM2.Draw(ToolMotor2.temperature(celsius));
+        ToolM3.Draw(ToolMotor3.temperature(celsius));
+        std::cout << ToolMotor1.temperature(celsius) << " " << ToolMotor2.temperature(celsius) << " " << ToolMotor3.temperature(celsius) << std::endl;
 
     }
 

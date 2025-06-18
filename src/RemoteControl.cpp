@@ -72,19 +72,11 @@ void ChassisControlFun(){
     }
 
     //  自动对齐功能
-<<<<<<< HEAD
-    if (false){
-        if (ai_target.SetTarget()){
-            auto_target_yaw = (ai_target.Target_CenterX - aiVision_w / 2) * 0.2;
-            ai_target.Target_CenterX = -1;
-        }
-=======
-    // if (Controller.ButtonR1.pressing()){
+    // if (false){
     //     if (ai_target.SetTarget()){
     //         auto_target_yaw = (ai_target.Target_CenterX - aiVision_w / 2) * 0.2;
     //         ai_target.Target_CenterX = -1;
     //     }
->>>>>>> master
 
     //     if (auto_target_yaw > Auto_Turn_To_Target_Speed){
     //         auto_target_yaw = Auto_Turn_To_Target_Speed;
@@ -232,22 +224,12 @@ void RemoteControl(){
             ErrorBall = 0;
         }
 
-        if(OpticalHaveRed()){
-            Brain.Screen.printAt(100, 80, "red");
-        }
-        else if(OpticalHaveBlue()){
-            Brain.Screen.printAt(100, 80, "blue");
-        }
-        else{
-            Brain.Screen.printAt(100, 80, "           ");
-        }
-
         if (Controller.ButtonL1.pressing() || Controller.ButtonL2.pressing() || Controller.ButtonR1.pressing() || Controller.ButtonR2.pressing()){
             
             // 吸球1
             if (Controller.ButtonR2.pressing() ){
-                TrackLeft.spin(forward, -1 * TrackSpeed, rpm);
-                TrackRight.spin(forward, -1 * TrackSpeed, rpm);
+                ToolMotor2.spin(forward, -1 * TrackSpeed, rpm);
+                ToolMotor3.spin(forward, -1 * TrackSpeed, rpm);
             }
             
             // 吸球2
@@ -255,72 +237,72 @@ void RemoteControl(){
 
                 // 分球
                 if (ErrorBall > 0){
-                    TrackLeft.spin(forward, -1 * TrackSpeed, rpm);
+                    ToolMotor2.spin(forward, -1 * TrackSpeed, rpm);
                 }
                 else{
-                    TrackLeft.spin(forward, TrackSpeed, rpm);
+                    ToolMotor2.spin(forward, TrackSpeed, rpm);
                 }
 
-                TrackRight.spin(forward, TrackSpeed, rpm);
+                ToolMotor3.spin(forward, TrackSpeed, rpm);
             }
             
 
             // 2-3层
             if (Controller.ButtonL1.pressing()){
-                TrackLeft.spin(forward, -1 * TrackSpeed, rpm);
-                TrackRight.spin(forward, TrackSpeed, rpm);
+                ToolMotor2.spin(forward, -1 * TrackSpeed, rpm);
+                ToolMotor3.spin(forward, TrackSpeed, rpm);
             }
 
             if (Controller.ButtonL2.pressing()){
                 if (HaveBall > 0){
-                    TrackLeft.spin(forward, TrackSpeed, rpm);
+                    ToolMotor2.spin(forward, TrackSpeed, rpm);
                 }else{
-                    TrackLeft.spin(forward, -1 * TrackSpeed, rpm);
+                    ToolMotor2.spin(forward, -1 * TrackSpeed, rpm);
                 }
                 
-                TrackRight.spin(forward, TrackSpeed, rpm);
+                ToolMotor3.spin(forward, TrackSpeed, rpm);
             }
         }
         else{
-            TrackLeft.spin(forward, 0, rpm);
-            TrackRight.spin(forward, 0, rpm);
+            ToolMotor2.spin(forward, 0, rpm);
+            ToolMotor3.spin(forward, 0, rpm);
         }
         ChassisControlFun();
 
         if (Controller.ButtonR1.pressing() ||Controller.ButtonL2.pressing() || Controller.ButtonL1.pressing()){
             if (Controller.ButtonL2.pressing()){
                 if (ErrorBall > 0){
-                    Flywheel.spin(forward, -1 * TrackSpeed, rpm);
+                    ToolMotor1.spin(forward, -1 * TrackSpeed, rpm);
                 }
                 else{
-                    Flywheel.spin(forward, TrackSpeed, rpm);
+                    ToolMotor1.spin(forward, TrackSpeed, rpm);
                 }
             }
 
             if (Controller.ButtonL1.pressing()){
                 // Flywheel.spin(forward, -1 * TrackSpeed, rpm);
-                int now_angle = (int)Flywheel.position(deg);
+                int now_angle = (int)ToolMotor1.position(deg);
                 int move_angle = now_angle % 180;
                 if (move_angle < 90){
-                    Flywheel.spinToPosition(now_angle - move_angle, deg, 1000000, dps, false);
+                    ToolMotor1.spinToPosition(now_angle - move_angle, deg, 1000000, dps, false);
                 }
                 else{
-                    Flywheel.spinToPosition(now_angle - move_angle + 180, deg, -1000000, dps, false);
+                    ToolMotor1.spinToPosition(now_angle - move_angle + 180, deg, -1000000, dps, false);
                 }
 
                 
             }
             if (Controller.ButtonR1.pressing()){
                 if (ErrorBall > 0){
-                    Flywheel.spin(forward, -1 * TrackSpeed, rpm);
+                    ToolMotor1.spin(forward, -1 * TrackSpeed, rpm);
                 }
                 else{
-                    Flywheel.spin(forward, TrackSpeed, rpm);
+                    ToolMotor1.spin(forward, TrackSpeed, rpm);
                 }
             }
         }
         else{
-            Flywheel.spin(forward, 0, rpm);
+            ToolMotor1.spin(forward, 0, rpm);
         }
         ChassisControlFun();
 
@@ -350,18 +332,9 @@ void RemoteControl(){
         // 退出
         if (Controller.ButtonB.pressing()){
             HoldButtonBCount += 1;
-<<<<<<< HEAD
             if (HoldButtonB(HoldButtonBCount, 50)){
                 break;
             }
-=======
-            if (HoldButtonB(HoldButtonBCount, 5)){
-                break;
-            }
-        }
-        else{
-            HoldButtonBCount = 0;
->>>>>>> master
         }
         else{
             HoldButtonBCount = 0;
