@@ -301,8 +301,8 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       }
 
 
-      PID pid(0.00900, 0.800, 3); // 创建PID控制器实例 
-      pid.setSetpoint(val); // 设置目标位置
+      PPS pps(0.00900, 0.800, 3); // 创建PPS控制器实例 
+      pps.setSetpoint(val); // 设置目标位置
 
       // 多线程阻断等待
       while (MoveEnd == false){
@@ -321,7 +321,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
           double current_position = GetPositions_mean();  // 当前位置
           // Brain.Screen.printAt( 10, 50, "current_position %f", current_position);
          
-          double output = pid.calculate(current_position, dt);  // 补偿
+          double output = pps.calculate(current_position, dt);  // 补偿
 
           if (std::abs(current_position - val) <= 5 && std::abs(output) <= Stuck_threshold) {
             overcount += 1;
@@ -440,8 +440,8 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
 
       // Brain.Screen.printAt( 10, 50, "taget_angle %f", taget_angle);
 
-      PID pid(0.065, 0.09, 2); // 创建PID控制器实例 
-      pid.setSetpoint(taget_angle); // 设置目标位置
+      PPS pps(0.065, 0.09, 2); // 创建PPS控制器实例 
+      pps.setSetpoint(taget_angle); // 设置目标位置
 
       // 多线程阻断等待
       while (MoveEnd == false){
@@ -458,7 +458,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
 
       while (true) {  
           double current_position = ChassisInertial.rotation();  // 当前位置
-          double output = pid.calculate(current_position, dt) * yaw_negative;  // 补偿
+          double output = pps.calculate(current_position, dt) * yaw_negative;  // 补偿
 
           // 检查目标是否达到  
           std::cout <<"turn" << std::abs(current_position - taget_angle) << " " << std::abs(output) << std::endl;
@@ -633,8 +633,8 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
     }
 
 
-    PID pid(8, 0.03, 0.1); // 创建PID控制器实例 
-    pid.setSetpoint(val); // 设置目标位置
+    PPS pps(8, 0.03, 0.1); // 创建PPS控制器实例 
+    pps.setSetpoint(val); // 设置目标位置
 
     // 多线程阻断等待
     while (MoveEnd == false){
@@ -647,7 +647,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
 
     while (true) {  
         double current_position = Rotation_y.position(deg);  // 当前位置
-        double output = pid.calculate(current_position, dt);  // 补偿
+        double output = pps.calculate(current_position, dt);  // 补偿
         // 控制小车运动 
         ChassisForward(std::min(v, output) * negative, yaw * yaw_negative);   //  控制移动
 
@@ -725,8 +725,8 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
           negative = 1;
       }
       double start_position = GetDistance(DistanceChioce);  // 当前位置
-      PID pid(0.0165, 0.3, 2.5); // 创建PID控制器实例。 
-      pid.setSetpoint(val - start_position); // 设置目标位置
+      PPS pps(0.0165, 0.3, 2.5); // 创建PPS控制器实例。 
+      pps.setSetpoint(val - start_position); // 设置目标位置
 
       // 多线程阻断等待
       while (MoveEnd == false){
@@ -747,7 +747,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
 
       while (true) {  
           double current_position = GetDistance(DistanceChioce) - start_position;  // 当前位置
-          double output = pid.calculate(current_position, dt)  * negative;  // 补偿
+          double output = pps.calculate(current_position, dt)  * negative;  // 补偿
 
           // 检查目标是否达到  
           if (std::abs(current_position - val + start_position) <= 4 && std::abs(output) <= Stuck_threshold) {
@@ -897,8 +897,8 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       }
 
 
-      PID pid(0.0085, 0.8, 3); // 创建PID控制器实例 
-      pid.setSetpoint(val); // 设置目标位置
+      PPS pps(0.0085, 0.8, 3); // 创建PPS控制器实例 
+      pps.setSetpoint(val); // 设置目标位置
 
       // 多线程阻断等待
       while (MoveEnd == false){
@@ -916,7 +916,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
 
       while (true) {  
           double current_position = Rotation_x.position(deg);  // 当前位置
-          double output = pid.calculate(current_position, dt);  // 补偿
+          double output = pps.calculate(current_position, dt);  // 补偿
 
           // 检查目标是否达到  
           if (std::abs(current_position - val) <= 7.5 && std::abs(output) <= Stuck_threshold) {
@@ -1041,11 +1041,11 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       int    negative = 1;   // 负方向指示器
       int yaw_negative= 1;   // 负偏指示器
 
-      PID pid(0.00900, 0.0, 0.0); // 创建PID控制器实例 
-      pid.setSetpoint(val); // 设置目标位置
+      PPS pps(0.00900, 0.0, 0.0); // 创建PPS控制器实例 
+      pps.setSetpoint(val); // 设置目标位置
 
-      PID pid_target(0.05, 0.0, 0.0); // 创建PID控制器实例 
-      pid_target.setSetpoint(aiVision_w / 2 + (Target.Align * aiVision_w / 2)); // 设置目标位置
+      PPS pps_target(0.05, 0.0, 0.0); // 创建PPS控制器实例 
+      pps_target.setSetpoint(aiVision_w / 2 + (Target.Align * aiVision_w / 2)); // 设置目标位置
 
 
       // 多线程阻断等待
@@ -1071,7 +1071,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
 
       while (true) {  
           double current_position = Rotation_x.position(deg);  // 当前位置
-          double output = pid.calculate(current_position, dt);  // 前进补偿
+          double output = pps.calculate(current_position, dt);  // 前进补偿
           
           // 视觉传感器
           aiVision.takeSnapshot(*(Target.Color));  // 当前视觉传感器的数据
@@ -1081,7 +1081,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
           if (aiVision.objectCount > 0 && have_target){
             int TargetCenterX = Target.GetTargetCenterX();
 
-            output_target = pid_target.calculate(TargetCenterX, dt) * -1;  // 前进补偿
+            output_target = pps_target.calculate(TargetCenterX, dt) * -1;  // 前进补偿
             // Brain.Screen.printAt( 10, 10, "target %d, %d", aiVision.largestObject.centerX, 5);
             
             if (output_target > 0){
@@ -1196,8 +1196,8 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       }
 
 
-      PID pid(0.1, 0, 0); // 创建PID控制器实例 
-      pid.setSetpoint(taget_angle); // 设置目标位置
+      PPS pps(0.1, 0, 0); // 创建PPS控制器实例 
+      pps.setSetpoint(taget_angle); // 设置目标位置
 
       // 多线程阻断等待
       while (MoveEnd == false){
@@ -1217,7 +1217,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       
       while (true) {  
           double current_position = ChassisInertial.rotation();  // 当前位置
-          double output = pid.calculate(current_position, dt) * yaw_negative;  // 补偿
+          double output = pps.calculate(current_position, dt) * yaw_negative;  // 补偿
 
           // 目标角度附近找到了目标物体
           if (abs(current_position - taget_angle) <= 30 and Target.SetTarget()){
@@ -1286,16 +1286,16 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       }  
       
       if (Target.SetTarget()){
-        PID pid_target(0.04, 0.0, 0.0); // 创建PID控制器实例 
+        PPS pps_target(0.04, 0.0, 0.0); // 创建PPS控制器实例 
         int tagetX = aiVision_w / 2 + (Target.Align * aiVision_w / 2);
         tagetX = aiVision_w / 2;
-        pid_target.setSetpoint(tagetX); // 设置目标位置
+        pps_target.setSetpoint(tagetX); // 设置目标位置
 
         overcount = 0;
         while (true) {  
             aiVision.takeSnapshot(*(Target.Color));  // 当前视觉传感器的数据
             int TargetCenterX = Target.GetTargetCenterX();
-            double output= pid_target.calculate(TargetCenterX, dt) * -1;  // 前进补偿
+            double output= pps_target.calculate(TargetCenterX, dt) * -1;  // 前进补偿
 
             // 检查目标是否达到  
             if (std::abs(TargetCenterX - tagetX) <= 1 && std::abs(output) < Stuck_threshold) {

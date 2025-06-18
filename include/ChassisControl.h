@@ -6,7 +6,7 @@
 #include <thread>  
 #include <vector>
 #include "vex.h"
-#include "PID.h"
+#include "PPS.h"
 #include "robot-config.h"
 
 // 视觉识别物体限制
@@ -247,7 +247,7 @@ class ChassisControl{
 
     double maxinum_speed_acceleration = 2;
 
-    PID     *StraightPid = new PID(5, 0.0, 0.1);            // 创建PID控制器实例 
+    PPS     *StraightPid = new PPS(5, 0.0, 0.1);            // 创建PPS控制器实例 
     double  StraightAngle   = 0.0;   // 记录直行的角度
     int     StraightNegative = 1.05;    // 记录执行方向
 
