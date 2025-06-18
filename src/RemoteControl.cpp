@@ -72,26 +72,34 @@ void ChassisControlFun(){
     }
 
     //  自动对齐功能
+<<<<<<< HEAD
     if (false){
         if (ai_target.SetTarget()){
             auto_target_yaw = (ai_target.Target_CenterX - aiVision_w / 2) * 0.2;
             ai_target.Target_CenterX = -1;
         }
+=======
+    // if (Controller.ButtonR1.pressing()){
+    //     if (ai_target.SetTarget()){
+    //         auto_target_yaw = (ai_target.Target_CenterX - aiVision_w / 2) * 0.2;
+    //         ai_target.Target_CenterX = -1;
+    //     }
+>>>>>>> master
 
-        if (auto_target_yaw > Auto_Turn_To_Target_Speed){
-            auto_target_yaw = Auto_Turn_To_Target_Speed;
-        }
-        if (auto_target_yaw < Auto_Turn_To_Target_Speed * -1){
-            auto_target_yaw = Auto_Turn_To_Target_Speed * -1;
-        }
-    }
+    //     if (auto_target_yaw > Auto_Turn_To_Target_Speed){
+    //         auto_target_yaw = Auto_Turn_To_Target_Speed;
+    //     }
+    //     if (auto_target_yaw < Auto_Turn_To_Target_Speed * -1){
+    //         auto_target_yaw = Auto_Turn_To_Target_Speed * -1;
+    //     }
+    // }
 
     // 自动对齐判断
-    if (abs(axis1) < blindCA && abs(axis2) < blindCA && abs(axis3) < blindCA && abs(axis4) < blindCA){
-        LeftMotorControl(auto_target_yaw);
-        RightMotorControl(-1 * auto_target_yaw);
-        return ;
-    }
+    // if (abs(axis1) < blindCA && abs(axis2) < blindCA && abs(axis3) < blindCA && abs(axis4) < blindCA){
+    //     LeftMotorControl(auto_target_yaw);
+    //     RightMotorControl(-1 * auto_target_yaw);
+    //     return ;
+    // }
 
     //  1：双 2：左 3：右 4：坦克
     if (RemoteControlMod == 2){
@@ -105,7 +113,7 @@ void ChassisControlFun(){
 
     }
 
-    if (RemoteControlMod == 3){
+    else if (RemoteControlMod == 3){
         if (abs(axis2) > blindCA || abs(axis1) > blindCA ){
             LeftMotorControl(axis2 * Sensitivity_1 + axis1 * Sensitivity_2 + auto_target_yaw);
             RightMotorControl(axis2 * Sensitivity_1 - axis1 * Sensitivity_2 - auto_target_yaw);
@@ -115,7 +123,7 @@ void ChassisControlFun(){
         }
     }
 
-    if (RemoteControlMod == 1){
+    else if (RemoteControlMod == 1){
         // 死区判定
         if (abs(axis3) > blindCA || abs(axis1) > blindCA ){
             LeftMotorControl(axis3 * Sensitivity_1 + axis1 * Sensitivity_2 + auto_target_yaw);
@@ -126,7 +134,7 @@ void ChassisControlFun(){
         }
     }
 
-    if (RemoteControlMod == 4){
+    else if (RemoteControlMod == 4){
         if (abs(axis3) > blindCA || abs(axis2) > blindCA ){
             LeftMotorControl(axis3 * Sensitivity_1 + auto_target_yaw);
             RightMotorControl(axis2 * Sensitivity_1 - auto_target_yaw);
@@ -342,9 +350,18 @@ void RemoteControl(){
         // 退出
         if (Controller.ButtonB.pressing()){
             HoldButtonBCount += 1;
+<<<<<<< HEAD
             if (HoldButtonB(HoldButtonBCount, 50)){
                 break;
             }
+=======
+            if (HoldButtonB(HoldButtonBCount, 5)){
+                break;
+            }
+        }
+        else{
+            HoldButtonBCount = 0;
+>>>>>>> master
         }
         else{
             HoldButtonBCount = 0;

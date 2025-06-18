@@ -6,6 +6,7 @@
 #include "units.h"
 #include "auto.h"
 #include "Positioning.h"
+#include "draw.h"
 
 // 陀螺仪初始化
 void ChassisInertialInit(){
@@ -29,28 +30,31 @@ void ChassisInertialInit(){
     }
 }
 
-// 电量监控
-vex::task LowBatteryMonitor_task;
-int LowBatteryMonitor(){
+// 设备监控
+vex::task EquipmentMonitor_task;
+int EquipmentMonitor(){
+    DrawEquipmentMonitor Draw_Equipment_Monitor = DrawEquipmentMonitor();
+    Draw_Equipment_Monitor.StartInit();
     while (true) {
+        // 电量监控
         if (Brain.Battery.capacity(pct) <= PowerLimit) {
             Controller.rumble("..");
             wait(500, msec);
         }
-        Brain.Screen.printAt( 200, 200, "Angle %f", ChassisInertial.rotation());
+
+        // 设备监控
+        Draw_Equipment_Monitor.Updata();
+
+        // Brain.Screen.printAt( 200, 200, "Angle %f", ChassisInertial.rotation());
         vex::task::sleep(1000);
     }
 }
 
 // 初始化 
 void vexcodeInit(void) {
-    LowBatteryMonitor_task = vex::task(LowBatteryMonitor);  // 电量监控开启
-    ChassisInertialInit();  // 底盘陀螺仪初始化
+    EquipmentMonitor_task = vex::task(EquipmentMonitor);  // 电量监控开启
+    // ChassisInertialInit();  // 底盘陀螺仪初始化
     AddAutoFun();           // 自动函数初始化
-    // Flywheel.setVelocity(100, dps);
-    // PositioningSTS.Reset(); // 底盘定位初始化
-    // PositioningSTS.TurnOn(); // 底盘定位开启
-    Optical.setLightPower(50, percent);
 }
 
 #endif 

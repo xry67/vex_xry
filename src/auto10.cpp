@@ -3,14 +3,15 @@
 #include "ChassisControl.h"
 
 void auto10(){
-    double speed = 9;
+    ChassisControlSTS.Over_count = 2;
+    double speed = 100;
     ChassisControlSTS.MoveToDistance(speed, 400, "front");
    
     ChassisControlSTS.TurnTo(speed, -90, false);
 
     ChassisControlSTS.SetStopModCoast();
-    ChassisControlSTS.MoveBySmallWheel(speed, 500, 0, 'n');
-    ChassisControlSTS.TurnTo(speed, -90, false);
+    ChassisControlSTS.MoveBySmallWheel(speed, 400, 0, 'n');
+    // ChassisControlSTS.TurnTo(speed, 90, false);
 
     // ChassisControlSTS.StopMoving();
     // ChassisControlSTS.MoveBySmallWheel(500, 350, 0, 'n');

@@ -71,6 +71,9 @@ extern aivision::colordesc Bule;
 extern aivision::colordesc Orange;
 extern aivision aiVision;
 
+// 颜色传感器
+extern optical Optical;
+
 extern std::vector<AutoFun> AutoFunctions;  // 自动路径储存
 
 extern std::vector<char*> MotorNames;

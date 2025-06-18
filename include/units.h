@@ -52,6 +52,7 @@ bool OpticalHaveRed();
 
 // 颜色传感器有一个蓝色物体？
 bool OpticalHaveBlue();
+
 // 将数字规范到这个区间
 double NumInterval(double num, double mininum, double maxinum);
 

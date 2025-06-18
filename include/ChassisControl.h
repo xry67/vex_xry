@@ -65,10 +65,10 @@ class AiTarget{
     aiVision.takeSnapshot(*(this->Color));  // 当前视觉传感器的数据
     int size = 0;
     int k = 100;
-    Brain.Screen.printAt( 100, 140, "count %d" , aiVision.objectCount);
+    // Brain.Screen.printAt( 100, 140, "count %d" , aiVision.objectCount);
     for (int i=0; i<aiVision.objectCount; i++){
       if (this->IsGood(aiVision.objects[i])){
-        Brain.Screen.printAt( 10, k, "w %d. h %d. s. %d" , Target_Width, Target_Height, aiVision.objects[i].width * aiVision.objects[i].height);
+        // Brain.Screen.printAt( 10, k, "w %d. h %d. s. %d" , Target_Width, Target_Height, aiVision.objects[i].width * aiVision.objects[i].height);
         k += 20;
         if (aiVision.objects[i].width * aiVision.objects[i].height > size)
           {
@@ -242,8 +242,8 @@ class ChassisControl{
     bool    Moveing         = true;  // 记录是否在运动
     bool    MoveEnd         = true;  // 记录运动是否完成
     int     MoveId          = 0;     // 运动id记录（计数）
-    double  min_move_speed       = 0.825;  // 直行电机的最小速度
-    double  min_turn_speed       = 1.075;  // 自转的最小速度
+    double  min_move_speed       = 0.75;  // 直行电机的最小速度
+    double  min_turn_speed       = 1.175;  // 自转的最小速度
 
     double maxinum_speed_acceleration = 2;
 
