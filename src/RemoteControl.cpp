@@ -212,7 +212,7 @@ void RemoteControl(){
 
         // 红色
         if (OpticalHaveRed() || OpticalHaveBlue()){
-            HaveBall = 5;
+            HaveBall = 50;
         }else{
             HaveBall = 0;
         }
@@ -282,10 +282,10 @@ void RemoteControl(){
         if (Controller.ButtonR1.pressing() ||Controller.ButtonL2.pressing() || Controller.ButtonL1.pressing()){
             if (Controller.ButtonL2.pressing()){
                 if (ErrorBall > 0){
-                    Flywheel.spin(forward, TrackSpeed, rpm);
+                    Flywheel.spin(forward, -1 * TrackSpeed, rpm);
                 }
                 else{
-                    Flywheel.spin(forward, -1 * TrackSpeed, rpm);
+                    Flywheel.spin(forward, TrackSpeed, rpm);
                 }
             }
 
@@ -294,10 +294,10 @@ void RemoteControl(){
                 int now_angle = (int)Flywheel.position(deg);
                 int move_angle = now_angle % 180;
                 if (move_angle < 90){
-                    Flywheel.spinToPosition(now_angle - move_angle, deg, -1000000, dps, false);
+                    Flywheel.spinToPosition(now_angle - move_angle, deg, 1000000, dps, false);
                 }
                 else{
-                    Flywheel.spinToPosition(now_angle - move_angle + 180, deg, 1000000, dps, false);
+                    Flywheel.spinToPosition(now_angle - move_angle + 180, deg, -1000000, dps, false);
                 }
 
                 
