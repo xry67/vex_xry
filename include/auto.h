@@ -30,6 +30,8 @@ void AddAutoFun(){
     AutoFunctions.push_back(AutoFun("距离传感器后", auto7));
     AutoFunctions.push_back(AutoFun("自动转向", auto8));
     AutoFunctions.push_back(AutoFun("auto9", auto9));
+    AutoFunctions.push_back(AutoFun("曲线测试", auto11));
+     AutoFunctions.push_back(AutoFun("教学示例", auto12));
 
 }
 
