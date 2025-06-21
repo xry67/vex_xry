@@ -148,8 +148,8 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
   }
 
   // 底盘前进
-  void ChassisControl::ChassisForward(double v, double yaw = 0){
-      if (abs(yaw) < 0.1){
+  void ChassisControl::ChassisForward(double v, double yaw){
+      if (std::abs(yaw) < 0.001){
         double now_rotation = ChassisInertial.rotation();
 
         double output = this->StraightPid->calculate(now_rotation, 0.01) * -1;  // 补偿
@@ -182,6 +182,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       if (yaw > 0){
           right_yaw = -2.0 * yaw + 1;
       }
+      std::cout << left_yaw << " " << right_yaw << std::endl;
 
 
       LeftMotor1.spin(vex::forward, v * left_yaw, voltageUnits::volt);
@@ -1044,7 +1045,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       PPS pps(0.00900, 0.0, 0.0); // 创建PPS控制器实例 
       pps.setSetpoint(val); // 设置目标位置
 
-      PPS pps_target(0.05, 0.0, 0.0); // 创建PPS控制器实例 
+      PPS pps_target(0.03, 0.0, 0.0); // 创建PPS控制器实例 
       pps_target.setSetpoint(aiVision_w / 2 + (Target.Align * aiVision_w / 2)); // 设置目标位置
 
 

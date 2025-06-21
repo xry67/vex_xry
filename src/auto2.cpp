@@ -4,7 +4,7 @@
 
 void auto2(){
     ChassisControlSTS.Target.SetColor(Red);
-    // ChassisControlSTS.Target.Limit_x = {0, aiVision_w / 2};
+    ChassisControlSTS.Target.Limit_y = {aiVision_h / 2, aiVision_h};
     ChassisControlSTS.FollowTarget(5, 3000, true);
 
     while(ChassisControlSTS.IsMoving()){
@@ -18,7 +18,6 @@ void auto2(){
         wait(10, msec);
     }
     ChassisControlSTS.StopMoving();
-    Brain.Screen.clearScreen();
 
     wait(2000, msec);
 }
