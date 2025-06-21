@@ -229,6 +229,9 @@ void RemoteControl(){
             ErrorBall = 0;
         }
 
+        // L2 最上层出
+        // R1 吸球
+
         if (Controller.ButtonL1.pressing() || Controller.ButtonL2.pressing() || Controller.ButtonR1.pressing() || Controller.ButtonR2.pressing()){
             
             // 吸球1
@@ -242,12 +245,13 @@ void RemoteControl(){
 
                 // 分球
                 if (ErrorBall > 0){
-                    ToolMotor2.spin(forward, -1 * TrackSpeed, rpm);
+                    ToolMotor4.spin(forward, TrackSpeed, rpm);
+                }else{
+                    ToolMotor4.spin(forward, -1 * TrackSpeed, rpm);
                 }
-                else{
-                    ToolMotor2.spin(forward, TrackSpeed, rpm);
-                }
+                
 
+                ToolMotor2.spin(forward, TrackSpeed, rpm);
                 ToolMotor3.spin(forward, TrackSpeed, rpm);
             }
             
@@ -259,18 +263,15 @@ void RemoteControl(){
             }
 
             if (Controller.ButtonL2.pressing()){
-                if (HaveBall > 0){
-                    ToolMotor2.spin(forward, TrackSpeed, rpm);
-                }else{
-                    ToolMotor2.spin(forward, -1 * TrackSpeed, rpm);
-                }
-                
+                ToolMotor2.spin(forward, -1 * TrackSpeed, rpm);
                 ToolMotor3.spin(forward, TrackSpeed, rpm);
+                ToolMotor4.spin(forward, -1 * TrackSpeed, rpm);
             }
         }
         else{
             ToolMotor2.spin(forward, 0, rpm);
             ToolMotor3.spin(forward, 0, rpm);
+            ToolMotor4.spin(forward, 0, rpm);
         }
         ChassisControlFun();
 

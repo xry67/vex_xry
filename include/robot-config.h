@@ -43,9 +43,11 @@ extern motor RightMotor2;//20
 extern motor RightMotor3;//19
 extern motor_group RightMotorGroup;  // 右电机组
 
-extern motor ToolMotor1;  // 上
-extern motor ToolMotor2;  // 中
-extern motor ToolMotor3;  // 下
+extern motor ToolMotor1;  //
+extern motor ToolMotor2;  // 
+extern motor ToolMotor3;  // 
+extern motor ToolMotor4;  // 
+
 extern digital_out digitalA; // 抬升
 extern digital_out digitalB;
 
@@ -70,9 +72,6 @@ extern aivision::colordesc Red;
 extern aivision::colordesc Bule;
 extern aivision::colordesc Orange;
 extern aivision aiVision;
-
-// 颜色传感器
-extern optical Optical;
 
 extern std::vector<AutoFun> AutoFunctions;  // 自动路径储存
 

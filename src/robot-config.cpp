@@ -42,7 +42,8 @@ motor_group RightMotorGroup = motor_group(RightMotor1, RightMotor2, RightMotor3)
 
 motor ToolMotor1    = motor(PORT3, ratio6_1, 1);  // 上  f
 motor ToolMotor2    = motor(PORT2, ratio6_1, 0);  // 中  l
-motor ToolMotor3    = motor(PORT1, ratio6_1, 0);  // 下  r
+motor ToolMotor3    = motor(PORT1, ratio6_1, 1);  // 下  r
+motor ToolMotor4    = motor(PORT4, ratio6_1, 0);  // 
 
 digital_out digitalA = digital_out(Brain.ThreeWirePort.A);  // 抬升
 digital_out digitalB = digital_out(Brain.ThreeWirePort.B);  // 抬升
@@ -67,9 +68,6 @@ distance Distance_bl = distance(PORT21);  // 左后
 distance Distance_br = distance(PORT21);  // 右后
 distance Distance_l  = distance(PORT21);  // 左后
 distance Distance_r  = distance(PORT21);  // 右后
-
-// 颜色传感器
-optical Optical = optical(PORT21);  // 颜色传感器
 
 // 设别列表
 std::vector<char*> MotorNames = {"L1", "L2", "L3", "R1", "R2", "R3"};

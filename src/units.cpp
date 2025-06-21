@@ -90,7 +90,7 @@ bool OpticalHaveRed(){
 // 颜色传感器有一个蓝色物体？
 bool OpticalHaveBlue(){
     double H = Optical.hue();
-    if (Optical.isNearObject() && (H > 200 && H < 270)){
+    if (Optical.isNearObject() && (H > 210 && H < 270)){
         return true;
     }
     return false;
