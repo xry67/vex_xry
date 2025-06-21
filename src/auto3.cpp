@@ -2,6 +2,7 @@
 #include "robot-config.h"
 #include "ChassisControl.h"
 
+// 定位轮测试
 void auto3(){
     // while(true){
     //     ChassisControlSTS.Turn(1000, 180, 'l');

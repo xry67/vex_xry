@@ -2,6 +2,7 @@
 #include "robot-config.h"
 #include "ChassisControl.h"
 
+// 红方高柱
 void auto10(){
     ChassisControlSTS.Over_count = 2;
     double speed = 100;

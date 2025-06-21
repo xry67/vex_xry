@@ -2,6 +2,7 @@
 #include "robot-config.h"
 #include "ChassisControl.h"
 
+// 旋转（定位目标）（柱子）
 void auto8(){
     ChassisControlSTS.Target.SetColor(Orange);
     // ChassisControlSTS.Target.Limit_w = {999, 999};

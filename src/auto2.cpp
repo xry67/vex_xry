@@ -2,6 +2,8 @@
 #include "robot-config.h"
 #include "ChassisControl.h"
 
+
+// 相机测试
 void auto2(){
     ChassisControlSTS.Target.SetColor(Red);
     ChassisControlSTS.Target.Limit_y = {aiVision_h / 2, aiVision_h};
