@@ -92,8 +92,8 @@ void vexcodeInit(void) {
     CheckEquipment();  // 设备检查
     EquipmentMonitor_task = vex::task(EquipmentMonitor);  // 电量监控开启
     ChassisInertialInit();  // 底盘陀螺仪初始化
-    Optical.setLightPower(50, percent);--·-9/*0=8510
-    . */
+    Optical.setLightPower(100, percent);
+
     AddAutoFun();           // 自动函数初始化
 }
 
