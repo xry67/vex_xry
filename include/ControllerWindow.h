@@ -105,6 +105,12 @@ BaseWindow* TestInertialChoiceWindowFun();
 // 距离传感器测试（选择）
 BaseWindow* TestDistanceChoiceWindowFun();   
 
+// 比赛确认选择
+BaseWindow* CompeteConfirmWindowFun();
+
+// 比赛-连接场控
+BaseWindow* CompetitionlWindowFun();
+
 // 电机测试
 BaseWindow* TestMotorWindowFun();        
 

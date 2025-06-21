@@ -4,6 +4,7 @@
 #include "RemoteControl.h"
 #include "units.h"
 #include "ChassisControl.h"
+#include "auto.h"
 
 BaseWindow* InitWindow          = new BaseWindow("初始化", nullptr, InitWindowFun);
 BaseWindow* RemoteControlWindow = new BaseWindow("遥控选择", InitWindow, RemoteControlWindowFun);
@@ -17,6 +18,8 @@ BaseWindow* TestWindow                  = new BaseWindow("测试模式", ModWind
 BaseWindow* AutoChoiceWindow_Compete    = new BaseWindow("比赛-自动选择", RemoteControlWindow_Compete, AutoChoiceWindow_CompeteFun);  //  比赛-自动选择
 BaseWindow* RemoteControlWindow_Auto    = new BaseWindow("自动-遥控选择", AutoWindow, RemoteControlWindow_AutoFun);  // 自动-遥控选择
 
+BaseWindow* CompeteConfirmWindow        = new BaseWindow("比赛-确认选择", AutoChoiceWindow_Compete, CompeteConfirmWindowFun);  //  比赛-确认选择
+BaseWindow* CompeteWindow               = new BaseWindow("比赛-连接场控", CompeteConfirmWindow, CompetitionlWindowFun);  //  比赛连接场控
 BaseWindow* TestMotorChoiceWindow       = new BaseWindow("电机测试 选择", TestWindow, TestMotorChoiceWindowFun);      // 电机测试（选择）
 BaseWindow* TestAirpoweredChoiceWindow  = new BaseWindow("活塞测试 选择", TestWindow, TestAirpoweredChoiceWindowFun);      // 活塞测试（选择）
 BaseWindow* TestInertialWindow          = new BaseWindow("陀螺仪测试", TestWindow, TestInertialWindowFun);  // 陀螺仪测试（选择）
@@ -370,12 +373,16 @@ BaseWindow* AutoChoiceWindow_CompeteFun(){
 
     index = ChoiceIndex(options);  // 获取用户操作
 
+    if (index != -1){
+        auto_index = index;
+    }
+
     if (index == -1){
       return RemoteControlWindow_Mod->Back();
     }
 
     
-    return ModWindow;
+    return CompeteConfirmWindow;
 }     
 
 // 自动-遥控选择
@@ -399,6 +406,50 @@ BaseWindow* RemoteControlWindow_AutoFun(){
     RemoteControl();
 
     return RemoteControlWindow_Auto->Back();;
+}
+
+// 比赛确认选择
+BaseWindow* CompeteConfirmWindowFun(){
+
+    PrintInLine(1);
+    Controller.Screen.print("自动：%s", AutoFunctions[auto_index].name);
+
+    std::vector<char*> options = {"双摇杆", "左单摇杆", "右单摇杆", "坦克操控"};
+    PrintInLine(2);
+    Controller.Screen.print("遥控：%s", options[RemoteControlMod]);
+
+    PrintInLine(3);
+    Controller.Screen.print("      确定(X)   返回(B)");
+
+    while (true){
+        if (Controller.ButtonX.pressing()){
+            return CompeteWindow;
+        }
+        if (Controller.ButtonB.pressing()){
+            return CompeteConfirmWindow->Back();
+        }
+        wait(10, msec);
+    }
+
+
+
+}
+
+// 已经选完了，连接接场控
+BaseWindow* CompetitionlWindowFun(){
+
+    PrintInLine(1);
+    Controller.Screen.print("比赛-已选择完成");
+    PrintInLine(2);
+    Controller.Screen.print("请连接场控");
+    PrintInLine(3);
+    Controller.Screen.print("勇往直前，超越自我");
+
+    Competition.autonomous(AutoControl);           // 自动程序加入
+    Competition.drivercontrol(RemoteControl);   // 遥控程序加入
+    while (true){
+        wait(100, msec);
+    }
 }
 
 // 电机测试（选择）

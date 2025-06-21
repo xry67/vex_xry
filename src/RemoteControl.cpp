@@ -235,7 +235,7 @@ void RemoteControl(){
         ChassisControlFun();
 
         // 退出
-        if (Controller.ButtonB.pressing()){
+        if (auto_index == -1 && Controller.ButtonB.pressing()){
             HoldButtonBCount += 1;
             if (HoldButtonB(HoldButtonBCount, 50)){
                 break;

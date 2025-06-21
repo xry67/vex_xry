@@ -16,6 +16,7 @@ double StraightCorrectionSpeed = 500;  // 执行修正pps最大速度
 double Sensitivity_Turn       = 0.9;  // 转向灵敏度
 double Sensitivity_Straight   = 1;    // 直行灵敏度
 double Sensitivity_Precision  = 0.1;  // 精密遥控比例
+int    auto_index = -1;   // 自动选择
 
 double TrackSpeed   = 300000000;  // 履带速度
 
@@ -29,6 +30,7 @@ std::vector<AutoFun> AutoFunctions;
 //  硬件定义
 brain Brain; 
 controller Controller = controller();
+competition Competition;
 
 motor LeftMotor1 = motor(PORT11, ratio6_1, 0);//11
 motor LeftMotor2 = motor(PORT12, ratio6_1, 1);//12

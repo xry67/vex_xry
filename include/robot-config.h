@@ -22,6 +22,7 @@ extern double StraightCorrectionSpeed;   // 执行修正pps最大速度
 extern double Sensitivity_Turn;           // 转向灵敏度
 extern double Sensitivity_Straight;       // 直行灵敏度
 extern double Sensitivity_Precision;      // 精密遥控比例
+extern int    auto_index;   // 自动选择
 
 extern double TrackSpeed;  // 履带速度
 
@@ -32,6 +33,7 @@ extern double Auto_Turn_To_Target_Speed;
 //  硬件定义
 extern brain Brain;
 extern controller Controller;
+extern competition Competition;
 
 extern motor LeftMotor1;//14
 extern motor LeftMotor2;//15
