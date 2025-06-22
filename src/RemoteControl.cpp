@@ -66,10 +66,10 @@ void ChassisControlFun(){
     float auto_target_yaw = 0.0;  // 智能对齐偏转
 
     // 精准操控模式
-    if (Controller.ButtonDown.pressing()){
-        Sensitivity_2 = Sensitivity_Straight * Sensitivity_Precision;
-        Sensitivity_1 = Sensitivity_Turn     * Sensitivity_Precision;
-    }
+    // if (Controller.ButtonDown.pressing()){
+    //     Sensitivity_2 = Sensitivity_Straight * Sensitivity_Precision;
+    //     Sensitivity_1 = Sensitivity_Turn     * Sensitivity_Precision;
+    // }
 
     //  自动对齐功能
     // if (false){
@@ -236,12 +236,12 @@ void RemoteControl(){
             if (Controller.ButtonL1.pressing()){
                 ToolMotor2.spin(forward, TrackSpeed, voltageUnits::volt);
                 ToolMotor3.spin(forward, -1 * TrackSpeed, voltageUnits::volt);
-                digitalA.set(0);
+                digitalH.set(0);
             }
             if (Controller.ButtonL2.pressing()){
                 ToolMotor2.spin(forward, TrackSpeed, voltageUnits::volt);
                 ToolMotor3.spin(forward, TrackSpeed, voltageUnits::volt);
-                digitalA.set(0);
+                digitalH.set(0);
             }
         }
         else{
@@ -263,13 +263,13 @@ void RemoteControl(){
         
 
         if (Controller.ButtonY.pressing()){
-            digitalB.set(1);
+            digitalG.set(1);
         }
         if (Controller.ButtonB.pressing()){
-            digitalB.set(0);
+            digitalG.set(0);
         }
         if (Controller.ButtonDown.pressing()){
-            digitalA.set(1);
+            digitalH.set(1);
         }
 
         // 底盘控制

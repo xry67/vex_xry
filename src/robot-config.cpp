@@ -47,8 +47,8 @@ motor ToolMotor2    = motor(PORT2, ratio6_1, 0);  // 中  l
 motor ToolMotor3    = motor(PORT3, ratio6_1, 0);  // 下  r
 motor ToolMotor4    = motor(PORT4, ratio6_1, 0);  // 
 
-digital_out digitalA = digital_out(Brain.ThreeWirePort.H);  // 抬升
-digital_out digitalB = digital_out(Brain.ThreeWirePort.G);  // 抬升
+digital_out digitalH = digital_out(Brain.ThreeWirePort.H);  // 抬升
+digital_out digitalG = digital_out(Brain.ThreeWirePort.G);  // 抬升
 
 optical Optical = optical(PORT10);  // 颜色传感器
 

@@ -50,8 +50,8 @@ extern motor ToolMotor2;  //
 extern motor ToolMotor3;  // 
 extern motor ToolMotor4;  // 
 
-extern digital_out digitalA; // 抬升
-extern digital_out digitalB;
+extern digital_out digitalH; // 抬升
+extern digital_out digitalG;
 
 extern inertial ChassisInertial;  // 底盘陀螺仪
 extern smartdrive Smartdrive;  // 官方底盘驱动
