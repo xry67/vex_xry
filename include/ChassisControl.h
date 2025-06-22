@@ -297,4 +297,7 @@ struct MoveToDistanceParams{
 
 extern ChassisControl ChassisControlSTS;  // sts底盘控制
 
+void ToolMotorSpin(double speed1, double speed2, double speed3, double timeout);
+void ToolMotorSpin(double speed1, double speed2, double speed3, double timeout, bool task);
+
 #endif

@@ -229,7 +229,48 @@ void RemoteControl(){
             ErrorBall = 0;
         }
 
+        // R1 R2 -  吸球 吐球
+        // L1 中层 吐
+        // L2 高层 吐
+        if (Controller.ButtonL1.pressing() || Controller.ButtonL2.pressing()){
+            if (Controller.ButtonL1.pressing()){
+                ToolMotor2.spin(forward, TrackSpeed, voltageUnits::volt);
+                ToolMotor3.spin(forward, -1 * TrackSpeed, voltageUnits::volt);
+                digitalA.set(0);
+            }
+            if (Controller.ButtonL2.pressing()){
+                ToolMotor2.spin(forward, TrackSpeed, voltageUnits::volt);
+                ToolMotor3.spin(forward, TrackSpeed, voltageUnits::volt);
+                digitalA.set(0);
+            }
+        }
+        else{
+            ToolMotor2.spin(forward, 0, voltageUnits::volt);
+            ToolMotor3.spin(forward, 0, voltageUnits::volt);
+        }
+
+        if (Controller.ButtonR1.pressing() || Controller.ButtonR2.pressing()){
+            if (Controller.ButtonR1.pressing()){
+                ToolMotor1.spin(forward, -1 * TrackSpeed, voltageUnits::volt);
+            }
+            if (Controller.ButtonR2.pressing()){
+                ToolMotor1.spin(forward, TrackSpeed, voltageUnits::volt);
+            }
+        }
+        else{
+            ToolMotor1.spin(forward, 0, voltageUnits::volt);
+        }
         
+
+        if (Controller.ButtonY.pressing()){
+            digitalB.set(1);
+        }
+        if (Controller.ButtonB.pressing()){
+            digitalB.set(0);
+        }
+        if (Controller.ButtonDown.pressing()){
+            digitalA.set(1);
+        }
 
         // 底盘控制
         ChassisControlFun();

@@ -1422,3 +1422,45 @@ int MoveToDistancetTask(void* args){
     // delete args;
     return 0;
 }
+
+// 工作电机相关参数
+double ChassisControl_speed1  = 0;
+double ChassisControl_speed2  = 0;
+double ChassisControl_speed3  = 0;
+double ChassisControl_timeout = 0;
+
+int ToolMotorSpinTaskFun(){
+  ToolMotor1.spin(forward, ChassisControl_speed1, voltageUnits::volt);
+  ToolMotor2.spin(forward, ChassisControl_speed2, voltageUnits::volt);
+  ToolMotor3.spin(forward, ChassisControl_speed3, voltageUnits::volt);
+  wait(ChassisControl_timeout, msec);
+  ToolMotor1.spin(forward, 0, voltageUnits::volt);
+  ToolMotor2.spin(forward, 0, voltageUnits::volt);
+  ToolMotor3.spin(forward, 0, voltageUnits::volt);
+  return 0;
+}
+
+void ToolMotorSpin(double speed1, double speed2, double speed3, double timeout){
+  ToolMotor1.spin(forward, speed1, voltageUnits::volt);
+  ToolMotor2.spin(forward, speed2, voltageUnits::volt);
+  ToolMotor3.spin(forward, speed3, voltageUnits::volt);
+  wait(timeout, msec);
+  ToolMotor1.spin(forward, 0, voltageUnits::volt);
+  ToolMotor2.spin(forward, 0, voltageUnits::volt);
+  ToolMotor3.spin(forward, 0, voltageUnits::volt);
+}
+
+// 工作电机旋转设置
+vex::task ToolMotorSpinTask;
+void ToolMotorSpin(double speed1, double speed2, double speed3, double timeout, bool task){
+  
+  if (task){
+    ChassisControl_speed1  = speed1;
+    ChassisControl_speed2  = speed2;
+    ChassisControl_speed3  = speed3;
+    ChassisControl_timeout = timeout;
+    ToolMotorSpinTask = vex::task(ToolMotorSpinTaskFun);  // 电量监控开启
+  }else{
+    ToolMotorSpin(speed1, speed2, speed3, timeout);
+  }
+}

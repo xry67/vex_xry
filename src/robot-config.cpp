@@ -18,7 +18,7 @@ double Sensitivity_Straight   = 1;    // 直行灵敏度
 double Sensitivity_Precision  = 0.1;  // 精密遥控比例
 int    auto_index = -1;   // 自动选择
 
-double TrackSpeed   = 300000000;  // 履带速度
+double TrackSpeed   = 18;  // 履带速度
 
 // 遥控期间自动追踪的灵敏度
 double Auto_Turn_To_Target_Speed = 50;
@@ -32,23 +32,23 @@ brain Brain;
 controller Controller = controller();
 competition Competition;
 
-motor LeftMotor1 = motor(PORT11, ratio6_1, 0);//11
+motor LeftMotor1 = motor(PORT11, ratio6_1, 1);//11
 motor LeftMotor2 = motor(PORT12, ratio6_1, 1);//12
-motor LeftMotor3 = motor(PORT15, ratio6_1, 1);//13
+motor LeftMotor3 = motor(PORT13, ratio6_1, 1);//13
 motor_group LeftMotorGroup = motor_group(LeftMotor1, LeftMotor2, LeftMotor3);  // 左边电机组
  
-motor RightMotor1 = motor(PORT16, ratio6_1, 1);//18
-motor RightMotor2 = motor(PORT17, ratio6_1, 0);//20
-motor RightMotor3 = motor(PORT18, ratio6_1, 0);//19
+motor RightMotor1 = motor(PORT14, ratio6_1, 0);//18
+motor RightMotor2 = motor(PORT15, ratio6_1, 0);//20
+motor RightMotor3 = motor(PORT16, ratio6_1, 0);//19
 motor_group RightMotorGroup = motor_group(RightMotor1, RightMotor2, RightMotor3);  // 右边边电机组
 
-motor ToolMotor1    = motor(PORT3, ratio6_1, 1);  // 上  f
+motor ToolMotor1    = motor(PORT1, ratio6_1, 0);  // 上  f
 motor ToolMotor2    = motor(PORT2, ratio6_1, 0);  // 中  l
-motor ToolMotor3    = motor(PORT1, ratio6_1, 1);  // 下  r
+motor ToolMotor3    = motor(PORT3, ratio6_1, 0);  // 下  r
 motor ToolMotor4    = motor(PORT4, ratio6_1, 0);  // 
 
-digital_out digitalA = digital_out(Brain.ThreeWirePort.A);  // 抬升
-digital_out digitalB = digital_out(Brain.ThreeWirePort.B);  // 抬升
+digital_out digitalA = digital_out(Brain.ThreeWirePort.H);  // 抬升
+digital_out digitalB = digital_out(Brain.ThreeWirePort.G);  // 抬升
 
 optical Optical = optical(PORT10);  // 颜色传感器
 
@@ -72,9 +72,9 @@ distance Distance_l  = distance(PORT21);  // 左后
 distance Distance_r  = distance(PORT21);  // 右后
 
 // 设别列表
-std::vector<char*> MotorNames = {"L1", "L2", "L3", "R1", "R2", "R3"};
+std::vector<char*> MotorNames = {"L1", "L2", "L3", "R1", "R2", "R3", "T1", "T2", "T3"};
 std::vector<motor> Motors = {LeftMotor1, LeftMotor2, LeftMotor3, 
-                                RightMotor1, RightMotor2, RightMotor3};
+                                RightMotor1, RightMotor2, RightMotor3, ToolMotor1, ToolMotor2, ToolMotor3};
 
 std::vector<char*> DistanceNames = {"Fl", "Fr", "Bl", "Nr", "L", "R"};
 std::vector<distance> Distances = {Distance_fl, Distance_fr, Distance_bl, 
