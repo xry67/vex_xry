@@ -98,7 +98,7 @@ class DrawMotor{
             return;
         }
 
-        if (std::abs(last_temperature - temperature) < 5){
+        if (std::abs(last_temperature - temperature) < 2){
             return ;
         }
         else{

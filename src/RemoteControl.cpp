@@ -5,7 +5,8 @@
 #include "units.h"
 
 AiTarget ai_target =  AiTarget();
-
+// 移动气动检测
+int MoveCount = 0;
 
 // 左电机控制
 void LeftMotorControl(int val){
@@ -71,36 +72,23 @@ void ChassisControlFun(){
     //     Sensitivity_1 = Sensitivity_Turn     * Sensitivity_Precision;
     // }
 
-    //  自动对齐功能
-    // if (false){
-    //     if (ai_target.SetTarget()){
-    //         auto_target_yaw = (ai_target.Target_CenterX - aiVision_w / 2) * 0.2;
-    //         ai_target.Target_CenterX = -1;
-    //     }
-
-    //     if (auto_target_yaw > Auto_Turn_To_Target_Speed){
-    //         auto_target_yaw = Auto_Turn_To_Target_Speed;
-    //     }
-    //     if (auto_target_yaw < Auto_Turn_To_Target_Speed * -1){
-    //         auto_target_yaw = Auto_Turn_To_Target_Speed * -1;
-    //     }
-    // }
-
-    // 自动对齐判断
-    // if (abs(axis1) < blindCA && abs(axis2) < blindCA && abs(axis3) < blindCA && abs(axis4) < blindCA){
-    //     LeftMotorControl(auto_target_yaw);
-    //     RightMotorControl(-1 * auto_target_yaw);
-    //     return ;
-    // }
+    int Move_Threshold = 30;
 
     //  1：双 2：左 3：右 4：坦克
     if (RemoteControlMod == 2){
         if (abs(axis3) > blindCA || abs(axis4) > blindCA ){
             LeftMotorControl(axis3 * Sensitivity_1 + axis4 * Sensitivity_2 + auto_target_yaw);
             RightMotorControl(axis3 * Sensitivity_1 - axis4 * Sensitivity_2 - auto_target_yaw);
+
+            if (abs(axis3) >= Move_Threshold || abs(axis4) >= Move_Threshold){
+                MoveCount += 1;
+            }else{
+                MoveCount -= 1;
+            }
         }
         else{
             BaseMotorStop(0);
+            MoveCount = 0;
         }
 
     }
@@ -109,9 +97,16 @@ void ChassisControlFun(){
         if (abs(axis2) > blindCA || abs(axis1) > blindCA ){
             LeftMotorControl(axis2 * Sensitivity_1 + axis1 * Sensitivity_2 + auto_target_yaw);
             RightMotorControl(axis2 * Sensitivity_1 - axis1 * Sensitivity_2 - auto_target_yaw);
+
+            if (abs(axis2) >= Move_Threshold || abs(axis1) >= Move_Threshold){
+                MoveCount += 1;
+            }else{
+                MoveCount -= 1;
+            }
         }
         else{
             BaseMotorStop(0);
+            MoveCount = 0;
         }
     }
 
@@ -120,9 +115,16 @@ void ChassisControlFun(){
         if (abs(axis3) > blindCA || abs(axis1) > blindCA ){
             LeftMotorControl(axis3 * Sensitivity_1 + axis1 * Sensitivity_2 + auto_target_yaw);
             RightMotorControl(axis3 * Sensitivity_1 - axis1 * Sensitivity_2 - auto_target_yaw);
+
+            if (abs(axis3) >= Move_Threshold || abs(axis1) >= Move_Threshold){
+                MoveCount += 1;
+            }else{
+                MoveCount -= 1;
+            }
         }
         else{
             BaseMotorStop(0);
+            MoveCount = 0;
         }
     }
 
@@ -130,11 +132,22 @@ void ChassisControlFun(){
         if (abs(axis3) > blindCA || abs(axis2) > blindCA ){
             LeftMotorControl(axis3 * Sensitivity_1 + auto_target_yaw);
             RightMotorControl(axis2 * Sensitivity_1 - auto_target_yaw);
+
+            if (abs(axis3) >= Move_Threshold || abs(axis2) >= Move_Threshold){
+                MoveCount += 1;
+            }else{
+                MoveCount -= 1;
+            }
         }
         else{
             BaseMotorStop(0);
+            MoveCount = 0;
         }
 
+    }
+
+    if (MoveCount > 100){
+        digitalH.set(1);
     }
 }
 
@@ -205,6 +218,7 @@ void RemoteControl(){
     int HaveBall = 0; 
     // 分球暂停计数器
     int ErrorBall = 0;
+
     // 退出计数
     int HoldButtonBCount = 0;
 
@@ -230,15 +244,15 @@ void RemoteControl(){
         }
 
         // R1 R2 -  吸球 吐球
-        // L1 中层 吐
-        // L2 高层 吐
+        // L1 高层 吐
+        // L2 中层 吐
         if (Controller.ButtonL1.pressing() || Controller.ButtonL2.pressing()){
-            if (Controller.ButtonL1.pressing()){
+            if (Controller.ButtonL2.pressing()){
                 ToolMotor2.spin(forward, TrackSpeed, voltageUnits::volt);
                 ToolMotor3.spin(forward, -1 * TrackSpeed, voltageUnits::volt);
                 digitalH.set(0);
             }
-            if (Controller.ButtonL2.pressing()){
+            if (Controller.ButtonL1.pressing()){
                 ToolMotor2.spin(forward, TrackSpeed, voltageUnits::volt);
                 ToolMotor3.spin(forward, TrackSpeed, voltageUnits::volt);
                 digitalH.set(0);
