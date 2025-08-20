@@ -78,10 +78,20 @@ double NormsAngle(double val){
   return val - ((int)val / 360) * 360;
 }
 
+// 将角度规范到0到360
+double NormsAngle_0_360(double val){
+    val   = NormsAngle(val);
+
+    if (val < 0){
+      val = 360 + val;
+    }
+    return val;
+}
+
 // 颜色传感器有一个红色物体？
 bool OpticalHaveRed(){
     double H = Optical.hue();
-    if (Optical.isNearObject() && ((H > 0 && H < 30)|| (H > 300 && H < 360))){
+    if (Optical.isNearObject() && ((H > 0 && H < 70)|| (H > 300 && H < 360))){
         return true;
     }
     return false;
@@ -90,11 +100,35 @@ bool OpticalHaveRed(){
 // 颜色传感器有一个蓝色物体？
 bool OpticalHaveBlue(){
     double H = Optical.hue();
-    if (Optical.isNearObject() && (H > 210 && H < 270)){
+    if (Optical.isNearObject() && (H > 200 && H < 270)){
         return true;
     }
     return false;
 }
+
+// 向量转换为角度
+double calculateAngle(int x, int y) {
+    // 计算弧度
+    double radians = atan2(x, y);
+    // 转换为度数
+    double degrees = radians * (180.0 / M_PI);
+    return degrees;
+}
+
+// 计算角度差值的函数
+double angleDifference(double current_angle, double target_angle) {
+    double difference = fmod(target_angle - current_angle + 180, 360) - 180;
+
+    // 根据差值的方向调整正负
+    if (difference > 0) {
+        // 如果差值为正，表示向右旋转
+        return difference; // 保持正数
+    } else {
+        // 如果差值为负，表示向左旋转
+        return difference; // 保持负数
+    }
+}
+
 
 // 将数字规范到这个区间
 double NumInterval(double num, double mininum, double maxinum){
@@ -114,4 +148,15 @@ double NumInterval(double num, double mininum, double maxinum){
             return std::min(maxinum, num);
         }
     }
+}
+
+// 三个数字的中值
+double medianOfThree(double a, double b, double c) {
+    // 将三个数放入数组中
+    double arr[] = {a, b, c};
+    // 对数组进行排序
+    std::sort(arr, arr + 3);
+    // 返回中间值
+    double ans = arr[1];
+    return ans;
 }

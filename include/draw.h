@@ -97,8 +97,8 @@ class DrawMotor{
             Brain.Screen.drawRectangle(x, y, w, h, Color);
             return;
         }
-
-        if (std::abs(last_temperature - temperature) < 2){
+        // 每几度替换一下
+        if (std::abs(last_temperature - temperature) < 5){
             return ;
         }
         else{
@@ -116,7 +116,7 @@ class DrawMotor{
             return 120;
         }
 
-        return -4 * temperature + 240;
+        return -2 * temperature * temperature / 15 + 8 * temperature;
     }
     
 
@@ -230,7 +230,7 @@ class DrawEquipmentMonitor
         ToolM1.Draw(ToolMotor1.temperature(celsius));
         ToolM2.Draw(ToolMotor2.temperature(celsius));
         ToolM3.Draw(ToolMotor3.temperature(celsius));
-        std::cout << ToolMotor1.temperature(celsius) << " " << ToolMotor2.temperature(celsius) << " " << ToolMotor3.temperature(celsius) << std::endl;
+        // std::cout << ToolMotor1.temperature(celsius) << " " << ToolMotor2.temperature(celsius) << " " << ToolMotor3.temperature(celsius) << std::endl;
 
     }
 

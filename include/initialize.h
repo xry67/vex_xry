@@ -5,29 +5,30 @@
 #include "robot-config.h"
 #include "units.h"
 #include "auto.h"
+#include "ChassisRemoteControl.h"
 #include "Positioning.h"
 #include "draw.h"
 
 // 陀螺仪初始化
 void ChassisInertialInit(){
-    ChassisInertial.calibrate(5);  // 陀螺仪校准
+    ChassisInertial.calibrate();  // 陀螺仪校准
 
-    Controller.Screen.clearScreen();  // 清除屏幕
+    // Controller.Screen.clearScreen();  // 清除屏幕
 
-    WaitStr wait_str = WaitStr();
+    // WaitStr wait_str = WaitStr();
   
-    while(ChassisInertial.isCalibrating()){
-        wait(500, msec);
+    // while(ChassisInertial.isCalibrating()){
+    //     wait(500, msec);
 
-        PrintInLine(2);
-        char formattedString[50]; // 创建字符数组来存储格式化字符串  
-        // 使用 snprintf 生成格式化字符串  
-        snprintf(formattedString, 50, "-> 初始化中 %s <-", wait_str.GetNextStr()); 
-        // 使字符串居中
-        CenterStr(formattedString);
+    //     PrintInLine(2);
+    //     char formattedString[50]; // 创建字符数组来存储格式化字符串  
+    //     // 使用 snprintf 生成格式化字符串  
+    //     snprintf(formattedString, 50, "-> 初始化中 %s <-", wait_str.GetNextStr()); 
+    //     // 使字符串居中
+    //     CenterStr(formattedString);
 
-        Controller.Screen.print(formattedString);
-    }
+    //     Controller.Screen.print(formattedString);
+    // }
 }
 
 // 设备监控
@@ -93,8 +94,10 @@ void vexcodeInit(void) {
     EquipmentMonitor_task = vex::task(EquipmentMonitor);  // 电量监控开启
     ChassisInertialInit();  // 底盘陀螺仪初始化
     Optical.setLightPower(100, percent);
+    digitalH.set(1);
 
     AddAutoFun();           // 自动函数初始化
+    AddRomoteFun();         // 遥控函数初始化
 }
 
 #endif 

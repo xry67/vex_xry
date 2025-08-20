@@ -6,12 +6,12 @@
 #include "vex.h"
 #include "AutoFun.h"
 #include "PPS.h"
+#include "ChassisRemoteControl.h"
+#include <map>
 
 using namespace vex;
 
 extern int ControllerScreenWidth;  // 屏幕宽度
-extern int RemoteControlMod;       // 遥控模式
-extern bool RemoteControlModLock;  // ture: 不再选择遥控模式，以RemoteControlMod初始值为准，false:需要选择
 extern int PowerLimit;             // 电量低警示
 extern double blindCA;             // 摇杆死区
 extern char stance;                // 站位选择
@@ -45,11 +45,18 @@ extern motor RightMotor2;//20
 extern motor RightMotor3;//19
 extern motor_group RightMotorGroup;  // 右电机组
 
+extern smartdrive Smartdrive;
+
 extern motor ToolMotor1;  //
 extern motor ToolMotor2;  // 
 extern motor ToolMotor3;  // 
 extern motor ToolMotor4;  // 
 
+extern digital_out digitalB;
+extern digital_out digitalC;
+extern digital_out digitalD;
+extern digital_out digitalE; // 抬升
+extern digital_out digitalF;
 extern digital_out digitalH; // 抬升
 extern digital_out digitalG;
 
@@ -70,17 +77,27 @@ extern distance Distance_l;  // 左
 extern distance Distance_r;  // 右
 
 // 视觉传感器
-extern aivision::colordesc Red;
-extern aivision::colordesc Bule;
-extern aivision::colordesc Orange;
-extern aivision aiVision;
+// extern aivision::colordesc Red;
+// extern aivision::colordesc Bule;
+// extern aivision::colordesc Orange;
+// extern aivision aiVision;
 
 extern std::vector<AutoFun> AutoFunctions;  // 自动路径储存
+extern std::vector<ChassisRomoteControlParams> ChassisRomoteControlList;  // 遥控列表
+extern ChassisRomoteControl ChassisRomoteControlSTS;                      // 遥控控制
+
 
 extern std::vector<char*> MotorNames;
 extern std::vector<motor> Motors;
 
 extern std::vector<char*> DistanceNames;
 extern std::vector<distance> Distances;
+
+// 记忆模式相关
+extern std::string FileName;
+
+// 自动校准陀螺仪飘值是否成功
+extern bool InertialIsReallyGood;
+
 
 #endif

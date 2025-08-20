@@ -4,7 +4,16 @@
 #include "vex.h"
 
 // 指定电机旋转到指定位置
-void MotorSpinFor(motor Motor, double v, double val, bool task);
+void MotorSpinFor(vex::motor Motor, double v, double val, bool task);
+
+// 将所有装置恢复到默认状态（马达停转）
+void RestoreInitial();
+
+// 等待陀螺仪校准完成
+void WaitInertialCalibrating();
+
+// 检测是否飘值
+bool CheckInertialCalibrationFailed(double time, double max_error);
 
 #endif
 

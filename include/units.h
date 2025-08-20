@@ -32,6 +32,9 @@ void PrintAt(int line, char* str, double num);
 // 将角度规范到-180到180
 double NormsAngle(double val);
 
+// 将角度规范到0到360
+double NormsAngle_0_360(double val);
+
 // 等待转圈的字符
 class WaitStr
 {
@@ -53,7 +56,15 @@ bool OpticalHaveRed();
 // 颜色传感器有一个蓝色物体？
 bool OpticalHaveBlue();
 
+// 方向向量转换为角度
+double calculateAngle(int x, int y);
+
+double angleDifference(double current_angle, double target_angle);
+
 // 将数字规范到这个区间
 double NumInterval(double num, double mininum, double maxinum);
+
+// 三个数字的中值
+double medianOfThree(double a, double b, double c);
 
 #endif

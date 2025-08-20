@@ -17,6 +17,13 @@ void auto9();
 void auto10();
 void auto11();
 void auto12();
+void auto13();
+void auto14();
+void auto15();
+void auto16();
+void auto17();
+void auto18();
+
 
 // 自动函数增加
 void AddAutoFun();

@@ -1,13 +1,14 @@
 #include "vex.h"
 #include "robot-config.h"
 #include "ChassisControl.h"
+#include "ToolControl.h"
 
-// 距离传感器测试（后）
 void auto7(){
-    for (int l=1500; l>100; l-=500){
-        ChassisControlSTS.MoveToDistance(7, l, "back");
-        ChassisControlSTS.MoveToDistance(7, 1500, "back");
+    // ChassisControlSTS.Turn(10, 10, 'r');
+
+    for (int i : {5, 10, 20, 45, 90, 120, 180}){
+        ChassisControlSTS.Turn_PPS = {0.02, 0.4, 6};
+        ChassisControlSTS.Turn(10, i, 'r');
+        wait(1000, msec);
     }
-    ChassisControlSTS.MoveToDistance(7, 200, "back");
-    ChassisControlSTS.MoveToDistance(7, 1500, "back");
 }

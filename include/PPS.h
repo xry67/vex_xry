@@ -41,23 +41,19 @@ public:
 
     double calculate(double measured, double dt) {  
         double error = setpoint - measured;  
-        integral += error * dt;  
-        double derivative = (error - prev_error) / dt;  
         
         double output = kp1 * error;  
 
         // 分段pps测试
         double k = kp2;
         double Completeness = 1 - std::abs(measured - setpoint) / std::abs(setpoint);  // 完成度
-        if (std::abs(measured - setpoint) < 3){
-            output = output;
-        }
-        else if (Completeness < k && k >= 0.001){
+        // if (std::abs(measured - setpoint) < 30){
+        //     output = output;
+        // }
+        if (Completeness < k && k >= 0.001){
             output *= ks * (1 - Completeness );
         }
 
-        // std::cout << "PPS: " << error << " " << integral << " " << derivative << std::endl;
-        prev_error = error;  
         return output;  
     }  
 

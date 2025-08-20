@@ -47,8 +47,9 @@ extern BaseWindow* ModWindow;  //  模式选择窗口
 
 extern BaseWindow* RemoteControlWindow_Mod;      //  模式-遥控
 extern BaseWindow* RemoteControlWindow_Compete;  //  比赛-遥控模式
-extern BaseWindow* AutoWindow;  //  自动测试模式
-extern BaseWindow* TestWindow;  //  测试模式
+extern BaseWindow* AutoWindow;   //  自动测试模式
+extern BaseWindow* TestWindow;   //  测试模式
+extern BaseWindow* MemoryWindow; //  记忆模式
 
 extern BaseWindow* AutoChoiceWindow_Compete;     //  比赛-自动选择
 extern BaseWindow* RemoteControlWindow_Auto;  // 自动-遥控选择
@@ -85,6 +86,9 @@ BaseWindow* AutoWindowFun();
 
 //  测试模式
 BaseWindow* TestWindowFun();
+
+// 记忆模式
+BaseWindow* MemoryWindowFun();
 
 //  比赛-自动选择
 BaseWindow* AutoChoiceWindow_CompeteFun();     
