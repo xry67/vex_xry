@@ -162,11 +162,11 @@ class DrawColor
 
     void Updata(){
         int now_color = 0;
-        if (OpticalHaveRed()){
+        if (OpticalHaveRed(Optical1)){
             Color.rgb(255, 0, 0);
             now_color = 1;
         }
-        else if(OpticalHaveBlue()){
+        else if(OpticalHaveBlue(Optical1)){
             Color.rgb(0, 0, 255);
             now_color = 2;
         }

@@ -51,10 +51,10 @@ class WaitStr
 };
 
 // 颜色传感器有一个红色物体？
-bool OpticalHaveRed();
+bool OpticalHaveRed(vex::optical Optical);
 
 // 颜色传感器有一个蓝色物体？
-bool OpticalHaveBlue();
+bool OpticalHaveBlue(vex::optical Optical);
 
 // 方向向量转换为角度
 double calculateAngle(int x, int y);

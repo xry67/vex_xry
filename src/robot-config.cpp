@@ -52,13 +52,15 @@ motor ToolMotor4    = motor(PORT4, ratio6_1, 0);  //
 
 digital_out digitalB = digital_out(Brain.ThreeWirePort.B);
 digital_out digitalC = digital_out(Brain.ThreeWirePort.C);
-digital_out digitalD = digital_out(Brain.ThreeWirePort.D);  // 
-digital_out digitalE = digital_out(Brain.ThreeWirePort.E);  // 钩子
-digital_out digitalF = digital_out(Brain.ThreeWirePort.F);  // 推球
-digital_out digitalG = digital_out(Brain.ThreeWirePort.G);  // 铲子
+digital_out digitalD = digital_out(Brain.ThreeWirePort.D); // 
+digital_out digitalE = digital_out(Brain.ThreeWirePort.E); // 
+digital_out digitalF = digital_out(Brain.ThreeWirePort.F);
 digital_out digitalH = digital_out(Brain.ThreeWirePort.H);  // 抬升
+digital_out digitalG = digital_out(Brain.ThreeWirePort.G);  // 抬升
 
-optical Optical = optical(PORT10);  // 颜色传感器
+
+optical Optical1 = optical(PORT10);  // 颜色传感器
+optical Optical2 = optical(PORT9);  // 颜色传感器
 
 inertial ChassisInertial = inertial(PORT17);  // 底盘陀螺仪
 

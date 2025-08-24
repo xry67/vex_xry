@@ -89,7 +89,7 @@ double NormsAngle_0_360(double val){
 }
 
 // 颜色传感器有一个红色物体？
-bool OpticalHaveRed(){
+bool OpticalHaveRed(vex::optical Optical){
     double H = Optical.hue();
     if (Optical.isNearObject() && ((H > 0 && H < 70)|| (H > 300 && H < 360))){
         return true;
@@ -98,7 +98,7 @@ bool OpticalHaveRed(){
 }
 
 // 颜色传感器有一个蓝色物体？
-bool OpticalHaveBlue(){
+bool OpticalHaveBlue(vex::optical Optical){
     double H = Optical.hue();
     if (Optical.isNearObject() && (H > 200 && H < 270)){
         return true;

@@ -27,6 +27,8 @@ void RestoreInitial(){
     ToolMotor4.spin(vex::forward, 0, voltageUnits::volt);
 }
 
+
+
 // 等待陀螺仪校准完成
 void WaitInertialCalibrating(){
     if (InertialIsReallyGood){
@@ -37,8 +39,8 @@ void WaitInertialCalibrating(){
 
     WaitStr wait_str = WaitStr();
   
-    while(ChassisInertial.isCalibrating()){
-        wait(500, msec);
+    while(! InertialIsReallyGood){
+        
 
         PrintInLine(2);
         char formattedString[50]; // 创建字符数组来存储格式化字符串  
@@ -48,17 +50,33 @@ void WaitInertialCalibrating(){
         CenterStr(formattedString);
 
         Controller.Screen.print(formattedString);
+
+        wait(100, msec);
+    }
+
+}
+
+// 保证陀螺仪矫正完成
+int InertialCalibrating(){
+    if (InertialIsReallyGood){
+      return 0 ;
+    }
+
+    WaitStr wait_str = WaitStr();
+  
+    while(ChassisInertial.isCalibrating()){
+        wait(10, msec);
     }
 
     // 校准失败则重新校准
     if (CheckInertialCalibrationFailed(1000, 0.1)){
         Controller.rumble(".");
         ChassisInertial.calibrate();  // 陀螺仪校准
-        WaitInertialCalibrating();
+        InertialCalibrating();
     }
 
     InertialIsReallyGood = true;
-
+    return 0;
 }
 
 // 检测是否飘值
@@ -79,15 +97,6 @@ bool CheckInertialCalibrationFailed(double time, double max_error){
         total_error += std::abs(last_angle - now_angle);
         last_angle = now_angle;
         // std::cout << total_error << std::endl;
-
-        PrintInLine(2);
-        char formattedString[50]; // 创建字符数组来存储格式化字符串  
-        // 使用 snprintf 生成格式化字符串  
-        snprintf(formattedString, 50, "-> 初始化中 %s <-", wait_str.GetNextStr()); 
-        // 使字符串居中
-        CenterStr(formattedString);
-
-        Controller.Screen.print(formattedString);
         wait(10, msec);
     }
 

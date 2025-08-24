@@ -12,6 +12,9 @@ void RestoreInitial();
 // 等待陀螺仪校准完成
 void WaitInertialCalibrating();
 
+// 保证陀螺仪矫正完成
+int InertialCalibrating();
+
 // 检测是否飘值
 bool CheckInertialCalibrationFailed(double time, double max_error);
 

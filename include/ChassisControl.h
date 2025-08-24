@@ -296,8 +296,8 @@ class ChassisControl{
     int ChassisSpeedConfig = 0;    // 底盘速度
 
     double  Move_time_out   = 3000;  // 超时保护，默认3000毫秒
-    double  Stuck_time_out  = 300000;   // 电机卡死保护，默认1000毫秒
-    double  Stuck_threshold = 10;   // 电机卡死认定阈值，单位dps
+    double  Stuck_time_out  = 300;   // 电机卡死保护，默认1000毫秒
+    double  Stuck_threshold = 10;    // 电机卡死认定阈值，单位dps
     double  Move_max_speed  = 0.0;   // 直行最大速度
     int     Over_count      = 10;    // 到位计数当前次数后，才会退出
     bool    Moveing         = true;  // 记录是否在运动
