@@ -154,10 +154,31 @@ void ChassisHumanMachineRomoteControl(){
     }
 }
 
+// 双摇杆/ 转向特调
+void ChassisBothHandsRomoteControl_Turn(){
+    int axis1 = ControlData.axis1;
+    int axis3 = ControlData.axis3;
+    
+
+    // double temp_Sensitivity_Straight = Sensitivity_Straight * std::abs(axis1 / 100.0);
+    double temp_Sensitivity_Turn = Sensitivity_Turn + std::abs((double)axis3 / 100.0) * 0.6;
+
+
+    // 死区判定
+    if (abs(axis3) > blindCA || abs(axis1) > blindCA ){
+        LeftMotorControl(axis3 * Sensitivity_Straight + axis1 * temp_Sensitivity_Turn);
+        RightMotorControl(axis3 * Sensitivity_Straight - axis1 * temp_Sensitivity_Turn);
+    }
+    else{
+        BaseMotorStop(0);
+    }
+}
+
 void AddRomoteFun(){
     ChassisRomoteControlList.push_back(ChassisRomoteControlParams("双摇杆", ChassisBothHandsRomoteControl));    // 双摇杆加入
     // ChassisRomoteControlList.push_back(ChassisRomoteControlParams("左单摇杆", ChassisLeftHandsRomoteControl));  // 左单摇杆
     // ChassisRomoteControlList.push_back(ChassisRomoteControlParams("右单摇杆", ChassisRightHandsRomoteControl));  // 右单摇杆
     // ChassisRomoteControlList.push_back(ChassisRomoteControlParams("坦克遥控", ChassisTankRomoteControl));  // 坦克遥控
     // ChassisRomoteControlList.push_back(ChassisRomoteControlParams("人机遥控", ChassisHumanMachineRomoteControl));  // 坦克遥控
+     ChassisRomoteControlList.push_back(ChassisRomoteControlParams("双-转向", ChassisBothHandsRomoteControl_Turn));  // 双-转向
 }

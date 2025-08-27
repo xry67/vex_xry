@@ -98,7 +98,9 @@ BaseWindow* InitWindowFun(){
     PrintInLine(1);
     Controller.Screen.print("选择你的站位");
     PrintInLine(2);
-    Controller.Screen.print("     蓝方(L1) 红方(R1)");
+    Controller.Screen.print("      蓝方(L1+L2)   ");
+    PrintInLine(3);
+    Controller.Screen.print("      红方(R1+R2)   ");
 
     while (true){
         // 选项确认 
