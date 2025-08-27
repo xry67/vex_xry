@@ -27,13 +27,13 @@ bool HoldButtonB(int count, int limit = 100){
 
 // 切换站位
 bool ChangeStance(){
-    if (ControlData.ButtonR1 && ControlData.ButtonR2){
+    if (ControlData.ButtonR1 && ControlData.ButtonR2 && (ControlData.axis1 + ControlData.axis2 + ControlData.axis3 + ControlData.axis4) < 20){
         stance = 'r';
         PrintInLine(1);
         Controller.Screen.print("遥控模式-Red  ");
         Controller.rumble(".");
     }
-    if (ControlData.ButtonL2 && ControlData.ButtonL2){
+    if (ControlData.ButtonL2 && ControlData.ButtonL2 && (ControlData.axis1 + ControlData.axis2 + ControlData.axis3 + ControlData.axis4) < 20){
         stance = 'b';
         PrintInLine(1);
         Controller.Screen.print("遥控模式-Blue");
@@ -47,9 +47,43 @@ bool ChangeStance(){
 int RemoteControl_3_child(){
     bool LastRight = false;
     while(true){
+        if (ControlData.ButtonDown){
+            digitalF.set(1);
+            digitalH.set(0);
+
+            // 收限位
+            if (! digitalC.value()){
+                digitalC.set(1);
+                digitalD.set(1);
+                wait(300, msec);
+            }
+
+            // 倒
+            digitalE.set(0);
+            wait(700, msec);
+
+            // 放钩子
+            digitalC.set(0);
+            digitalD.set(0);
+        }
+
+
+       if (ControlData.ButtonL1 || ControlData.ButtonL2){
+            if (! digitalC.value()){
+                digitalC.set(1);
+                digitalD.set(1);
+                wait(300, msec);
+            }
+            digitalE.set(1);
+            wait(200, msec);
+            digitalH.set(1);
+            digitalF.set(0);
+       }
+
+
         if (ControlData.ButtonRight && ! LastRight){
             digitalC.set(digitalC.value() ^ 1);
-            wait(500, msec);
+            wait(200, msec);
             digitalD.set(digitalC.value());
         }
         LastRight = ControlData.ButtonRight;
@@ -132,7 +166,6 @@ void RemoteControl_3(bool SaveFile, bool ReadFile, int OutTime, std::string file
         // 底盘控制
         ChassisRomoteControlSTS.Work(); 
 
-        
         ChangeStance();
 
         // 红色
@@ -158,15 +191,9 @@ void RemoteControl_3(bool SaveFile, bool ReadFile, int OutTime, std::string file
         if (ControlData.ButtonL1 || ControlData.ButtonL2 || ControlData.ButtonR2 || ControlData.ButtonR1){
             if (ControlData.ButtonL2){
                 ToolMotor1.spin(forward, -1 * TrackSpeed, voltageUnits::volt);
-                digitalH.set(1);
-                digitalF.set(0);
-                digitalE.set(1);
             }
             if (ControlData.ButtonL1){
                 ToolMotor1.spin(forward, -1 * TrackSpeed, voltageUnits::volt);
-                digitalH.set(1);
-                digitalF.set(0);
-                digitalE.set(1);
             }
 
             if (ControlData.ButtonR1){
@@ -190,7 +217,7 @@ void RemoteControl_3(bool SaveFile, bool ReadFile, int OutTime, std::string file
                 ToolMotor2.spin(forward, TrackSpeed, voltageUnits::volt);
             }
             if (ControlData.ButtonR1){
-                ToolMotor2.spin(forward, 2, voltageUnits::volt);
+                ToolMotor2.spin(forward, 10, pct);
             }
 
             if (ControlData.ButtonR2){
@@ -223,14 +250,6 @@ void RemoteControl_3(bool SaveFile, bool ReadFile, int OutTime, std::string file
         }
         LastButtonX = ControlData.ButtonX;
 
-        
-        if (ControlData.ButtonDown){
-            digitalC.set(0);
-            digitalD.set(0);
-            digitalE.set(0);
-            digitalF.set(1);
-            digitalH.set(0);
-        }
 
         if (ControlData.ButtonY){
           digitalG.set(0);
