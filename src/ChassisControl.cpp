@@ -772,7 +772,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       // PrintAt(1, "Turn %f", val);
       // PrintAt(2, "Moving...");
       v    = std::abs(v);
-      val  = std::abs(val);
+      val = NormsAngle_0_360(val);
   
       double taget_angle = 0.0;
       double start_angle   = ChassisInertial.rotation();

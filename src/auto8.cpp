@@ -6,5 +6,5 @@
 
 void auto8(){
 
-
+    ChassisControlSTS.Move(1, 2000, 'n');
 }

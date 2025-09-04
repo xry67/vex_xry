@@ -176,9 +176,9 @@ void ChassisBothHandsRomoteControl_Turn(){
 
 void AddRomoteFun(){
     ChassisRomoteControlList.push_back(ChassisRomoteControlParams("双摇杆", ChassisBothHandsRomoteControl));    // 双摇杆加入
-    // ChassisRomoteControlList.push_back(ChassisRomoteControlParams("左单摇杆", ChassisLeftHandsRomoteControl));  // 左单摇杆
-    // ChassisRomoteControlList.push_back(ChassisRomoteControlParams("右单摇杆", ChassisRightHandsRomoteControl));  // 右单摇杆
-    // ChassisRomoteControlList.push_back(ChassisRomoteControlParams("坦克遥控", ChassisTankRomoteControl));  // 坦克遥控
-    // ChassisRomoteControlList.push_back(ChassisRomoteControlParams("人机遥控", ChassisHumanMachineRomoteControl));  // 坦克遥控
-     ChassisRomoteControlList.push_back(ChassisRomoteControlParams("双-转向", ChassisBothHandsRomoteControl_Turn));  // 双-转向
+    ChassisRomoteControlList.push_back(ChassisRomoteControlParams("左单摇杆", ChassisLeftHandsRomoteControl));  // 左单摇杆
+    ChassisRomoteControlList.push_back(ChassisRomoteControlParams("右单摇杆", ChassisRightHandsRomoteControl));  // 右单摇杆
+    ChassisRomoteControlList.push_back(ChassisRomoteControlParams("坦克遥控", ChassisTankRomoteControl));  // 坦克遥控
+    ChassisRomoteControlList.push_back(ChassisRomoteControlParams("人机遥控", ChassisHumanMachineRomoteControl));  // 坦克遥控
+    ChassisRomoteControlList.push_back(ChassisRomoteControlParams("双-转向", ChassisBothHandsRomoteControl_Turn));  // 双-转向
 }
