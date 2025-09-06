@@ -69,9 +69,10 @@ int InertialCalibrating(){
     }
 
     // 校准失败则重新校准
-    if (CheckInertialCalibrationFailed(1000, 0.1)){
+    if (CheckInertialCalibrationFailed(1000, 0.1 * 0.2 * (InertialCalibrationCount % 5))){
         Controller.rumble(".");
         ChassisInertial.calibrate();  // 陀螺仪校准
+        InertialCalibrationCount += 1;
         InertialCalibrating();
     }
 

@@ -97,8 +97,7 @@ extern std::vector<distance> Distances;
 // 记忆模式相关
 extern std::string FileName;
 
-// 自动校准陀螺仪飘值是否成功
-extern bool InertialIsReallyGood;
-
+extern bool InertialIsReallyGood;     // 自动校准陀螺仪飘值是否成功
+extern int InertialCalibrationCount;  // 陀螺仪校准次数
 
 #endif

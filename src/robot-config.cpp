@@ -59,7 +59,7 @@ digital_out digitalH = digital_out(Brain.ThreeWirePort.H);  // 抬升
 digital_out digitalG = digital_out(Brain.ThreeWirePort.G);  // 抬升
 
 
-optical Optical1 = optical(PORT10);  // 颜色传感器
+optical Optical1 = optical(PORT17);  // 颜色传感器
 optical Optical2 = optical(PORT9);  // 颜色传感器
 
 inertial ChassisInertial = inertial(PORT17);  // 底盘陀螺仪
@@ -95,6 +95,5 @@ std::string FileName = "save.txt";
 
 // 设备检测绘图
 
-
-// 自动校准陀螺仪飘值是否成功
-bool InertialIsReallyGood = false;
+bool InertialIsReallyGood = false; // 自动校准陀螺仪飘值是否成功
+int InertialCalibrationCount = 0;  // 陀螺仪校准次数

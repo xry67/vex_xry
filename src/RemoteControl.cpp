@@ -33,7 +33,7 @@ bool ChangeStance(){
         Controller.Screen.print("遥控模式-Red  ");
         Controller.rumble(".");
     }
-    if (ControlData.ButtonL2 && ControlData.ButtonL2 && (ControlData.axis1 + ControlData.axis2 + ControlData.axis3 + ControlData.axis4) < 20){
+    if (ControlData.ButtonL1 && ControlData.ButtonL2 && (ControlData.axis1 + ControlData.axis2 + ControlData.axis3 + ControlData.axis4) < 20){
         stance = 'b';
         PrintInLine(1);
         Controller.Screen.print("遥控模式-Blue");
@@ -178,7 +178,7 @@ void RemoteControl_3(bool SaveFile, bool ReadFile, int OutTime, std::string file
 
         ChangeStance();
 
-        // 红色
+        // 有一个球
         if (OpticalHaveRed(Optical1) || OpticalHaveBlue(Optical1)){
             HaveBall = 50;
         }else{
@@ -187,6 +187,7 @@ void RemoteControl_3(bool SaveFile, bool ReadFile, int OutTime, std::string file
 
         if ((stance == 'r' && OpticalHaveBlue(Optical1)) || (stance == 'b' && OpticalHaveRed(Optical1))){
             ErrorBall = 20;
+            // Controller.rumble(".");
         }
         else if ((stance == 'b' && OpticalHaveBlue(Optical1)) || (stance == 'r' && OpticalHaveRed(Optical1))){
             ErrorBall = 0;
@@ -221,16 +222,17 @@ void RemoteControl_3(bool SaveFile, bool ReadFile, int OutTime, std::string file
         // 2号
         if (ControlData.ButtonL1 || ControlData.ButtonL2 || ControlData.ButtonR1 || ControlData.ButtonA || ControlData.ButtonX || ControlData.ButtonR2){
             if (ControlData.ButtonL2){
-                ToolMotor2.spin(forward, TrackSpeed, voltageUnits::volt);
+                ToolMotor2.spin(forward, 50, pct);
                 MotorBlocked2 = false;
             }
             if (ControlData.ButtonL1){
-                ToolMotor2.spin(forward, TrackSpeed, voltageUnits::volt);
+                // ToolMotor2.spin(forward, TrackSpeed, voltageUnits::volt);
+                ToolMotor2.spin(forward, 50, pct);
                 MotorBlocked2 = false;
             }
             if (ControlData.ButtonR1){
 
-                std::cout << ToolMotor2.torque() << " " << ToolMotor2.velocity(dps) << std::endl;
+                // std::cout << ToolMotor2.torque() << " " << ToolMotor2.velocity(dps) << std::endl;
 
                 if (ToolMotor2.torque() > 0.3 && std::abs(ToolMotor2.velocity(dps)) < 50){
                     MotorBlocked2 = true;
@@ -260,10 +262,19 @@ void RemoteControl_3(bool SaveFile, bool ReadFile, int OutTime, std::string file
         // 3号
         if (ControlData.ButtonL1 || ControlData.ButtonL2 || ControlData.ButtonR1){
             if (ControlData.ButtonL2){
-                ToolMotor3.spin(forward, -1 * TrackSpeed, voltageUnits::volt);
+                if (ErrorBall <= 0){
+                    ToolMotor3.spin(forward, -1 * TrackSpeed, voltageUnits::volt);
+                }else{
+                    ToolMotor3.spin(forward, TrackSpeed, voltageUnits::volt);
+                }
+                
             }
             if (ControlData.ButtonL1){
-                ToolMotor3.spin(forward, TrackSpeed, voltageUnits::volt);
+                if (ErrorBall <= 0){
+                    ToolMotor3.spin(forward, TrackSpeed, voltageUnits::volt);
+                }else{
+                    ToolMotor3.spin(forward, -1 * TrackSpeed, voltageUnits::volt);
+                }
             }
             if (ControlData.ButtonR1){
                 ToolMotor3.spin(forward, 0.85, voltageUnits::volt);
@@ -316,6 +327,9 @@ int RemoteControl_WuBiao_child(){
         if (ControlData.ButtonDown){
             digitalB.set(0);
 
+            digitalF.set(1);
+            digitalH.set(0);
+
             // 收限位
             if (digitalC.value()){
                 digitalC.set(0);
@@ -337,6 +351,9 @@ int RemoteControl_WuBiao_child(){
             digitalE.set(1);
             wait(500, msec);
             digitalB.set(1);
+
+            digitalH.set(1);
+            digitalF.set(0);
        }
 
         if (ControlData.ButtonB){
