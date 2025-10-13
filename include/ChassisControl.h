@@ -9,6 +9,15 @@
 #include "PPS.h"
 #include "robot-config.h"
 
+double GetDistance_front();
+
+double GetDistance_back();
+
+double GetDistance_left();
+
+double GetDistance_right();
+
+
 // 组合运动参数相关
 struct ComboMoveParams{
     double v = 0.0;        // 速度
@@ -215,7 +224,7 @@ class ChassisControl{
   double GetVelocity_mean();
 
   // 等待电机编码器到达某个值
-  void WaitVelocityArrive(double val);
+  void WaitPositionArrive(double val);
 
   // 设置电机归位 
   void ChassisRsetPosition();
@@ -240,6 +249,9 @@ class ChassisControl{
 
   // 曲线移动
   void CurveMove(double v, double r, double TargetPosition, char direction);
+
+  // 曲线运动可选多线程
+  void CurveMove(double v, double r, double TargetPosition, char direction, bool task);
 
   // 组合运动
   void ComboMove(std::vector<ComboMoveParams> MoveParams);
@@ -304,7 +316,7 @@ class ChassisControl{
     bool    MoveEnd         = true;  // 记录运动是否完成
     bool    Whileing        = false; // 是否进入循环
     int     MoveId          = 0;     // 运动id记录（计数）
-    double maxinum_speed_acceleration = 0.5;  // 最大加速度
+    double maxinum_speed_acceleration = 0.17;  // 最大加速度
 
     // 各类pps
 
@@ -312,7 +324,7 @@ class ChassisControl{
     PPS     *StraightPid;
     std::vector<double> Move_PPS;
     double  min_move_speed       = 0;  // 直行电机的最小速度
-    double  move_allowable_error = 10; // 直行允许误差
+    double  move_allowable_error = 8; // 直行允许误差
 
     // 旋转相关参数
     std::vector<double> Turn_PPS;
@@ -328,7 +340,7 @@ class ChassisControl{
     int Target_Width         = 0;    // 目标物体的宽度
     int Target_Height        = 0;    // 目标物体的高度
     
-    public: 
+    // public: 
     // AiTarget Target = AiTarget();
 };
 
@@ -342,6 +354,8 @@ int TurnTask(void* args);
 int FollowTargetTask(void* args);
 //  多线程距离传感器友元函数 
 int MoveToDistancetTask(void* args);
+// 多线程曲线友元函数
+int CurveMoveTask(void* args);
 
 // 多线程准备的结构体函数
 struct ChassisMoveParams{
@@ -365,6 +379,15 @@ struct MoveToDistanceParams{
     double v;
     double val;
     std::string DistanceChioce;
+};
+
+// 曲线运动结构体函数
+struct CurveMoveParams{
+    ChassisControl* self;
+    double v;
+    double r;
+    double TargetPosition;
+    char direction;
 };
 
 extern ChassisControl ChassisControlSTS;  // sts底盘控制

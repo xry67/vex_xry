@@ -74,15 +74,15 @@ void Help(){
 
     // ->在运动过程中进行其他操作
     ChassisControlSTS.Move(16, 2000, 'n', true);  // 开启多线程
-    ChassisControlSTS.WaitVelocityArrive(500);        // 等待运动500之后
+    ChassisControlSTS.WaitPositionArrive(500);        // 等待运动500之后
     digitalE.set(1);                                  // 设置E到1状态
-    ChassisControlSTS.WaitVelocityArrive(1500);       // 等待运动到1500之后
+    ChassisControlSTS.WaitPositionArrive(1500);       // 等待运动到1500之后
     digitalE.set(0);                                  // 设置E到0状态
     ChassisControlSTS.WaitMoveFinish();               // 等待多线程运动完成
 
     // ->使直走拥有多段速度
     ChassisControlSTS.Move(10, 2000, 'n', true);  // 发布多线程运动
-    ChassisControlSTS.WaitVelocityArrive(500);    // 等待行走到500
+    ChassisControlSTS.WaitPositionArrive(500);    // 等待行走到500
     ChassisControlSTS.ResetMaxSpeed(1.5);         // 修改最大速度
     ChassisControlSTS.WaitMoveFinish();           // 等待多线程运动执行完成
 
@@ -101,7 +101,7 @@ void Help(){
 
     // ->在直走中途更改对齐角度
     ChassisControlSTS.Move(10, 2000, 'n', true);  // 发布多线程运动
-    ChassisControlSTS.WaitVelocityArrive(1000);   // 等待运动至1000
+    ChassisControlSTS.WaitPositionArrive(1000);   // 等待运动至1000
     ChassisControlSTS.ResetStraightAngle(45);     // 修改对齐角度为45度
     ChassisControlSTS.WaitMoveFinish();           // 等待多线程运动执行完成
 

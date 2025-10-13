@@ -6,31 +6,20 @@
 
 // 左9
 void auto3(){
-    
-    ChassisControlSTS.Move(16, 640, 'n'); 
-    ChassisControlSTS.TurnTo(10, 360-50, false); 
-    ToolMotor1.spin(forward, -16, voltageUnits::volt);
+   digitalH.set(1);
+   ChassisControlSTS.CurveMove(10, 780, 700, 'q');
 
-    ChassisControlSTS.Move(2.5, 800 + 700 + 350, 'n', true);
-    wait(500, msec);
-    while(ChassisControlSTS.IsMoving()){
-      if (ChassisControlSTS.GetPositions_mean() > 900){
-        ChassisControlSTS.Move_max_speed = 10;
-        digitalC.set(1);
-        break;
-      }
-      wait(10, msec);
-    }
-    while(ChassisControlSTS.IsMoving()){
-      if (ChassisControlSTS.GetPositions_mean() > 800 + 400){
-        ChassisControlSTS.Move_max_speed = 1.7;
-        digitalC.set(1);
-        break;
-      }
-      wait(10, msec);
-    }
+    ToolMotor1.spin(forward, -16, voltageUnits::volt);
+    ToolMotor2.spin(forward, 7, pct);
+
+    ChassisControlSTS.Move(5, 1800, 'n', true);
+  
     ChassisControlSTS.WaitMoveFinish();
-    digitalG.set(1);
+
+    ChassisControlSTS.Move(5, 700, 'u');
+
+
+    wait(2000, msec);
 
     wait(200, msec);
     digitalE.set(1);

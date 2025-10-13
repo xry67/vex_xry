@@ -100,7 +100,7 @@ bool OpticalHaveRed(vex::optical Optical){
 // 颜色传感器有一个蓝色物体？
 bool OpticalHaveBlue(vex::optical Optical){
     double H = Optical.hue();
-    if (Optical.isNearObject() && (H > 200 && H < 270)){
+    if (Optical.isNearObject() && (H > 150 && H < 270)){
         return true;
     }
     return false;

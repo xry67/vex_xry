@@ -70,6 +70,8 @@ extern optical Optical1;      // 颜色传感器
 extern optical Optical2;      // 颜色传感器
 
 // 距离传感器
+extern distance Distance_f;  // 前
+extern distance Distance_b;  // 后
 extern distance Distance_fl;  // 左前
 extern distance Distance_fr;  // 右前
 extern distance Distance_bl;  // 左后

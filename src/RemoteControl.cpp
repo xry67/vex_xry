@@ -63,15 +63,15 @@ int RemoteControl_3_child(){
             wait(900, msec);
 
             // 放钩子
-            digitalC.set(0);
-            digitalD.set(0);
+            digitalC.set(1);
+            digitalD.set(1);
         }
 
 
-       if (ControlData.ButtonL1 || ControlData.ButtonL2){
-            if (! digitalC.value()){
-                digitalC.set(1);
-                digitalD.set(1);
+       if (ControlData.ButtonL1 || ControlData.ButtonL2 ){
+            if (digitalD.value()){
+                digitalC.set(0);
+                digitalD.set(0);
                 wait(300, msec);
             }
             digitalE.set(1);
@@ -89,8 +89,7 @@ int RemoteControl_3_child(){
 
         if (ControlData.ButtonRight && ! LastRight){
             digitalC.set(digitalC.value() ^ 1);
-            wait(200, msec);
-            digitalD.set(digitalC.value());
+            digitalD.set(digitalD.value() ^ 1);
         }
         LastRight = ControlData.ButtonRight;
         wait(50, msec);
@@ -135,7 +134,8 @@ void RemoteControl_3(bool SaveFile, bool ReadFile, int OutTime, std::string file
     // 吐球反转计数器
     int HaveBall = 0; 
     // 分球暂停计数器
-    int ErrorBall = 0;
+    int ErrorBall1 = 0;
+    int ErrorBall2 = 0;
 
     // 退出计数
     int HoldButtonBCount = 0;
@@ -186,11 +186,21 @@ void RemoteControl_3(bool SaveFile, bool ReadFile, int OutTime, std::string file
         }
 
         if ((stance == 'r' && OpticalHaveBlue(Optical1)) || (stance == 'b' && OpticalHaveRed(Optical1))){
-            ErrorBall = 20;
+            ErrorBall1 = 20;
             // Controller.rumble(".");
         }
         else if ((stance == 'b' && OpticalHaveBlue(Optical1)) || (stance == 'r' && OpticalHaveRed(Optical1))){
-            ErrorBall = 0;
+            ErrorBall1 = 0;
+        }
+
+         if ((stance == 'r' && OpticalHaveBlue(Optical2)) || (stance == 'b' && OpticalHaveRed(Optical2))){
+            ErrorBall2 = 20;
+        }
+        else if ((stance == 'b' && OpticalHaveBlue(Optical2)) || (stance == 'r' && OpticalHaveRed(Optical2))){
+            ErrorBall2 = 0;
+        }
+        else{
+          ErrorBall2 = -1;
         }
 
         // R1 R2 -  吸球 吐球
@@ -222,14 +232,15 @@ void RemoteControl_3(bool SaveFile, bool ReadFile, int OutTime, std::string file
         // 2号
         if (ControlData.ButtonL1 || ControlData.ButtonL2 || ControlData.ButtonR1 || ControlData.ButtonA || ControlData.ButtonX || ControlData.ButtonR2){
             if (ControlData.ButtonL2){
-                ToolMotor2.spin(forward, 50, pct);
+                if ((ErrorBall1 > 0)){
+                    ToolMotor2.spin(forward, 100, pct);
+                }else{
+                    ToolMotor2.spin(forward, 100, pct);
+                }
+                
                 MotorBlocked2 = false;
             }
-            if (ControlData.ButtonL1){
-                // ToolMotor2.spin(forward, TrackSpeed, voltageUnits::volt);
-                ToolMotor2.spin(forward, 50, pct);
-                MotorBlocked2 = false;
-            }
+
             if (ControlData.ButtonR1){
 
                 // std::cout << ToolMotor2.torque() << " " << ToolMotor2.velocity(dps) << std::endl;
@@ -248,6 +259,16 @@ void RemoteControl_3(bool SaveFile, bool ReadFile, int OutTime, std::string file
                 }
                 
             }
+            
+            if (ControlData.ButtonL1){
+                if ((ErrorBall1 > 0)){
+                    ToolMotor2.spin(forward, 100, pct);
+                }else{
+                    ToolMotor2.spin(forward, 100, pct);
+                }
+                // ToolMotor2.spin(forward, 100, pct);
+                MotorBlocked2 = false;
+            }
 
             if (ControlData.ButtonR2){
                 ToolMotor2.spin(forward, -1 * TrackSpeed, voltageUnits::volt);
@@ -262,22 +283,23 @@ void RemoteControl_3(bool SaveFile, bool ReadFile, int OutTime, std::string file
         // 3号
         if (ControlData.ButtonL1 || ControlData.ButtonL2 || ControlData.ButtonR1){
             if (ControlData.ButtonL2){
-                if (ErrorBall <= 0){
-                    ToolMotor3.spin(forward, -1 * TrackSpeed, voltageUnits::volt);
-                }else{
+                if ((ErrorBall1 > 0)){
                     ToolMotor3.spin(forward, TrackSpeed, voltageUnits::volt);
+                }else{
+                    ToolMotor3.spin(forward, -1 * TrackSpeed, voltageUnits::volt);
                 }
                 
             }
             if (ControlData.ButtonL1){
-                if (ErrorBall <= 0){
-                    ToolMotor3.spin(forward, TrackSpeed, voltageUnits::volt);
-                }else{
+                if ((ErrorBall1 > 0)){
                     ToolMotor3.spin(forward, -1 * TrackSpeed, voltageUnits::volt);
+                }
+                else{
+                    ToolMotor3.spin(forward, TrackSpeed, voltageUnits::volt);
                 }
             }
             if (ControlData.ButtonR1){
-                ToolMotor3.spin(forward, 0.85, voltageUnits::volt);
+                ToolMotor3.spin(forward, 1.7, voltageUnits::volt);
             }
         }
         else{
@@ -306,7 +328,8 @@ void RemoteControl_3(bool SaveFile, bool ReadFile, int OutTime, std::string file
             HoldButtonBCount = 0;
         }
 
-        ErrorBall = std::max(ErrorBall - 1, 0);    // 反转计数器减小
+        ErrorBall1 = std::max(ErrorBall1 - 1, 0);    // 反转计数器减小
+        ErrorBall2 = std::max(ErrorBall2 - 1, 0);    // 反转计数器减小
         HaveBall = std::max(HaveBall - 1, 0);  // 暂停计数器减小
 
         out_time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count();
@@ -325,6 +348,11 @@ int RemoteControl_WuBiao_child(){
     bool LastRight = false;
     while(true){
         if (ControlData.ButtonDown){
+            if (digitalF.value() == 1){
+                digitalF.set(0);
+                wait(300, msec);
+            }
+
             digitalB.set(0);
 
             digitalF.set(1);
@@ -332,8 +360,8 @@ int RemoteControl_WuBiao_child(){
 
             // 收限位
             if (digitalC.value()){
-                digitalC.set(0);
-                digitalD.set(0);
+                digitalC.set(1);
+                digitalD.set(1);
                 // wait(300, msec);
             }
             wait(200, msec);
@@ -344,8 +372,8 @@ int RemoteControl_WuBiao_child(){
 
        if (ControlData.ButtonL1 || ControlData.ButtonL2){
             if (! digitalC.value()){
-                digitalC.set(1);
-                digitalD.set(1);
+                digitalC.set(0);
+                digitalD.set(0);
                 wait(300, msec);
             }
             digitalE.set(1);
@@ -354,6 +382,7 @@ int RemoteControl_WuBiao_child(){
 
             digitalH.set(1);
             digitalF.set(0);
+            digitalB.set(1);
        }
 
         if (ControlData.ButtonB){
@@ -411,7 +440,10 @@ void RemoteControl_WuBiao(bool SaveFile, bool ReadFile, int OutTime, std::string
     // 吐球反转计数器
     int HaveBall = 0; 
     // 分球暂停计数器
-    int ErrorBall = 0;
+    int ErrorBall1 = 0;
+
+       // 二号电机堵死检测
+    bool MotorBlocked2 = false;
 
     // 退出计数
     int HoldButtonBCount = 0;
@@ -459,10 +491,10 @@ void RemoteControl_WuBiao(bool SaveFile, bool ReadFile, int OutTime, std::string
         }
 
         if ((stance == 'r' && OpticalHaveBlue(Optical1)) || (stance == 'b' && OpticalHaveRed(Optical1))){
-            ErrorBall = 20;
+            ErrorBall1 = 20;
         }
         else if ((stance == 'b' && OpticalHaveBlue(Optical1)) || (stance == 'r' && OpticalHaveRed(Optical1))){
-            ErrorBall = 0;
+            ErrorBall1 = 0;
         }
 
         // R1 R2 -  吸球 吐球
@@ -494,17 +526,45 @@ void RemoteControl_WuBiao(bool SaveFile, bool ReadFile, int OutTime, std::string
         // 2号
         if (ControlData.ButtonL1 || ControlData.ButtonL2 || ControlData.ButtonR1 || ControlData.ButtonA || ControlData.ButtonX || ControlData.ButtonR2){
             if (ControlData.ButtonL2){
-                ToolMotor2.spin(forward, TrackSpeed, voltageUnits::volt);
+                if ((ErrorBall1 > 0)){
+                    ToolMotor2.spin(forward, 100, pct);
+                }else{
+                    ToolMotor2.spin(forward, 100, pct);
+                }
+                
+                MotorBlocked2 = false;
             }
             if (ControlData.ButtonL1){
-                ToolMotor2.spin(forward, TrackSpeed, voltageUnits::volt);
+                if ((ErrorBall1 > 0)){
+                    ToolMotor2.spin(forward, 100, pct);
+                }else{
+                    ToolMotor2.spin(forward, 100, pct);
+                }
+                // ToolMotor2.spin(forward, 100, pct);
+                MotorBlocked2 = false;
             }
             if (ControlData.ButtonR1){
-                ToolMotor2.spin(forward, 10, pct);
+
+                // std::cout << ToolMotor2.torque() << " " << ToolMotor2.velocity(dps) << std::endl;
+
+                if (ToolMotor2.torque() > 0.3 && std::abs(ToolMotor2.velocity(dps)) < 50){
+                    MotorBlocked2 = true;
+                }
+
+                // ToolMotor2.spin(forward, 10, pct);
+
+                
+                if (! MotorBlocked2){
+                    ToolMotor2.spin(forward, 10, pct);
+                }else{
+                    ToolMotor2.spin(forward, 0, pct);
+                }
+                
             }
 
             if (ControlData.ButtonR2){
                 ToolMotor2.spin(forward, -1 * TrackSpeed, voltageUnits::volt);
+                MotorBlocked2 = false;
             }
 
         }
@@ -550,7 +610,7 @@ void RemoteControl_WuBiao(bool SaveFile, bool ReadFile, int OutTime, std::string
             HoldButtonBCount = 0;
         }
 
-        ErrorBall = std::max(ErrorBall - 1, 0);    // 反转计数器减小
+        ErrorBall1 = std::max(ErrorBall1 - 1, 0);    // 反转计数器减小
         HaveBall = std::max(HaveBall - 1, 0);  // 暂停计数器减小
 
         out_time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count();
@@ -570,6 +630,10 @@ void RemoteControlUnit(bool SaveFile, bool ReadFile, int OutTime, std::string fi
     RemoteControl_3(SaveFile, ReadFile, OutTime, file_name, timeout);  // 二代车，双颜色传感器 刘老师版本
 
     // RemoteControl_WuBiao(SaveFile, ReadFile, OutTime, file_name, timeout); // 二代车，双颜色传感器 伍老师版本
+
+    // RemoteControl_YeJunXu(SaveFile, ReadFile, OutTime, file_name, timeout); // 二代车，双颜色传感器 叶俊旭版本
+
+
 
 }
 

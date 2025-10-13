@@ -9,15 +9,13 @@
 #include "units.h"
 
 double GetDistance_front(){
-  double value1 = Distance_fl.objectDistance(mm);
-  double value2 = Distance_fr.objectDistance(mm);
-  return (value1 + value2) / 2.0;
+  double value1 = Distance_f.objectDistance(mm);
+  return value1;
 }
 
 double GetDistance_back(){
-  double value1 = Distance_bl.objectDistance(mm);
-  double value2 = Distance_br.objectDistance(mm);
-  return (value1 + value2) / 2.0;
+  double value1 = Distance_b.objectDistance(mm);
+  return value1;
 }
 
 double GetDistance_left(){
@@ -65,11 +63,11 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
     std::map<int, std::vector<double>> Straight_PPS_Map = {{343, {7.5, 0.0, 0.1}}, {450, {7.5, 0.0, 0.1}}, {300, {7.5, 0.0, 0.1}}};
 
     // 编码器
-    std::map<int, std::vector<double>> Move_PPS_Map = {{343, {0.00950, 0.800, 2}}, {450, {0.00950, 0.800, 2}}, {300, {0.02, 0.800, 2}}};
+    std::map<int, std::vector<double>> Move_PPS_Map = {{343, {0.00950, 0.800, 2}}, {450, {0.00850, 0.500, 2}}, {300, {0.02, 0.800, 2}}};
     std::map<int, double> Min_Move_Speed_Map = {{343, 0.75}, {450, 0.75}, {300, 0.95}};
 
     // 陀螺仪
-    std::map<int, std::vector<double>> Turn_PPS_Map = {{343, {0.075, 0, 3}}, {450, {0.022, 0.5, 5}}, {300, {0.042, 0.5, 5}}};
+    std::map<int, std::vector<double>> Turn_PPS_Map = {{343, {0.075, 0, 3}}, {450, {0.025, 0.5, 5}}, {300, {0.042, 0.5, 5}}};
     std::map<int, double> Min_Turn_Speed_Map = {{343, 1.10}, {450, 1.6}, {300, 1.5}};
 
     min_move_speed       = Min_Move_Speed_Map[ChassisSpeedConfig];  // 直行电机的最小速度
@@ -252,7 +250,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
   }
 
   // 等待电机编码器到达某个值
-  void ChassisControl::WaitVelocityArrive(double val){
+  void ChassisControl::WaitPositionArrive(double val){
 
     int now_p;
 
@@ -505,6 +503,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
     }
   }
 
+
   // 曲线移动
   void ChassisControl::CurveMove(double v, double r, double TargetPosition, char direction){
       ChassisRsetPosition();  // 电机初始化
@@ -655,6 +654,25 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       }
       MoveOver();
 
+  }
+
+  // 曲线移动可选多线程
+  void ChassisControl::CurveMove(double v, double r, double TargetPosition, char direction, bool task){
+    if (task == true){
+        CurveMoveParams* Params = new CurveMoveParams();
+        Params->self = this;
+        Params->v = v;
+        Params->r = r;
+        Params->TargetPosition = TargetPosition;
+        Params->direction = direction;
+
+        void* p = Params;
+        vex::task Task(CurveMoveTask, p);
+        this->WaitMoveStart();
+    }
+    else{
+        CurveMove(v, r, TargetPosition, direction);    
+    }
   }
 
   // 组合运动
@@ -825,7 +843,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
           if (std::abs(current_position - taget_angle) <= turn_allowable_error && std::abs(output) <  min_turn_speed ) {
             overcount += 1;
             if (overcount == Over_count){
-              PrintAt(2, " ->到位");
+              // PrintAt(2, " ->到位");
               // std::cout <<"daowei" <<std::endl;
               break;  
             }
@@ -859,7 +877,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
           if (GetVelocity_mean() <= Stuck_threshold){
               stuck_time_count += dt * 1000.0;  // 计算抱死时间
               if (stuck_time_count >= Stuck_time_out){
-                PrintAt(2, " ->抱死");
+                // PrintAt(2, " ->抱死");
                 break;
               }
 
@@ -923,7 +941,9 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
     if (start_angle_norm < 0){
       start_angle_norm = 360 + start_angle_norm;
     }
-
+    if (val < 0){
+      val = 360 + val;
+    }
     // std::cout << start_angle_norm - val  << std::endl;
 
     double lval = start_angle_norm - val;
@@ -1694,6 +1714,20 @@ int MoveToDistancetTask(void* args){
     std::string DistanceChioce = params->DistanceChioce; // 前后距离传感器选择
 
     self->MoveToDistance(v, val, DistanceChioce);
+
+    // delete args;
+    return 0;
+}
+
+// 多线程曲线友元函数
+int CurveMoveTask(void* args){
+    CurveMoveParams* params = (CurveMoveParams*)args;
+    ChassisControl* self= params->self;       // 当前类
+    double v            = params->v;          // 速度
+    double r            = params->r;          // 半径
+    double TargetPosition = params->TargetPosition;   // 路径长度
+    char direction = params->direction; // 方向
+    self->CurveMove(v, r, TargetPosition, direction);
 
     // delete args;
     return 0;

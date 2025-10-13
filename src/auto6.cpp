@@ -3,69 +3,78 @@
 #include "ChassisControl.h"
 #include "ToolControl.h"
 
-// 右6+1
+// 右6+1 队牌对位
 void auto6(){
-    double k=1;
-
-    ChassisControlSTS.Over_count = 4;
-    ChassisControlSTS.Move(16, 600 * k, 0.0, 'n'); // 1550
+double k=1;
+    ChassisInertial.setRotation(0, degrees);
+    ChassisControlSTS.Over_count = 5;
+    ChassisControlSTS.CurveMove(10, 780, 700, 'p');
 
     ToolMotor1.spin(forward, -16, voltageUnits::volt);
-    ChassisControlSTS.Turn(10, 44, 'r');
 
-    ChassisControlSTS.Move(6, 450 * k, 0.0, 'n'); // 1550
-    ChassisControlSTS.Move(2, 690 * k, 0, 'n'); // 1550
-    
-    ChassisControlSTS.Turn_PPS = {0.0935, 0.0, 3};
-    ChassisControlSTS.TurnTo(14, 315, false); // 1550
+    ChassisControlSTS.Move(4, 570 * k, 'n'); // 1550
 
-    ChassisControlSTS.Move_PPS = {0.01, 0, 2};
-    ChassisControlSTS.Move(16, 480 * k, 0.0, 'n', true); // 1550
-    digitalE.set(1);
+    ChassisControlSTS.TurnTo(14, 360  - 46, false); // 1550
 
-    wait(800, msec);
-    ToolMotor1.spin(forward, 14, voltageUnits::volt);
-
-   ToolMotor2.spin(forward, -14, voltageUnits::volt);
-
-    wait(900, msec);
-    ToolMotor1.spin(forward, -14, voltageUnits::volt);
+    ChassisControlSTS.Move(16, 560 * k, 'n', true); // 1550
+    ChassisControlSTS.WaitPositionArrive(500);
+    ToolMotor2.spin(forward, -16, voltageUnits::volt);
+    ToolMotor1.spin(forward, 16, voltageUnits::volt);
+    wait(500, msec);
+    ToolMotor1.spin(forward, -16, voltageUnits::volt);
     ToolMotor2.spin(forward, 0, voltageUnits::volt);
-
     ChassisControlSTS.WaitMoveFinish();
-
-    ChassisControlSTS.Over_count = 12;
-
-    ChassisControlSTS.TurnTo(14, 310, false); // 1550
-    ChassisControlSTS.Move(14, 2350 * k, 0.0, 'u'); // 1550
-
-    
-    ChassisControlSTS.Over_count = 15;
-        digitalG.set(1);
-
-    ChassisControlSTS.TurnTo(8, 179, false);
-    ChassisControlSTS.Over_count = 4;
+    digitalH.set(1);
     digitalE.set(1);
 
-    ToolMotor1.spin(forward, -16, voltageUnits::volt);
-    // ChassisControlSTS.ComboMove(    {ComboMoveParams(5, 600 * k, 0.0, 'n', nullptr)}   );
-    ChassisControlSTS.Move(14, 850, 0.0, 'n'); // 1550
+    ChassisControlSTS.Move(10, 1970, 'u'); // 1550        
 
-    SetToolMotorSpin(-16, 16, 16, 1700);
-    AutoIntake();
-    ChassisControlSTS.ComboMove(    {ComboMoveParams(5, 200, 0.0, 'u', nullptr)}   );
-    ChassisControlSTS.TurnTo(8, 179, false);
-    ChassisControlSTS.Move(16, 1320 * k, 0, 'u', true); // 1550
-    digitalD.set(1);    
+    ChassisControlSTS.turn_allowable_error = 1;
+    ChassisControlSTS.TurnTo(10, 180, false);
 
+    digitalG.set(1);
     wait(200, msec);
-    digitalG.set(0);   
-    wait(400, msec);
-       ToolMotor2.spin(forward, 16, voltageUnits::volt);
+    ChassisControlSTS.Move(14, 900, 'n', true); // 1550  
+    ChassisControlSTS.WaitPositionArrive(850);
+    ChassisControlSTS.StopMoving();
+    ToolMotor1.spin(forward, -16, voltageUnits::volt);
+    ChassisControlSTS.ChassisLeftControl(2);
+    ChassisControlSTS.ChassisRightControl(2);
+    for (int i=0; i< 100; i++){
+        if (std::abs(ToolMotor1.velocity(dps)) < 5){
+            ToolMotor1.spin(forward, 16, voltageUnits::volt);
+            wait(100, msec);
+            i += 10;
+        }
+        ToolMotor1.spin(forward, -16, voltageUnits::volt);
 
-    SetToolMotorSpin(-16, 16, 16, 2000);
-    AutoPush();
-    
-    ChassisControlSTS.WaitMoveFinish();
+
+        wait(10, msec);
+    }
+
+    wait(1000, msec);
+    ChassisControlSTS.ChassisLeftControl(0);
+    ChassisControlSTS.ChassisRightControl(0);
+
+    ChassisControlSTS.Move(7, 1500, -170, 'u', true); // 1550
+    ToolMotor2.spin(forward, 16, voltageUnits::volt);
+    ToolMotor3.spin(forward, 3, voltageUnits::volt);
+    digitalD.set(1);  
+    ChassisControlSTS.WaitPositionArrive(500);
+    ChassisControlSTS.ResetStraightAngle(-180);
+
+    digitalG.set(0);
+    digitalE.set(1);
+
+    ChassisControlSTS.WaitPositionArrive(1100);
+    digitalB.set(1);
+
+    ToolMotor2.spin(forward, 16, voltageUnits::volt);
+    ToolMotor3.spin(forward, 16, voltageUnits::volt);
+    ChassisControlSTS.StopMoving();
+    ChassisControlSTS.ChassisLeftControl(-2);
+    ChassisControlSTS.ChassisRightControl(-2);
+    wait(2000, msec);
+
    
 }

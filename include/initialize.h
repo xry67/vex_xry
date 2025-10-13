@@ -80,8 +80,8 @@ void vexcodeInit(void) {
     ChassisInertialInit();  // 底盘陀螺仪初始化
     
     // 初始状态
-    digitalC.set(1);
-    digitalD.set(1);
+    // digitalC.set(1);
+    // digitalD.set(1);
 
     Optical1.setLightPower(100, percent);
     Optical2.setLightPower(100, percent);

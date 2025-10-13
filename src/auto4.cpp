@@ -12,9 +12,9 @@ void auto4(){
     ToolMotor2.spin(forward, 3, voltageUnits::volt);
 
     ChassisControlSTS.Move(1.5, 800 + 700 + 370, 'n', true);
-    ChassisControlSTS.WaitVelocityArrive(500);
+    ChassisControlSTS.WaitPositionArrive(500);
     ChassisControlSTS.ResetMaxSpeed(16);
-    ChassisControlSTS.WaitVelocityArrive(1200);
+    ChassisControlSTS.WaitPositionArrive(1200);
     ChassisControlSTS.ResetMaxSpeed(1.7);
     ChassisControlSTS.WaitMoveFinish();
     digitalG.set(1);
@@ -53,7 +53,7 @@ void auto4(){
     wait(200, msec);
     digitalG.set(0); 
 
-    ChassisControlSTS.WaitVelocityArrive(1000);
+    ChassisControlSTS.WaitPositionArrive(1000);
 
     SetToolMotorSpin(-16, 16, 16, 1800);
     AutoPush();
