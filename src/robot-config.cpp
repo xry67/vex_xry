@@ -75,7 +75,7 @@ rotation Rotation_y = rotation(PORT21, false); // 底盘定位轮y
 
 // 距离传感器
 distance Distance_f = distance(PORT2);  // 前
-distance Distance_b = distance(PORT21);  // 后
+distance Distance_b = distance(PORT3);  // 后
 distance Distance_fl = distance(PORT21);  // 左前
 distance Distance_fr = distance(PORT21);  // 右前
 distance Distance_bl = distance(PORT21);  // 左后

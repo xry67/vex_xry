@@ -30,6 +30,7 @@ void auto9(){
     ChassisControlSTS.Move(12, 2800, 'n', true); // 1550        
     ChassisControlSTS.WaitPositionArrive(1300);
 
+    // 高阶==================================================
     // 重新对其至-90度
     ChassisControlSTS.ResetMaxSpeed(2);        
     ChassisControlSTS.ResetStraightAngle(-90);
@@ -64,16 +65,17 @@ void auto9(){
       std::cout << GetDistance_front() << std::endl;
       wait(10, msec);
     }
-    ChassisControlSTS.SetStopModCoast();
+    ChassisControlSTS.SetStopModCoast();   // 需要保留，否则容易插不进去
     ChassisControlSTS.StopMoving();
     wait(100,msec);
 
-    // 恒力吸导入
-    while(GetDistance_front() > 170){
+    // 恒力吸导入  pct可以保证匀速插入导入筒
+    while(GetDistance_front() > 120){
       ChassisControlSTS.ChassisLeftControl_pct(2);
       ChassisControlSTS.ChassisRightControl_pct(2);
     }
 
+    // 轻微的蠕动
     for (int i=0; i<50; i++){
       if (GetDistance_front() > 118){
         ChassisControlSTS.ChassisLeftControl(1.5);
@@ -84,18 +86,19 @@ void auto9(){
       }
       wait(10, msec);
     }
-
+    // 倒车 打球
     ChassisControlSTS.Move(7, 1500, -180, 'u', true); // 1550
     ToolMotor2.spin(forward, 20, pct);
     ToolMotor3.spin(forward, 3, voltageUnits::volt);
     digitalH.set(1);  
     digitalG.set(0);
-
+    // 提前打球
     ChassisControlSTS.WaitPositionArrive(1100);
-
     ToolMotor2.spin(forward, 16, voltageUnits::volt);
     ToolMotor3.spin(forward, 16, voltageUnits::volt);
+    ChassisControlSTS.SetStopModCoast();
     ChassisControlSTS.StopMoving();
+    // 努力进入对位
     ChassisControlSTS.ChassisLeftControl(-2);
     ChassisControlSTS.ChassisRightControl(-2);
     wait(1000, msec);
@@ -105,19 +108,18 @@ void auto9(){
     digitalC.set(1);
     digitalD.set(1);
     digitalE.set(1);
-    ChassisControlSTS.SetStopModCoast();
-    ChassisControlSTS.CurveMove(3, 290, 1500, 'p', true);
+    ChassisControlSTS.CurveMove(3, 290, 1500, 'p', true);   // 曲线
     ChassisControlSTS.WaitPositionArrive(1070);
-    ChassisControlSTS.StopMoving();
+    ChassisControlSTS.StopMoving();   // 提前结束，不需要精准
 
     digitalC.set(0);
     digitalD.set(0);
-    ChassisControlSTS.Move(12, 1500, 0, 'n', true); // 1550
+    ChassisControlSTS.Move(12, 1500, 0, 'n', true); // 直线钩
     ChassisControlSTS.WaitPositionArrive(1300);
     ChassisControlSTS.SetStopModHold();
 
     ChassisControlSTS.StopMoving();
-
+    // 急刹车
     ChassisControlSTS.ChassisLeftControl(-2);
     ChassisControlSTS.ChassisRightControl(-2);
     wait(100, msec);
