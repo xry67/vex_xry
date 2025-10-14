@@ -3,6 +3,8 @@
 #include "ChassisControl.h"
 #include "ToolControl.h"
 
+
+// 右6+1+钩 队牌摆位
 void auto10(){
     double k=1;
     ChassisInertial.setRotation(0, degrees);

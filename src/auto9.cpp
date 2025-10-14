@@ -3,7 +3,7 @@
 #include "ChassisControl.h"
 #include "ToolControl.h"
 
-
+// 左6+1+钩 队牌摆位
 void auto9(){
     double k=0.82;
     digitalH.set(1);
@@ -26,11 +26,11 @@ void auto9(){
     ToolMotor2.spin(forward, 0, voltageUnits::volt);
     ToolMotor3.spin(forward, 0, voltageUnits::volt);
 
+    // 高阶==================================================
     // 斜线到达判定距离传感器位置
     ChassisControlSTS.Move(12, 2800, 'n', true); // 1550        
     ChassisControlSTS.WaitPositionArrive(1300);
-
-    // 高阶==================================================
+    
     // 重新对其至-90度
     ChassisControlSTS.ResetMaxSpeed(2);        
     ChassisControlSTS.ResetStraightAngle(-90);
