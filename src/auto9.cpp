@@ -21,7 +21,6 @@ void auto9(){
     ChassisControlSTS.Move_PPS = {0.01, 0, 2};
     ChassisControlSTS.Move(16, 820 * k, 'u'); // 1550
     ToolMotor2.spin(forward, 16, voltageUnits::volt);
-    ToolMotor3.spin(forward, -10, voltageUnits::volt);
     wait(200, msec);
     ToolMotor2.spin(forward, 0, voltageUnits::volt);
     ToolMotor3.spin(forward, 0, voltageUnits::volt);

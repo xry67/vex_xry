@@ -69,9 +69,9 @@ int RemoteControl_3_child(){
 
 
        if (ControlData.ButtonL1 || ControlData.ButtonL2 ){
-            if (digitalD.value()){
-                digitalC.set(0);
-                digitalD.set(0);
+            if (! digitalD.value()){
+                digitalC.set(1);
+                digitalD.set(1);
                 wait(300, msec);
             }
             digitalE.set(1);

@@ -57,6 +57,7 @@ extern BaseWindow* TestMotorChoiceWindow;        // 电机测试（选择）
 extern BaseWindow* TestAirpoweredChoiceWindow;   // 活塞测试（选择）
 extern BaseWindow* TestInertialChoiceWindow;     // 陀螺仪测试（选择）
 extern BaseWindow* TestDistanceChoiceWindow;     // 距离传感器测试（选择）
+extern BaseWindow* TestDecenteringWindow;        // 电机脱轴测试
 
 extern BaseWindow* TestMotorWindow;        // 电机测试
 extern BaseWindow* TestAirpoweredWindow;   // 活塞测试
@@ -108,6 +109,9 @@ BaseWindow* TestInertialChoiceWindowFun();
 
 // 距离传感器测试（选择）
 BaseWindow* TestDistanceChoiceWindowFun();   
+
+// 脱轴检测
+BaseWindow* TestDecenteringFun();
 
 // 比赛确认选择
 BaseWindow* CompeteConfirmWindowFun();

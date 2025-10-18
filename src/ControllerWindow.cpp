@@ -23,10 +23,12 @@ BaseWindow* RemoteControlWindow_Auto    = new BaseWindow("自动-遥控选择", 
 
 BaseWindow* CompeteConfirmWindow        = new BaseWindow("比赛-确认选择", AutoChoiceWindow_Compete, CompeteConfirmWindowFun);   // 比赛-确认选择
 BaseWindow* CompeteWindow               = new BaseWindow("比赛-连接场控", CompeteConfirmWindow, CompetitionlWindowFun);         // 比赛连接场控
+
 BaseWindow* TestMotorChoiceWindow       = new BaseWindow("电机测试 选择", TestWindow, TestMotorChoiceWindowFun);                // 电机测试（选择）
 BaseWindow* TestAirpoweredChoiceWindow  = new BaseWindow("活塞测试 选择", TestWindow, TestAirpoweredChoiceWindowFun);           // 活塞测试（选择）
 BaseWindow* TestInertialWindow          = new BaseWindow("陀螺仪测试", TestWindow, TestInertialWindowFun);                      // 陀螺仪测试（选择）
 BaseWindow* TestDistanceChoiceWindow    = new BaseWindow("距离传感器测试 选择", TestWindow, TestDistanceChoiceWindowFun);       // 距离传感器测试（选择）
+BaseWindow* TestDecenteringWindow       = new BaseWindow("脱轴检测", TestWindow, TestDecenteringFun);                          // 电机脱轴测试
 
 BaseWindow* TestMotorWindow             = new BaseWindow("电机测试", TestMotorChoiceWindow, TestMotorWindowFun);                // 电机测试
 BaseWindow* TestAirpoweredWindow        = new BaseWindow("活塞测试", TestAirpoweredChoiceWindow, TestAirpoweredWindowFun);      // 活塞测试
@@ -104,12 +106,12 @@ BaseWindow* InitWindowFun(){
 
     while (true){
         // 选项确认 
-        if (Controller.ButtonR1.pressing()){
+        if (Controller.ButtonR1.pressing() && Controller.ButtonR2.pressing()){
             stance = 'r';
             break;
         }
 
-        if (Controller.ButtonL1.pressing()){
+        if (Controller.ButtonL1.pressing() && Controller.ButtonL1.pressing()){
             stance = 'b';
            break;
         }
@@ -367,7 +369,7 @@ BaseWindow* AutoWindowFun(){
 //  测试模式
 BaseWindow* TestWindowFun(){
     int index = -1;
-    std::vector<char*> options = {"电机测试", "陀螺仪测试", "距离测试", "活塞测试", "定位轮测试"};
+    std::vector<char*> options = {"脱轴检测", "电机测试", "陀螺仪测试", "距离测试", "活塞测试", "定位轮测试"};
     PrintInLine(1);
     Controller.Screen.print("测试>测试选择");
     PrintInLine(3);
@@ -377,22 +379,26 @@ BaseWindow* TestWindowFun(){
 
     // 选项确认 
     if (index == 0){
-        return TestMotorChoiceWindow;
+        return TestDecenteringWindow;
     }
 
     if (index == 1){
-        return TestInertialWindow;
+        return TestMotorChoiceWindow;
     }
 
     if (index == 2){
-        return TestDistanceChoiceWindow;
+        return TestInertialWindow;
     }
 
     if (index == 3){
-        return TestAirpoweredChoiceWindow;
+        return TestDistanceChoiceWindow;
     }
 
     if (index == 4){
+        return TestAirpoweredChoiceWindow;
+    }
+
+    if (index == 5){
         return TestRotationWindow;
     }
 
@@ -614,6 +620,60 @@ BaseWindow* TestDistanceChoiceWindowFun(){
     std::cout << options[index] << std::endl;
     TestDistanceWindow->num = index;
     return TestDistanceWindow;
+}
+
+// 脱轴检测
+BaseWindow* TestDecenteringFun(){
+    motor motor_new = Motors[0];
+    int motor_last = 0, motor_now = 0;
+
+    PrintInLine(1);
+    Controller.Screen.print("L1                     R1");
+    PrintInLine(2);
+    Controller.Screen.print("L2                     R2");
+    PrintInLine(3);
+    Controller.Screen.print("L3                     R3");
+
+    while (true){
+        PrintInLine(2);
+        Controller.Screen.print("L2    %7.2f      R2", motor_new.position(deg));
+        PrintInLine(3);
+        Controller.Screen.print("L3    %7.2f      R3", motor_new.velocity(dps));
+
+        if (Controller.Axis4.position() < 0){
+            if (100 > Controller.Axis4.position() > 70){
+                motor_now = 0;
+            }else if (70 >= Controller.Axis4.position() > -70){
+                motor_now = 1;
+            }else{
+                motor_now = 2;
+            }
+        }else{
+            if (100 > Controller.Axis4.position() > 70){
+                motor_now = 3;
+            }else if (70 >= Controller.Axis4.position() > -70){
+                motor_now = 4;
+            }else{
+                motor_now = 5;
+            }
+        }
+
+        if (Controller.ButtonB.pressing()){
+          return TestMotorWindow->Back();
+        }
+        
+        if (motor_last != motor_now){
+            motor_new.spin(fwd, 0, voltageUnits::volt);
+            motor_last = motor_now;
+        }
+        motor_last = motor_now;
+        
+        motor_new = Motors[motor_now];
+
+        motor_new.spin(fwd, Controller.Axis2.position() * 0.16, voltageUnits::volt);
+
+        wait(10, msec);
+    }
 }
 
 // 电机测试
