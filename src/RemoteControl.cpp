@@ -918,13 +918,11 @@ void RemoteControl_YeJunXu(bool SaveFile, bool ReadFile, int OutTime, std::strin
 // 整体遥控
 void RemoteControlUnit(bool SaveFile, bool ReadFile, int OutTime, std::string file_name, double timeout){
 
-    // RemoteControl_3(SaveFile, ReadFile, OutTime, file_name, timeout);  // 二代车，双颜色传感器 刘老师版本
+    RemoteControl_3(SaveFile, ReadFile, OutTime, file_name, timeout);  // 二代车，双颜色传感器 刘老师版本
 
     // RemoteControl_WuBiao(SaveFile, ReadFile, OutTime, file_name, timeout); // 二代车，双颜色传感器 伍老师版本
 
-    RemoteControl_YeJunXu(SaveFile, ReadFile, OutTime, file_name, timeout); // 二代车，双颜色传感器 叶俊旭版本
-
-
+    // RemoteControl_YeJunXu(SaveFile, ReadFile, OutTime, file_name, timeout); // 二代车，双颜色传感器 叶俊旭版本
 
 }
 

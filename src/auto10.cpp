@@ -15,7 +15,7 @@ void auto10(){
 
     ChassisControlSTS.Move(4, 570 * k, 'n'); // 1550
 
-    ChassisControlSTS.TurnTo(14, 360  - 46, false); // 1550
+    ChassisControlSTS.TurnTo(14, 360  - 40, false); // 1550
 
     ChassisControlSTS.Move(16, 560 * k, 'n', true); // 1550
     ChassisControlSTS.WaitPositionArrive(500);
@@ -31,15 +31,15 @@ void auto10(){
     // 高阶============================================================================
     // 斜线到达判定距离传感器位置
     ChassisControlSTS.Move(12, 2400, 'u', true);        
-    ChassisControlSTS.WaitPositionArrive(1300);
+    ChassisControlSTS.WaitPositionArrive(1100);
 
     // 重新对齐至-90度
     ChassisControlSTS.ResetMaxSpeed(2);        
     ChassisControlSTS.ResetStraightAngle(-90);
-    ChassisControlSTS.WaitPositionArrive(1600);
+    ChassisControlSTS.WaitPositionArrive(1400);
 
     // 等待到达指定距离
-    while (GetDistance_back() > 435){
+    while (GetDistance_back() > 495){
       std::cout << GetDistance_back() << std::endl;
       if (! ChassisControlSTS.IsMoving()){
           ChassisControlSTS.ChassisLeftControl(2);
@@ -79,7 +79,7 @@ void auto10(){
 
     // 轻微的蠕动
     for (int i=0; i<50; i++){
-      if (GetDistance_front() > 115){
+      if (GetDistance_front() > 118){
         ChassisControlSTS.ChassisLeftControl(1.5);
         ChassisControlSTS.ChassisRightControl(1.5);
       }else{
@@ -105,24 +105,17 @@ void auto10(){
     // 努力进入对位
     ChassisControlSTS.ChassisLeftControl(-3);
     ChassisControlSTS.ChassisRightControl(-3);
-    wait(1000, msec);
+    wait(1500, msec);
 
 
     // 钩子
-    digitalC.set(1);
-    digitalD.set(1);
-    digitalE.set(1);
-    ChassisControlSTS.CurveMove(3, 280, 1500, 'p', true);   // 曲线
-    ChassisControlSTS.WaitPositionArrive(1070);
-    ChassisControlSTS.StopMoving();   // 提前结束，不需要精准
+    ChassisControlSTS.CurveMove(3, 295, 900, 'q');   // 曲线
 
-    digitalC.set(0);
-    digitalD.set(0);
-    ChassisControlSTS.Move(12, 1500, 0, 'n', true); // 直线钩
-    ChassisControlSTS.WaitPositionArrive(1300);
+    ChassisControlSTS.Move(12, 1700, -360, 'n', true); // 直线钩
+    ChassisControlSTS.WaitPositionArrive(1500);
     ChassisControlSTS.SetStopModHold();
-    ChassisControlSTS.StopMoving();
 
+    ChassisControlSTS.StopMoving();
     // 急刹车
     ChassisControlSTS.ChassisLeftControl(-2);
     ChassisControlSTS.ChassisRightControl(-2);

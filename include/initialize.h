@@ -48,6 +48,17 @@ void WaitForX(){
     }
 }
 
+// 寻找陀螺仪
+bool FindChassisInertial(){
+    for (int32_t now_port = 0; now_port < 21; now_port++){
+        ChassisInertial = inertial(now_port);  // 底盘陀螺仪
+        if (ChassisInertial.installed()){
+            return true;
+        }
+    }
+    return false;
+}
+
 // 设备检查
 void CheckEquipment(){
     // 电机检查
@@ -64,7 +75,7 @@ void CheckEquipment(){
     }
 
     // 陀螺仪检查
-    if (! ChassisInertial.installed()){
+    if (! FindChassisInertial()){
         PrintInLine(2);
         Controller.Screen.print("陀螺仪失联");
         WaitForX();

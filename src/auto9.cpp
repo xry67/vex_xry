@@ -21,7 +21,7 @@ void auto9(){
     ChassisControlSTS.Move_PPS = {0.01, 0, 2};
     ChassisControlSTS.Move(16, 820 * k, 'u'); // 1550
     ToolMotor2.spin(forward, 16, voltageUnits::volt);
-    wait(200, msec);
+    wait(400, msec);
     ToolMotor2.spin(forward, 0, voltageUnits::volt);
     ToolMotor3.spin(forward, 0, voltageUnits::volt);
 
@@ -104,12 +104,10 @@ void auto9(){
 
 
     // 钩子
-    ChassisControlSTS.CurveMove(3, 295, 1100, 'q', true);   // 曲线
-    ChassisControlSTS.WaitPositionArrive(1070);
-    ChassisControlSTS.StopMoving();   // 提前结束，不需要精准
+    ChassisControlSTS.CurveMove(3, 295, 900, 'q');   // 曲线
 
-    ChassisControlSTS.Move(12, 1500, -360, 'n', true); // 直线钩
-    ChassisControlSTS.WaitPositionArrive(1300);
+    ChassisControlSTS.Move(12, 1700, -360, 'n', true); // 直线钩
+    ChassisControlSTS.WaitPositionArrive(1500);
     ChassisControlSTS.SetStopModHold();
 
     ChassisControlSTS.StopMoving();
