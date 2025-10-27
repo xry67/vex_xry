@@ -16,7 +16,7 @@ void auto9(){
     ChassisControlSTS.Move(4, 720 * k, 'n'); // 1550
     
     // ChassisControlSTS.Turn_PPS = {0.0935, 0.0, 3};
-    ChassisControlSTS.TurnTo(14, 228, false); // 1550
+    ChassisControlSTS.TurnTo(14, 222, false); // 1550
 
     ChassisControlSTS.Move_PPS = {0.01, 0, 2};
     ChassisControlSTS.Move(16, 820 * k, 'u'); // 1550
@@ -36,7 +36,7 @@ void auto9(){
     ChassisControlSTS.WaitPositionArrive(1600);
 
     // 等待到达指定距离
-    while (GetDistance_front() > 400){
+    while (GetDistance_front() > 360){
       std::cout << GetDistance_front() << std::endl;
       if (! ChassisControlSTS.IsMoving()){
           ChassisControlSTS.ChassisLeftControl(2);
@@ -100,20 +100,15 @@ void auto9(){
     // 努力进入对位
     ChassisControlSTS.ChassisLeftControl(-2);
     ChassisControlSTS.ChassisRightControl(-2);
-    wait(1000, msec);
+    wait(1500, msec);
 
 
     // 钩子
-    digitalC.set(1);
-    digitalD.set(1);
-    digitalE.set(1);
-    ChassisControlSTS.CurveMove(3, 290, 1500, 'p', true);   // 曲线
+    ChassisControlSTS.CurveMove(3, 295, 1100, 'q', true);   // 曲线
     ChassisControlSTS.WaitPositionArrive(1070);
     ChassisControlSTS.StopMoving();   // 提前结束，不需要精准
 
-    digitalC.set(0);
-    digitalD.set(0);
-    ChassisControlSTS.Move(12, 1500, 0, 'n', true); // 直线钩
+    ChassisControlSTS.Move(12, 1500, -360, 'n', true); // 直线钩
     ChassisControlSTS.WaitPositionArrive(1300);
     ChassisControlSTS.SetStopModHold();
 

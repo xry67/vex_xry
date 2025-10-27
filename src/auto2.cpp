@@ -18,7 +18,7 @@ void auto2(){
         int start_p = ChassisInertial.rotation();
 
         speed = (left_speed + right_speed) / 2.0;
-        Brain.Screen.printAt(300, 50, "%f", speed);
+        Brain.Screen.printAt(300, 100, "%f", speed);
 
         ChassisControlSTS.ChassisLeftControl(speed);
         ChassisControlSTS.ChassisRightControl(-1 * speed);

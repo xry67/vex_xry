@@ -639,23 +639,30 @@ BaseWindow* TestDecenteringFun(){
         Controller.Screen.print("L2    %7.2f      R2", motor_new.position(deg));
         PrintInLine(3);
         Controller.Screen.print("L3    %7.2f      R3", motor_new.velocity(dps));
-
-        if (Controller.Axis4.position() < 0){
-            if (100 > Controller.Axis4.position() > 70){
-                motor_now = 0;
-            }else if (70 >= Controller.Axis4.position() > -70){
-                motor_now = 1;
-            }else{
-                motor_now = 2;
-            }
-        }else{
-            if (100 > Controller.Axis4.position() > 70){
-                motor_now = 3;
-            }else if (70 >= Controller.Axis4.position() > -70){
-                motor_now = 4;
-            }else{
-                motor_now = 5;
-            }
+        PrintInLine(1);
+        if (Controller.ButtonL1.pressing()){
+            motor_now = 0;
+            Controller.Screen.print("L1         L1         R1");
+        }
+        if (Controller.ButtonL2.pressing()){
+            motor_now = 1;
+            Controller.Screen.print("L1         L2         R1");
+        }
+        if (Controller.ButtonUp.pressing()){
+            motor_now = 2;
+            Controller.Screen.print("L1         L3         R1");
+        }
+        if (Controller.ButtonR1.pressing()){
+            motor_now = 3;
+            Controller.Screen.print("L1         R1         R1");
+        }
+        if (Controller.ButtonR2.pressing()){
+            motor_now = 4;
+            Controller.Screen.print("L1         R2         R1");
+        }
+        if (Controller.ButtonX.pressing()){
+            motor_now = 5;
+            Controller.Screen.print("L1         R3         R1");
         }
 
         if (Controller.ButtonB.pressing()){

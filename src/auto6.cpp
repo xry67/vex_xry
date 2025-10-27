@@ -27,14 +27,14 @@ double k=1;
     digitalH.set(1);
     digitalE.set(1);
 
-    ChassisControlSTS.Move(10, 1970, 'u'); // 1550        
+    ChassisControlSTS.Move(10, 1970, 'u');        
 
     ChassisControlSTS.turn_allowable_error = 1;
     ChassisControlSTS.TurnTo(10, 180, false);
 
     digitalG.set(1);
     wait(200, msec);
-    ChassisControlSTS.Move(14, 900, 'n', true); // 1550  
+    ChassisControlSTS.Move(14, 900, 'n', true);  
     ChassisControlSTS.WaitPositionArrive(850);
     ChassisControlSTS.StopMoving();
     ToolMotor1.spin(forward, -16, voltageUnits::volt);
