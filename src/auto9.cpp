@@ -13,7 +13,7 @@ void auto9(){
 
     ToolMotor1.spin(forward, -16, voltageUnits::volt);
 
-    ChassisControlSTS.Move(4, 720 * k, 'n'); // 1550
+    ChassisControlSTS.Move(3, 650 * k, 'n'); // 1550
     
     // ChassisControlSTS.Turn_PPS = {0.0935, 0.0, 3};
     ChassisControlSTS.TurnTo(14, 222, false); // 1550
@@ -21,7 +21,9 @@ void auto9(){
     ChassisControlSTS.Move_PPS = {0.01, 0, 2};
     ChassisControlSTS.Move(16, 820 * k, 'u'); // 1550
     ToolMotor2.spin(forward, 16, voltageUnits::volt);
-    wait(400, msec);
+    ToolMotor3.spin(forward, -16, voltageUnits::volt);
+    wait(600, msec);
+    digitalC.set(1);
     ToolMotor2.spin(forward, 0, voltageUnits::volt);
     ToolMotor3.spin(forward, 0, voltageUnits::volt);
 
@@ -36,7 +38,7 @@ void auto9(){
     ChassisControlSTS.WaitPositionArrive(1600);
 
     // 等待到达指定距离
-    while (GetDistance_front() > 360){
+    while (GetDistance_front() > 410){
       std::cout << GetDistance_front() << std::endl;
       if (! ChassisControlSTS.IsMoving()){
           ChassisControlSTS.ChassisLeftControl(2);
@@ -53,14 +55,17 @@ void auto9(){
     digitalG.set(1);
 
     // 转至180
+    ChassisControlSTS.Over_count = 15;
     ChassisControlSTS.TurnTo(10, 180, false);
+    ChassisControlSTS.Over_count = 5;
+
 
     // 吸导入
     ToolMotor1.spin(forward, -16, voltageUnits::volt);
     ChassisControlSTS.Move(5, 900, 'n', true); // 1550  
 
     // 使用距离传感器判断是否到达恒力区域
-    while (GetDistance_front() > 250){
+    while (GetDistance_front() > 270){
       std::cout << GetDistance_front() << std::endl;
       wait(10, msec);
     }
@@ -69,14 +74,14 @@ void auto9(){
     wait(100,msec);
 
     // 恒力吸导入  pct可以保证匀速插入导入筒
-    while(GetDistance_front() > 120){
+    while(GetDistance_front() > 190){
       ChassisControlSTS.ChassisLeftControl_pct(2);
       ChassisControlSTS.ChassisRightControl_pct(2);
     }
 
     // 轻微的蠕动
     for (int i=0; i<50; i++){
-      if (GetDistance_front() > 118){
+      if (GetDistance_front() > 137){
         ChassisControlSTS.ChassisLeftControl(1.5);
         ChassisControlSTS.ChassisRightControl(1.5);
       }else{
@@ -91,8 +96,9 @@ void auto9(){
     ToolMotor3.spin(forward, 3, voltageUnits::volt);
     digitalH.set(1);  
     digitalG.set(0);
+
     // 提前打球
-    ChassisControlSTS.WaitPositionArrive(1100);
+    ChassisControlSTS.WaitPositionArrive(1200);
     ToolMotor2.spin(forward, 16, voltageUnits::volt);
     ToolMotor3.spin(forward, 16, voltageUnits::volt);
     ChassisControlSTS.SetStopModCoast();
@@ -104,6 +110,7 @@ void auto9(){
 
 
     // 钩子
+    digitalC.set(0);
     ChassisControlSTS.CurveMove(3, 295, 900, 'q');   // 曲线
 
     ChassisControlSTS.Move(12, 1700, -360, 'n', true); // 直线钩
@@ -111,11 +118,18 @@ void auto9(){
     ChassisControlSTS.SetStopModHold();
 
     ChassisControlSTS.StopMoving();
+    ToolMotor2.spin(forward, 0, voltageUnits::volt);
+    ToolMotor3.spin(forward, 0, voltageUnits::volt);
     // 急刹车
     ChassisControlSTS.ChassisLeftControl(-2);
     ChassisControlSTS.ChassisRightControl(-2);
     wait(100, msec);
     ChassisControlSTS.ChassisLeftControl(0);
     ChassisControlSTS.ChassisRightControl(0);
+
+    ChassisControlSTS.ChassisLeftControl_pct(0);
+    ChassisControlSTS.ChassisRightControl_pct(0);
+    wait(3000, msec);
+
 
 }

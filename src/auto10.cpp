@@ -25,8 +25,8 @@ void auto10(){
     ToolMotor1.spin(forward, -16, voltageUnits::volt);
     ToolMotor2.spin(forward, 0, voltageUnits::volt);
     ChassisControlSTS.WaitMoveFinish();
-    digitalH.set(1);
-    digitalE.set(1);
+    digitalC.set(1);
+
 
     // 高阶============================================================================
     // 斜线到达判定距离传感器位置
@@ -39,7 +39,7 @@ void auto10(){
     ChassisControlSTS.WaitPositionArrive(1400);
 
     // 等待到达指定距离
-    while (GetDistance_back() > 495){
+    while (GetDistance_back() > 485){
       std::cout << GetDistance_back() << std::endl;
       if (! ChassisControlSTS.IsMoving()){
           ChassisControlSTS.ChassisLeftControl(2);
@@ -49,11 +49,12 @@ void auto10(){
     }
     
     // 刹车
+    digitalG.set(1);
     ChassisControlSTS.ChassisLeftControl(0);
     ChassisControlSTS.ChassisRightControl(0);
     ChassisControlSTS.StopMoving();
     wait(100,msec);   // 需要保留等待时间，否则自转的旋转中心会由于惯性发生改变
-    digitalG.set(1);
+    
 
     // 转至180
     ChassisControlSTS.TurnTo(10, 180, false);
@@ -63,7 +64,7 @@ void auto10(){
     ChassisControlSTS.Move(5, 900, 'n', true); // 1550  
 
     // 使用距离传感器判断是否到达恒力区域 250是即将进入导入区的距离
-    while (GetDistance_front() > 250){
+    while (GetDistance_front() > 300){
       std::cout << GetDistance_front() << std::endl;
       wait(10, msec);
     }
@@ -72,14 +73,14 @@ void auto10(){
     wait(100,msec);
 
     // 恒力吸导入  pct可以保证匀速插入导入筒
-    while(GetDistance_front() > 120){
+    while(GetDistance_front() > 200){
       ChassisControlSTS.ChassisLeftControl_pct(2);
       ChassisControlSTS.ChassisRightControl_pct(2);
     }
 
     // 轻微的蠕动
     for (int i=0; i<50; i++){
-      if (GetDistance_front() > 118){
+      if (GetDistance_front() > 150){
         ChassisControlSTS.ChassisLeftControl(1.5);
         ChassisControlSTS.ChassisRightControl(1.5);
       }else{
@@ -109,6 +110,8 @@ void auto10(){
 
 
     // 钩子
+    digitalC.set(0);
+
     ChassisControlSTS.CurveMove(3, 295, 900, 'q');   // 曲线
 
     ChassisControlSTS.Move(12, 1700, -360, 'n', true); // 直线钩
@@ -116,10 +119,16 @@ void auto10(){
     ChassisControlSTS.SetStopModHold();
 
     ChassisControlSTS.StopMoving();
+    ToolMotor2.spin(forward, 0, voltageUnits::volt);
+    ToolMotor3.spin(forward, 0, voltageUnits::volt);
     // 急刹车
     ChassisControlSTS.ChassisLeftControl(-2);
     ChassisControlSTS.ChassisRightControl(-2);
     wait(100, msec);
     ChassisControlSTS.ChassisLeftControl(0);
     ChassisControlSTS.ChassisRightControl(0);
+
+    ChassisControlSTS.ChassisLeftControl_pct(0);
+    ChassisControlSTS.ChassisRightControl_pct(0);
+    wait(3000, msec);
 }
