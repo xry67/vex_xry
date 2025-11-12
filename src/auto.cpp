@@ -17,8 +17,8 @@ void AddAutoFun(){
     AutoFunctions.push_back(AutoFun("左6+1+钩", auto9));  // 有距离传感器
     AutoFunctions.push_back(AutoFun("右6+1+钩", auto10)); // 有距离传感器
     // AutoFunctions.push_back(AutoFun("钩子", auto11));
-    AutoFunctions.push_back(AutoFun("技能赛", auto12));
-    // AutoFunctions.push_back(AutoFun("测试", auto13));
+    // AutoFunctions.push_back(AutoFun("技能赛", auto12, 60));
+    AutoFunctions.push_back(AutoFun("测试", auto13));
     // AutoFunctions.push_back(AutoFun("", auto14));
 
 }
@@ -26,5 +26,5 @@ void AddAutoFun(){
 // 比赛的自动函数
 void AutoControl(){
     // 运行自动程序
-    AutoFunctions[auto_index].fun();
+    AutoFunctions[auto_index].RunAutoFun();
 }

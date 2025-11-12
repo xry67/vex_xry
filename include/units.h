@@ -67,4 +67,7 @@ double NumInterval(double num, double mininum, double maxinum);
 // 三个数字的中值
 double medianOfThree(double a, double b, double c);
 
+// 获取时间（秒）
+double GetNowTime();
+
 #endif

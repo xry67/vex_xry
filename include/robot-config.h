@@ -86,6 +86,7 @@ extern distance Distance_r;  // 右
 // extern aivision aiVision;
 
 extern std::vector<AutoFun> AutoFunctions;  // 自动路径储存
+extern AutoFun *RunningAutoFun;  // 当前自动路径
 extern std::vector<ChassisRomoteControlParams> ChassisRomoteControlList;  // 遥控列表
 extern ChassisRomoteControl ChassisRomoteControlSTS;                      // 遥控控制
 

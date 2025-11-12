@@ -160,3 +160,8 @@ double medianOfThree(double a, double b, double c) {
     double ans = arr[1];
     return ans;
 }
+
+// 获取时间（秒）
+double GetNowTime(){
+    return std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count();  // 运动开始时间
+}

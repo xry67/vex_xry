@@ -84,7 +84,7 @@ void WaitFrontDistanceArriveThenStopMove(double speed, double val, double angle,
     ChassisControlSTS.StopMoving();
 }
 
-int auto12_child(){
+void auto12(){
     double best_vertical_d = 620; // 竖直方向，接近墙壁距离
     double best_horizontal_d = 475; // 水平方向，接近墙壁距离
     double uniform_start_end_d = 0; // 恒力开始距离
@@ -171,26 +171,24 @@ int auto12_child(){
     ChassisControlSTS.ChassisLeftControl(0);
     ChassisControlSTS.ChassisRightControl(0);
     wait(1000, msec);
-
-    return 0;
 }
 
-void auto12(){
+// void auto12(){
 
-    vex::thread  Task = thread(auto12_child);
+//     vex::thread  Task = thread(auto12_child);
 
-    double start_time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count();  // 运动开始时间
-    double end_time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count();  // 运动开始时间
+//     double start_time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count();  // 运动开始时间
+//     double end_time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count();  // 运动开始时间
 
-    while (end_time - start_time < 60){
-        end_time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count();  // 运动开始时间
-        if (Controller.ButtonB.pressing() && Controller.ButtonA.pressing()){
-            break;
-        }
-        wait(10, msec); 
-    }
-    Task.interrupt(); // 中止线程
-    RestoreInitial(); // 停止所有
-    RemoteControl();
-}   
+//     while (end_time - start_time < 60){
+//         end_time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count();  // 运动开始时间
+//         if (Controller.ButtonB.pressing() && Controller.ButtonA.pressing()){
+//             break;
+//         }
+//         wait(10, msec); 
+//     }
+//     Task.interrupt(); // 中止线程
+//     RestoreInitial(); // 停止所有
+//     RemoteControl();
+// }   
 

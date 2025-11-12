@@ -25,6 +25,8 @@ double Auto_Turn_To_Target_Speed = 50;
 
 // 自动程序加入
 std::vector<AutoFun> AutoFunctions;
+AutoFun *RunningAutoFun;  // 当前自动路径
+
 // 遥控模式加入
 std::vector<ChassisRomoteControlParams> ChassisRomoteControlList;  // 遥控列表
 ChassisRomoteControl ChassisRomoteControlSTS;                      // 遥控控制

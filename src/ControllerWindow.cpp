@@ -336,14 +336,27 @@ BaseWindow* AutoWindowFun(){
 
     // 运行自动程序
     ChassisControlSTS.ResetPPS();
-    double start_time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count();
-    AutoFunctions[index].fun();
-    
-    double end_time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count();
 
 
-    RestoreInitial();
+    // 线程开启
+    double start_time = GetNowTime();
+    auto_index = index;
+    RunningAutoFun = &AutoFunctions[index];
+    RunningAutoFun->start_time = start_time;
+    vex::thread  Task = thread(AutoControl);
+    double now_time = GetNowTime();
+
+    while(now_time - start_time < RunningAutoFun->out_time && ! RunningAutoFun->IsOver()){
+        now_time = GetNowTime();  // 运动开始时间
+        if (Controller.ButtonX.pressing() && Controller.ButtonA.pressing()){
+            break;
+        }
+        wait(10, msec); 
+    }
+    Task.interrupt(); // 中止线程
+    double end_time = GetNowTime();
     ChassisControlSTS.ChassisStoppingCoast();  // 底盘停止抱死
+    RestoreInitial();
     PrintInLine(1);
     Controller.Screen.print("运行完成");
     PrintInLine(2);
