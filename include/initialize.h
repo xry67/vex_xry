@@ -27,6 +27,8 @@ int EquipmentMonitor(){
             Controller.rumble("..");
             wait(500, msec);
         }
+        
+        // Brain.Screen.printAt(100, 150, "%d %d %d", Competition.isCompetitionSwitch(), Competition.isEnabled(), Competition.isFieldControl());
 
         // 设备监控
         Draw_Equipment_Monitor.Updata();

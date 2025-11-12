@@ -11,6 +11,5 @@ void auto13(){
     ChassisControlSTS.Move(10, 1000, now_angle, 'n');
     ChassisControlSTS.Turn(10, 180, 'r');
     now_angle += 180;
-    PrintAt(2, "---%f---", RunningAutoFun->GetAutoRunTime());
   }
 }

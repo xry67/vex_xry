@@ -525,6 +525,38 @@ BaseWindow* CompeteConfirmWindowFun(){
     Controller.Screen.print("      确定(X)   返回(B)");
 
     while (true){
+        if (Competition.isFieldControl()){
+            PrintInLine(3);
+            Controller.Screen.print("你没有按X确认");
+            wait(900, msec);
+
+            PrintInLine(3);
+            Controller.Screen.print("如果有误请重启所有设备"); 
+            wait(900, msec);
+
+            PrintInLine(3);
+            Controller.rumble(".");
+            PrintInLine(1);
+            Controller.Screen.print("自动：%s", AutoFunctions[auto_index].name);
+            PrintInLine(2);
+            Controller.Screen.print("遥控：%s", ChassisRomoteControlSTS.name);
+            PrintInLine(3);
+            Controller.Screen.print("即将自动确认选项（3）"); 
+            wait(900, msec);
+
+            PrintInLine(3);
+            Controller.rumble(".");
+            Controller.Screen.print("即将自动确认选项（2）"); 
+            wait(900, msec);
+
+            PrintInLine(3);
+            Controller.rumble(".");
+            Controller.Screen.print("即将自动确认选项（1）"); 
+            wait(900, msec);
+
+            return CompeteWindow;
+        }
+
         if (Controller.ButtonX.pressing()){
             return CompeteWindow;
         }
@@ -545,11 +577,47 @@ BaseWindow* CompetitionlWindowFun(){
     Controller.Screen.print("比赛-已选择完成");
     PrintInLine(2);
     Controller.Screen.print("请连接场控");
-    PrintInLine(3);
-    Controller.Screen.print("");
 
-    Competition.autonomous(AutoControl);        // 自动程序加入
+
+
+    // 等待场控连接
+    double start_time = GetNowTime();
+    double now_time = GetNowTime();
+    bool txt_print = false;
+
+    while(! Competition.isFieldControl()){
+
+        now_time = GetNowTime();
+        if (now_time - start_time > 15){
+            txt_print = true;
+            PrintInLine(3);
+            Controller.Screen.print("向上拨动两个摇杆进入手动");
+        }
+        
+        if (std::abs(Controller.Axis2.position()) > 50 || std::abs(Controller.Axis3.position()) > 50 ) 
+        {
+            RemoteControl();
+        }
+
+        if (Controller.ButtonB.pressing()){
+            return CompeteWindow->Back();
+        }
+
+        wait(100, msec);
+    }
+
+    Controller.rumble("-");
+    PrintInLine(1);
+    Controller.Screen.print("场控已连接");
+    wait(500, msec);
+
+    PrintInLine(2);
+    Controller.Screen.print("自动已加入"); 
+    wait(500, msec);
+
     Competition.drivercontrol(RemoteControl);   // 遥控程序加入
+    Competition.autonomous(AutoControl);        // 自动程序加入
+
     while (true){
         wait(180000, msec);
     }
