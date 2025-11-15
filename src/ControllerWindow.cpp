@@ -18,7 +18,7 @@ BaseWindow* AutoWindow                  = new BaseWindow("自动测试模式", M
 BaseWindow* TestWindow                  = new BaseWindow("测试模式", ModWindow, TestWindowFun);                         //  测试模式
 BaseWindow* MemoryWindow                = new BaseWindow("记忆模式", ModWindow, MemoryWindowFun);                       //  记忆模式
 
-BaseWindow* AutoChoiceWindow_Compete    = new BaseWindow("比赛-自动选择", RemoteControlWindow, AutoChoiceWindow_CompeteFun);    // 比赛-自动选择
+BaseWindow* AutoChoiceWindow_Compete    = new BaseWindow("比赛-自动选择", ModWindow, AutoChoiceWindow_CompeteFun);    // 比赛-自动选择
 BaseWindow* RemoteControlWindow_Auto    = new BaseWindow("自动-遥控选择", AutoWindow, RemoteControlWindow_AutoFun);             // 自动-遥控选择
 
 BaseWindow* CompeteConfirmWindow        = new BaseWindow("比赛-确认选择", AutoChoiceWindow_Compete, CompeteConfirmWindowFun);   // 比赛-确认选择
@@ -391,6 +391,7 @@ BaseWindow* AutoWindowFun(){
         }
         last_A = Controller.ButtonA.pressing();
         last_B = Controller.ButtonB.pressing();
+        wait(10, msec);
     }
 
     return ModWindow;
@@ -478,7 +479,7 @@ BaseWindow* MemoryWindowFun(){
 
 //  比赛-自动选择
 BaseWindow* AutoChoiceWindow_CompeteFun(){
-    WaitInertialCalibrating();
+     WaitInertialCalibrating();
 
     int index = -1;
     // 获取各个自动程序的名称和内容
@@ -490,9 +491,9 @@ BaseWindow* AutoChoiceWindow_CompeteFun(){
     PrintInLine(1);
     Controller.Screen.print("比赛>自动选择");
     PrintInLine(3);
-    // Controller.Screen.print("      确定(A)   返回(B)");
     Controller.Screen.print("   选定(A) 运行(R1+R2)");
-
+    ChassisControlSTS.Reset();  // 初始化
+    
     // 获取用户操作
     int n   = options.size();
     bool print_flag = true;
@@ -503,7 +504,7 @@ BaseWindow* AutoChoiceWindow_CompeteFun(){
 
     while (true){
         PrintInLine(1);
-        Controller.Screen.print("%.3f", ChassisInertial.rotation());
+        Controller.Screen.print(ChassisInertial.rotation());
 
         if (print_flag){
             PrintInLine(2);
@@ -547,36 +548,15 @@ BaseWindow* AutoChoiceWindow_CompeteFun(){
         ButtonRightFlag = Controller.ButtonRight.pressing();
         ButtonLeftFlag  = Controller.ButtonLeft.pressing();
 
-        // 运行自动
-        if (Controller.ButtonR1.pressing() && Controller.ButtonR2.pressing()){
-            ChassisControlSTS.ResetPPS();
-            auto_index = index_i;
-            RunAutoFunAndUpdataToControl();
-
-            PrintInLine(3);
-            Controller.Screen.print("      遥控(A)   重试(B)");
-
-            // 等待下一步操作
-            bool last_A = Controller.ButtonA.pressing();
-            bool last_B = Controller.ButtonB.pressing();
-            while (true){
-                // 选项确认 
-                if (Controller.ButtonA.pressing() && ! last_A){
-                    return RemoteControlWindow_Mod;
-                }
-
-                // 退出选择
-                if (Controller.ButtonB.pressing() && ! last_B){
-                return ModWindow;
-                }
-                last_A = Controller.ButtonA.pressing();
-                last_B = Controller.ButtonB.pressing();
-            }
-            return ModWindow;
-        }
-
         // 选项确认 
         if (Controller.ButtonA.pressing()){
+            index = index_i;
+            auto_index = index;
+            return CompeteConfirmWindow;
+        }
+
+        // 运行自动
+        if (Controller.ButtonR1.pressing() && Controller.ButtonR2.pressing()){
             index = index_i;
             break;
         }
@@ -590,16 +570,40 @@ BaseWindow* AutoChoiceWindow_CompeteFun(){
         wait(100, msec);
     }
 
-    if (index != -1){
-        auto_index = index;
-    }
-
     if (index == -1){
       return RemoteControlWindow_Mod->Back();
     }
 
-    
-    return CompeteConfirmWindow;
+    std::cout << options[index] << std::endl;
+
+    // 运行自动程序
+    ChassisControlSTS.ResetPPS();
+    auto_index = index;
+
+    RunAutoFunAndUpdataToControl();  // 运行自动程序
+
+    PrintInLine(3);
+    Controller.Screen.print("      遥控(A)   重试(B)");
+
+    // 等待下一步操作
+    bool last_A = Controller.ButtonA.pressing();
+    bool last_B = Controller.ButtonB.pressing();
+    while (true){
+        // 选项确认 
+        if (Controller.ButtonA.pressing() && ! last_A){
+            return RemoteControlWindow_Mod;
+        }
+
+        // 退出选择
+        if (Controller.ButtonB.pressing() && ! last_B){
+          return AutoChoiceWindow_Compete;
+        }
+        last_A = Controller.ButtonA.pressing();
+        last_B = Controller.ButtonB.pressing();
+        wait(10, msec);
+    }
+
+    return ModWindow;
 }     
 
 // 自动-遥控选择
