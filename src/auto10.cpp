@@ -42,8 +42,8 @@ void auto10(){
     while (GetDistance_back() > 485){
       std::cout << GetDistance_back() << std::endl;
       if (! ChassisControlSTS.IsMoving()){
-          ChassisControlSTS.ChassisLeftControl(2);
-          ChassisControlSTS.ChassisRightControl(2);
+          ChassisControlSTS.ChassisLeftControl(-2);
+          ChassisControlSTS.ChassisRightControl(-2);
       }
       wait(10, msec);
     }

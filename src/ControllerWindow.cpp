@@ -93,6 +93,39 @@ int ChoiceIndex(std::vector<char*> options){
     }
 }
 
+// 运行自动函数并且结束后更新时间到遥控器
+int RunAutoFunAndUpdataToControl(){
+    // 运行自动程序
+    ChassisControlSTS.ResetPPS();
+
+    // 线程开启
+    double start_time = GetNowTime();
+    
+    RunningAutoFun = &AutoFunctions[auto_index];
+    RunningAutoFun->start_time = start_time;
+    RunningAutoFun->Over = false;
+    vex::thread  Task = thread(AutoControl);
+    double now_time = GetNowTime();
+
+    while(now_time - start_time < RunningAutoFun->out_time && ! RunningAutoFun->IsOver()){
+        now_time = GetNowTime();  // 运动开始时间
+        if (Controller.ButtonX.pressing() && Controller.ButtonA.pressing()){
+            break;
+        }
+        wait(10, msec); 
+    }
+    Task.interrupt(); // 中止线程
+    double end_time = GetNowTime();
+    ChassisControlSTS.ChassisStoppingCoast();  // 底盘停止抱死
+    RestoreInitial();
+    PrintInLine(1);
+    Controller.Screen.print("运行完成");
+    PrintInLine(2);
+    Controller.Screen.print("运行时间： %.2f", end_time - start_time);
+    // wait(2000, msec);
+    return 0;
+}
+
 // 初始化函数
 BaseWindow* InitWindowFun(){
     // 站位选择
@@ -336,31 +369,10 @@ BaseWindow* AutoWindowFun(){
 
     // 运行自动程序
     ChassisControlSTS.ResetPPS();
-
-
-    // 线程开启
-    double start_time = GetNowTime();
     auto_index = index;
-    RunningAutoFun = &AutoFunctions[index];
-    RunningAutoFun->start_time = start_time;
-    vex::thread  Task = thread(AutoControl);
-    double now_time = GetNowTime();
 
-    while(now_time - start_time < RunningAutoFun->out_time && ! RunningAutoFun->IsOver()){
-        now_time = GetNowTime();  // 运动开始时间
-        if (Controller.ButtonX.pressing() && Controller.ButtonA.pressing()){
-            break;
-        }
-        wait(10, msec); 
-    }
-    Task.interrupt(); // 中止线程
-    double end_time = GetNowTime();
-    ChassisControlSTS.ChassisStoppingCoast();  // 底盘停止抱死
-    RestoreInitial();
-    PrintInLine(1);
-    Controller.Screen.print("运行完成");
-    PrintInLine(2);
-    Controller.Screen.print("运行时间： %.2f", end_time - start_time);
+    RunAutoFunAndUpdataToControl();  // 运行自动程序
+
     PrintInLine(3);
     Controller.Screen.print("      遥控(A)   重试(B)");
 
@@ -473,9 +485,84 @@ BaseWindow* AutoChoiceWindow_CompeteFun(){
     PrintInLine(1);
     Controller.Screen.print("比赛>自动选择");
     PrintInLine(3);
-    Controller.Screen.print("      确定(A)   返回(B)");
+    // Controller.Screen.print("      确定(A)   返回(B)");
+    Controller.Screen.print("   选定(A) 运行(R1+R2)");
 
-    index = ChoiceIndex(options);  // 获取用户操作
+    // 获取用户操作
+    int n   = options.size();
+    bool print_flag = true;
+    int index_i = 0;
+    
+    bool ButtonRightFlag = false;
+    bool ButtonLeftFlag  = false;
+
+    while (true){
+        PrintInLine(1);
+        Controller.Screen.print("%.3f", ChassisInertial.rotation());
+
+        if (print_flag){
+            PrintInLine(2);
+
+            char formattedString[50]; // 创建字符数组来存储格式化字符串  
+            // 使用 snprintf 生成格式化字符串  
+            snprintf(formattedString, 50, "-> %s <-", options[index_i]); 
+            // 使字符串居中
+            CenterStr(formattedString);
+
+            Controller.Screen.print(formattedString);
+        }
+   
+        print_flag = false;
+
+        // 选项加一
+        if ((! Controller.ButtonRight.pressing() && ButtonRightFlag)  || Controller.Axis4.position() > 50  || Controller.Axis1.position() > 50){
+            index_i = (index_i + 1) % n;
+            print_flag = true;
+        }
+
+        // 选项减一
+        if ((! Controller.ButtonLeft.pressing() && ButtonLeftFlag)  || Controller.Axis4.position() < -50  || Controller.Axis1.position() < -50){
+            index_i = index_i - 1;
+            if (index_i == -1){
+                index_i = n - 1;
+            }
+            print_flag = true;
+        }
+
+        // 底盘重新初始化
+        if (Controller.ButtonX.pressing()){
+            PrintInLine(1);
+            Controller.Screen.print("自动>初始化成功！");
+            ChassisControlSTS.Reset();  // 初始化
+            wait(500, msec);
+            PrintInLine(1);
+            Controller.Screen.print("自动>自动选择");
+        }
+
+        ButtonRightFlag = Controller.ButtonRight.pressing();
+        ButtonLeftFlag  = Controller.ButtonLeft.pressing();
+
+        // 运行自动
+        if (Controller.ButtonR1.pressing() && Controller.ButtonR2.pressing()){
+            auto_index = index_i;
+            RunAutoFunAndUpdataToControl();
+            return RemoteControlWindow_Mod;
+        }
+
+        // 选项确认 
+        if (Controller.ButtonA.pressing()){
+            index = index_i;
+            break;
+        }
+
+        // 退出选择
+        if (Controller.ButtonB.pressing()){
+            index = -1;
+          break;
+        }
+
+        wait(100, msec);
+    }
 
     if (index != -1){
         auto_index = index;

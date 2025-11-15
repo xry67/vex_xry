@@ -32,6 +32,7 @@ class AutoFun{
 
     // 运行自动函数
     void RunAutoFun(){
+        start_time = 0;
         Over = false; 
         fun();
         Over = true; 
