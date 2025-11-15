@@ -376,16 +376,21 @@ BaseWindow* AutoWindowFun(){
     PrintInLine(3);
     Controller.Screen.print("      遥控(A)   重试(B)");
 
+    // 等待下一步操作
+    bool last_A = Controller.ButtonA.pressing();
+    bool last_B = Controller.ButtonB.pressing();
     while (true){
         // 选项确认 
-        if (Controller.ButtonA.pressing()){
+        if (Controller.ButtonA.pressing() && ! last_A){
             return RemoteControlWindow_Auto;
         }
 
         // 退出选择
-        if (Controller.ButtonB.pressing()){
+        if (Controller.ButtonB.pressing() && ! last_B){
           return AutoWindow;
         }
+        last_A = Controller.ButtonA.pressing();
+        last_B = Controller.ButtonB.pressing();
     }
 
     return ModWindow;
@@ -544,9 +549,30 @@ BaseWindow* AutoChoiceWindow_CompeteFun(){
 
         // 运行自动
         if (Controller.ButtonR1.pressing() && Controller.ButtonR2.pressing()){
+            ChassisControlSTS.ResetPPS();
             auto_index = index_i;
             RunAutoFunAndUpdataToControl();
-            return RemoteControlWindow_Mod;
+
+            PrintInLine(3);
+            Controller.Screen.print("      遥控(A)   重试(B)");
+
+            // 等待下一步操作
+            bool last_A = Controller.ButtonA.pressing();
+            bool last_B = Controller.ButtonB.pressing();
+            while (true){
+                // 选项确认 
+                if (Controller.ButtonA.pressing() && ! last_A){
+                    return RemoteControlWindow_Mod;
+                }
+
+                // 退出选择
+                if (Controller.ButtonB.pressing() && ! last_B){
+                return ModWindow;
+                }
+                last_A = Controller.ButtonA.pressing();
+                last_B = Controller.ButtonB.pressing();
+            }
+            return ModWindow;
         }
 
         // 选项确认 

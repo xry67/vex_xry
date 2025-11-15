@@ -318,7 +318,7 @@ void RemoteControl_3(bool SaveFile, bool ReadFile, int OutTime, std::string file
         LastButtonY = ControlData.ButtonY;
 
         // 退出
-        if (auto_index == -1 && ControlData.ButtonB){
+        if (! Competition.isFieldControl() && ControlData.ButtonB){
             HoldButtonBCount += 1;
             if (HoldButtonB(HoldButtonBCount, OutTime)){
                 break;
@@ -600,7 +600,7 @@ void RemoteControl_WuBiao(bool SaveFile, bool ReadFile, int OutTime, std::string
         LastButtonY = ControlData.ButtonY;
 
         // 退出
-        if (auto_index == -1 && ControlData.ButtonB){
+        if (! Competition.isFieldControl() && ControlData.ButtonB){
             HoldButtonBCount += 1;
             if (HoldButtonB(HoldButtonBCount, OutTime)){
                 break;
@@ -889,7 +889,7 @@ void RemoteControl_YeJunXu(bool SaveFile, bool ReadFile, int OutTime, std::strin
         LastButtonY = ControlData.ButtonY;
 
         // 退出
-        if (auto_index == -1 && ControlData.ButtonB){
+        if (! Competition.isFieldControl() && ControlData.ButtonB){
             HoldButtonBCount += 1;
             if (HoldButtonB(HoldButtonBCount, OutTime)){
                 break;
