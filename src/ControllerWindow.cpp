@@ -144,7 +144,7 @@ BaseWindow* InitWindowFun(){
             break;
         }
 
-        if (Controller.ButtonL1.pressing() && Controller.ButtonL1.pressing()){
+        if (Controller.ButtonL2.pressing() && Controller.ButtonL1.pressing()){
             stance = 'b';
            break;
         }
@@ -358,6 +358,9 @@ BaseWindow* AutoWindowFun(){
           break;
         }
 
+        // 自动选择更换
+        auto_index = index_i;
+
         wait(100, msec);
     }
 
@@ -567,6 +570,9 @@ BaseWindow* AutoChoiceWindow_CompeteFun(){
           break;
         }
 
+        // 自动选项更换
+        auto_index = index_i;
+
         wait(100, msec);
     }
 
@@ -700,16 +706,10 @@ BaseWindow* CompetitionlWindowFun(){
     // 等待场控连接
     double start_time = GetNowTime();
     double now_time = GetNowTime();
-    bool txt_print = false;
 
     while(! Competition.isFieldControl()){
 
         now_time = GetNowTime();
-        if (now_time - start_time > 15){
-            txt_print = true;
-            PrintInLine(3);
-            Controller.Screen.print("向上拨动两个摇杆进入手动");
-        }
         
         if (std::abs(Controller.Axis2.position()) > 50 || std::abs(Controller.Axis3.position()) > 50 ) 
         {
