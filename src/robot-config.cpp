@@ -36,20 +36,20 @@ brain Brain;
 controller Controller = controller();
 competition Competition;
 
-motor LeftMotor1 = motor(PORT11, ratio6_1, 1);//11
-motor LeftMotor2 = motor(PORT12, ratio6_1, 1);//12
-motor LeftMotor3 = motor(PORT13, ratio6_1, 1);//13
+motor LeftMotor1 = motor(PORT18, ratio6_1, 1);
+motor LeftMotor2 = motor(PORT19, ratio6_1, 1);
+motor LeftMotor3 = motor(PORT20, ratio6_1, 1);
 motor_group LeftMotorGroup = motor_group(LeftMotor1, LeftMotor2, LeftMotor3);  // 左边电机组
- 
-motor RightMotor1 = motor(PORT14, ratio6_1, 0);//18
-motor RightMotor2 = motor(PORT15, ratio6_1, 0);//20
-motor RightMotor3 = motor(PORT16, ratio6_1, 0);//19
+
+motor RightMotor1 = motor(PORT15, ratio6_1, 0);
+motor RightMotor2 = motor(PORT16, ratio6_1, 0);
+motor RightMotor3 = motor(PORT17, ratio6_1, 0);
 motor_group RightMotorGroup = motor_group(RightMotor1, RightMotor2, RightMotor3);  // 右边边电机组
 
 
-motor ToolMotor1    = motor(PORT18, ratio6_1, 0);  // 上  f
-motor ToolMotor2    = motor(PORT19, ratio6_1, 0);  // 中  l
-motor ToolMotor3    = motor(PORT20, ratio6_1, 0);  // 下  r
+motor ToolMotor1    = motor(PORT8, ratio6_1, 0);  // 上  f
+motor ToolMotor2    = motor(PORT9, ratio6_1, 0);  // 中  l
+motor ToolMotor3    = motor(PORT10, ratio6_1, 0);  // 下  r
 motor ToolMotor4    = motor(PORT4, ratio6_1, 0);  // 
 
 digital_out digitalB = digital_out(Brain.ThreeWirePort.B);
