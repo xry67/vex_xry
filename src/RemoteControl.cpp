@@ -44,20 +44,15 @@ bool ChangeStance(){
 
 
 // 遥控额外线程控制 刘老师版本
-int RemoteControl_3_child(){
+int RemoteControl_child(){
     return 0;
 }
 
-// 二代车，双颜色传感器 刘老师版本
-void RemoteControl_3(bool SaveFile, bool ReadFile, int OutTime, std::string file_name, double timeout){
+// 三代车，双颜色传感器
+void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_name, double timeout){
 
-    // digitalG  铲子
-    // digitalH  抬升
-    // digitalF  撞球
-    // digitalE  钩子的大架子
-    // digitalD  左边钩子
-    // digitalC  右边钩子
-
+    // digitalH  铲子
+    // digitalG  钩子
 
     PrintInLine(1);
     if (stance == 'r'){
@@ -83,17 +78,25 @@ void RemoteControl_3(bool SaveFile, bool ReadFile, int OutTime, std::string file
 
     PrintInLine(2);
 
+    // 分球暂停计数器
+    int ErrorBall1 = 0;
+    int ErrorBall2 = 0;
+
     // 退出计数
     int HoldButtonBCount = 0;
 
-
+    // 时间变量
     double start_time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count(); 
     double now_time = start_time; 
     double out_time = 0;
     double last_time = start_time; 
 
+    // 按钮上一状态记录
+    bool LastRight = false;
+    bool LastY     = false;
 
-    vex::task Task(RemoteControl_3_child);  // 线程开启
+
+    vex::task Task(RemoteControl_child);  // 线程开启
 
     while (now_time - start_time < timeout){    
         last_time = now_time;
@@ -115,6 +118,24 @@ void RemoteControl_3(bool SaveFile, bool ReadFile, int OutTime, std::string file
             ControlData.save(outFile);
         }
 
+        // 分球
+        if ((stance == 'r' && OpticalHaveBlue(Optical1)) || (stance == 'b' && OpticalHaveRed(Optical1))){
+            ErrorBall1 = 20;
+        }
+        else if ((stance == 'b' && OpticalHaveBlue(Optical1)) || (stance == 'r' && OpticalHaveRed(Optical1))){
+            ErrorBall1 = 0;
+        }
+
+         if ((stance == 'r' && OpticalHaveBlue(Optical2)) || (stance == 'b' && OpticalHaveRed(Optical2))){
+            ErrorBall2 = 20;
+        }
+        else if ((stance == 'b' && OpticalHaveBlue(Optical2)) || (stance == 'r' && OpticalHaveRed(Optical2))){
+            ErrorBall2 = 0;
+        }
+        else{
+          ErrorBall2 = -1;
+        }
+
         // 底盘控制
         ChassisRomoteControlSTS.Work(); 
 
@@ -133,7 +154,7 @@ void RemoteControl_3(bool SaveFile, bool ReadFile, int OutTime, std::string file
                 ToolMotor1.spin(forward, 16, voltageUnits::volt);
             }
             if (ControlData.ButtonR2){
-                ToolMotor1.spin(forward, -60, pct);
+                ToolMotor1.spin(forward, -50, pct);
             }
             if (ControlData.ButtonL1){
                 ToolMotor1.spin(forward, 16, voltageUnits::volt);
@@ -141,7 +162,6 @@ void RemoteControl_3(bool SaveFile, bool ReadFile, int OutTime, std::string file
             if (ControlData.ButtonL2){
                 ToolMotor1.spin(forward, -16, voltageUnits::volt);
             }
-
 
         }
         else{
@@ -154,7 +174,7 @@ void RemoteControl_3(bool SaveFile, bool ReadFile, int OutTime, std::string file
                 ToolMotor2.spin(forward, 16, voltageUnits::volt);
             }
             if (ControlData.ButtonR2){
-                ToolMotor2.spin(forward, -60, pct);
+                ToolMotor2.spin(forward, -50 * ((ErrorBall1 > 0 || ErrorBall2 > 0 ) ? 1 : -1), pct);
             }
             if (ControlData.ButtonL1){
                 ToolMotor2.spin(forward, -16, voltageUnits::volt);
@@ -174,7 +194,7 @@ void RemoteControl_3(bool SaveFile, bool ReadFile, int OutTime, std::string file
                 ToolMotor3.spin(forward, -16, voltageUnits::volt);
             }
             if (ControlData.ButtonR2){
-                ToolMotor3.spin(forward, 60, pct);
+                ToolMotor3.spin(forward, 50, pct);
             }
             if (ControlData.ButtonL1){
                 ToolMotor3.spin(forward, 16, voltageUnits::volt);
@@ -186,6 +206,21 @@ void RemoteControl_3(bool SaveFile, bool ReadFile, int OutTime, std::string file
         else{
             ToolMotor3.spin(forward, 0, voltageUnits::volt);
         }
+
+        // 铲子钩子
+        if (! LastRight && ControlData.ButtonRight){
+            digitalG.set(! digitalG.value());
+        }
+        if (! LastY && ControlData.ButtonY){
+            digitalH.set(! digitalH.value());
+        }
+
+        // 变量维护
+        LastRight = ControlData.ButtonRight;
+        LastY     = ControlData.ButtonY;
+
+        ErrorBall1 = std::max(0, ErrorBall1 - 1);
+        ErrorBall2 = std::max(0, ErrorBall2 - 1);
 
         // 退出
         if (! Competition.isFieldControl() && ControlData.ButtonB){
@@ -213,7 +248,7 @@ void RemoteControl_3(bool SaveFile, bool ReadFile, int OutTime, std::string file
 // 整体遥控
 void RemoteControlUnit(bool SaveFile, bool ReadFile, int OutTime, std::string file_name, double timeout){
 
-    RemoteControl_3(SaveFile, ReadFile, OutTime, file_name, timeout);  // 二代车，双颜色传感器 刘老师版本
+    RemoteControl(SaveFile, ReadFile, OutTime, file_name, timeout);  // 三代车，双颜色传感器
 
 }
 
