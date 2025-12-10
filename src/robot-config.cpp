@@ -61,8 +61,8 @@ digital_out digitalH = digital_out(Brain.ThreeWirePort.H);  // 抬升
 digital_out digitalG = digital_out(Brain.ThreeWirePort.G);  // 抬升
 
 
-optical Optical1 = optical(PORT10);  // 颜色传感器
-optical Optical2 = optical(PORT9);  // 颜色传感器
+optical Optical1 = optical(PORT6);  // 颜色传感器
+optical Optical2 = optical(PORT5);  // 颜色传感器
 
 inertial ChassisInertial = inertial(PORT1);  // 底盘陀螺仪
 

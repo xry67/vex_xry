@@ -125,8 +125,11 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
         else if ((stance == 'b' && OpticalHaveBlue(Optical1)) || (stance == 'r' && OpticalHaveRed(Optical1))){
             ErrorBall1 = 0;
         }
+        else{
+            ErrorBall1 = -1;
+        }
 
-         if ((stance == 'r' && OpticalHaveBlue(Optical2)) || (stance == 'b' && OpticalHaveRed(Optical2))){
+        if ((stance == 'r' && OpticalHaveBlue(Optical2)) || (stance == 'b' && OpticalHaveRed(Optical2))){
             ErrorBall2 = 20;
         }
         else if ((stance == 'b' && OpticalHaveBlue(Optical2)) || (stance == 'r' && OpticalHaveRed(Optical2))){
@@ -135,6 +138,8 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
         else{
           ErrorBall2 = -1;
         }
+
+        Brain.Screen.printAt(100, 150, " %d/////%d  ", ErrorBall1, ErrorBall2);
 
         // 底盘控制
         ChassisRomoteControlSTS.Work(); 
@@ -154,7 +159,7 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
                 ToolMotor1.spin(forward, 16, voltageUnits::volt);
             }
             if (ControlData.ButtonR2){
-                ToolMotor1.spin(forward, -50, pct);
+                ToolMotor1.spin(forward, -40, pct);
             }
             if (ControlData.ButtonL1){
                 ToolMotor1.spin(forward, 16, voltageUnits::volt);
@@ -171,10 +176,56 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
         // 2号
         if (ControlData.ButtonR1 || ControlData.ButtonR2 || ControlData.ButtonL1 || ControlData.ButtonL2){
             if (ControlData.ButtonR1){
-                ToolMotor2.spin(forward, 16, voltageUnits::volt);
+                //  分球逻辑
+                // ErrorBall1： 靠前方的颜色传感器
+                // ErrorBall2： 靠后方的颜色传感器
+                // 0   ：正确颜色的球
+                // -1  ：没有球
+                // 1~20：错误的球，检测到错球值为20
+
+                if (ErrorBall1 > 0 && ErrorBall2 > 0){
+                    // 前后都是异色球，反转
+                    ToolMotor2.spin(forward, -16, voltageUnits::volt);
+                }
+                else if (ErrorBall1 > 0 && ErrorBall2 < 0){
+                    // 前异色，后没球，反转
+                    ToolMotor2.spin(forward, -16, voltageUnits::volt);
+                }
+                else if (ErrorBall1 > 0 && ErrorBall2 == 0){
+                    // 前异色，后同色，正转
+                    ToolMotor2.spin(forward, 16, voltageUnits::volt);
+                }
+                else if (ErrorBall1 == 0 && ErrorBall2 > 0){
+                    // 前同色，后异色，反转
+                    ToolMotor2.spin(forward, -16, voltageUnits::volt);
+                }
+                else if (ErrorBall1 == 0 && ErrorBall2 == 0){
+                    // 前同色，后同色，正转
+                    ToolMotor2.spin(forward, 16, voltageUnits::volt);
+                }
+                else if (ErrorBall1 == 0 && ErrorBall2 < 0){
+                    // 前同色，后没球，正转
+                    ToolMotor2.spin(forward, 16, voltageUnits::volt);
+                }
+                else if (ErrorBall1 < 0 && ErrorBall2 > 0){
+                    // 前没球，后异色，反转
+                    ToolMotor2.spin(forward, -16, voltageUnits::volt);
+                }
+                else if (ErrorBall1 < 0 && ErrorBall2 == 0){
+                    // 前没球，后同色，正转
+                    ToolMotor2.spin(forward, 16, voltageUnits::volt);
+                }
+                else if (ErrorBall1 < 0 && ErrorBall2 < 0){
+                    // 前没球，后没球，正转
+                    ToolMotor2.spin(forward, 16, voltageUnits::volt);
+                }
+                else{
+                    // 不可能进来，但还是留有保底，正转
+                    ToolMotor2.spin(forward, 16, voltageUnits::volt);
+                }
             }
             if (ControlData.ButtonR2){
-                ToolMotor2.spin(forward, -50 * ((ErrorBall1 > 0 || ErrorBall2 > 0 ) ? 1 : -1), pct);
+                ToolMotor2.spin(forward, -40, pct);
             }
             if (ControlData.ButtonL1){
                 ToolMotor2.spin(forward, -16, voltageUnits::volt);
@@ -194,7 +245,7 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
                 ToolMotor3.spin(forward, -16, voltageUnits::volt);
             }
             if (ControlData.ButtonR2){
-                ToolMotor3.spin(forward, 50, pct);
+                ToolMotor3.spin(forward, 40, pct);
             }
             if (ControlData.ButtonL1){
                 ToolMotor3.spin(forward, 16, voltageUnits::volt);
