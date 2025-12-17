@@ -60,15 +60,15 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
   // 重新设置相关数据
   void ChassisControl::ResetPPS(){
     // 直线修正
-    std::map<int, std::vector<double>> Straight_PPS_Map = {{343, {7.5, 0.0, 0.1}}, {450, {7.5, 0.0, 0.1}}, {300, {7.5, 0.0, 0.1}}};
+    std::map<int, std::vector<double>> Straight_PPS_Map = {{343, {7.5, 0.0, 0.1}}, {450, {3, 0.0, 0.1}}, {300, {7.5, 0.0, 0.1}}};
 
     // 编码器
-    std::map<int, std::vector<double>> Move_PPS_Map = {{343, {0.00950, 0.800, 2}}, {450, {0.00850, 0.500, 2}}, {300, {0.02, 0.800, 2}}};
+    std::map<int, std::vector<double>> Move_PPS_Map = {{343, {0.00950, 0.800, 2}}, {450, {0.0082, 0.5, 2}}, {300, {0.02, 0.800, 2}}};
     std::map<int, double> Min_Move_Speed_Map = {{343, 0.75}, {450, 0.75}, {300, 0.95}};
 
     // 陀螺仪
-    std::map<int, std::vector<double>> Turn_PPS_Map = {{343, {0.075, 0, 3}}, {450, {0.025, 0.5, 5}}, {300, {0.042, 0.5, 5}}};
-    std::map<int, double> Min_Turn_Speed_Map = {{343, 1.10}, {450, 1.6}, {300, 1.5}};
+    std::map<int, std::vector<double>> Turn_PPS_Map = {{343, {0.075, 0, 3}}, {450, {0.0063, 0.0, 5}}, {300, {0.042, 0.5, 5}}};
+    std::map<int, double> Min_Turn_Speed_Map = {{343, 1.10}, {450, 2}, {300, 1.5}};
 
     min_move_speed       = Min_Move_Speed_Map[ChassisSpeedConfig];  // 直行电机的最小速度
     min_turn_speed       = Min_Turn_Speed_Map[ChassisSpeedConfig];  // 自转的最小速度
@@ -169,6 +169,26 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
     else{
       if (output < nowspeed){
         nowspeed = std::max(output, nowspeed - maxinum_speed_acceleration);
+      }else{
+        nowspeed = output;
+      }
+    }
+    // nowspeed = output;
+    return nowspeed;
+  }
+
+  // 获得缓冲后的速度
+  double ChassisControl::GetBufferSpeed_turn(double nowspeed, double output, int negative){
+    if (negative == 1){
+      if (output > nowspeed){
+        nowspeed = std::min(output, nowspeed + maxinum_speed_acceleration_turn);
+      }else{
+        nowspeed = output;
+      }
+    }
+    else{
+      if (output < nowspeed){
+        nowspeed = std::max(output, nowspeed - maxinum_speed_acceleration_turn);
       }else{
         nowspeed = output;
       }
@@ -327,6 +347,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
     this->Move(v, val, ChassisInertial.rotation(), direction, task);
   }
 
+  
   // 直线运动函数
   void ChassisControl::Move(double v, double val, double yaw, char direction){
       // 最大速度
@@ -483,7 +504,6 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       // PrintAt(3, "%f",  GetPositions_mean());
       // std::cout << "ans: " << GetPositions_mean() << std::endl;
   }
-
   // 直线运动函数(可选多线程)
   void ChassisControl::Move(double v, double val, double yaw, char direction, bool task){
     if (task == true){
@@ -909,12 +929,11 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
           last_speed = output;
           wait(dt * 1000.0, msec);
       }  
-      // std::cout << ChassisInertial.rotation() << std::endl;
+
       MoveOver();
       // PrintAt(3, " %d", (int)ChassisInertial.rotation());
     
   }
-
   // 旋转函数(可选多线程)
   void ChassisControl::Turn(double v, double val, char direction, bool task){
       if (task == true){
@@ -931,6 +950,72 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       else{
           Turn(v, val, direction);    
       }
+  }
+
+  // 自动选择pps旋转
+  void ChassisControl::AutoPPSTurn(double v, double val, char direction){
+    double abs_val = std::abs(val);
+    if (abs_val < 70){
+      ChassisControlSTS.Turn_PPS = {0.09, 0.5, 2};
+      ChassisControlSTS.min_turn_speed = 1.5;
+    }
+    else if (abs_val < 150){
+      ChassisControlSTS.Turn_PPS = {0.0625, 0.5, 2};
+      ChassisControlSTS.min_turn_speed = 1.5;
+    }
+    else{
+      ChassisControlSTS.Turn_PPS = {0.055, 0.5, 2};
+      ChassisControlSTS.min_turn_speed = 1;
+    }
+    this->Turn(v, val ,direction);
+
+  }
+  
+  // 自动选择pps转至
+  void ChassisControl::AutoPPSTurnTo(double v, double val){
+    double start_angle        = ChassisInertial.rotation();
+    double start_angle_norm   = NormsAngle(start_angle);
+
+    if (start_angle_norm < 0){
+      start_angle_norm = 360 + start_angle_norm;
+    }
+    if (val < 0){
+      val = 360 + val;
+    }
+    // std::cout << start_angle_norm - val  << std::endl;
+
+    double lval = start_angle_norm - val;
+    double rval = 360 - lval;
+
+    if (start_angle_norm > val){
+      lval = start_angle_norm - val;
+      rval = 360 - lval;
+    }else{
+      rval = val - start_angle_norm;
+      lval = 360 - rval;
+    }
+    
+    // 自动参数选择s
+    double abs_val = std::abs(std::min(rval, lval));
+    if (abs_val < 70){
+      ChassisControlSTS.Turn_PPS = {0.09, 0.5, 2};
+      ChassisControlSTS.min_turn_speed = 1.5;
+    }
+    else if (abs_val < 150){
+      ChassisControlSTS.Turn_PPS = {0.0625, 0.5, 2};
+      ChassisControlSTS.min_turn_speed = 1.5;
+    }
+    else{
+      ChassisControlSTS.Turn_PPS = {0.055, 0.5, 2};
+      ChassisControlSTS.min_turn_speed = 1;
+    }
+
+    if (lval > rval){
+      this->Turn(v, rval, 'r', false);
+    }
+    else{
+      this->Turn(v, lval, 'l', false);
+    }
   }
 
   // 旋转到指定角度

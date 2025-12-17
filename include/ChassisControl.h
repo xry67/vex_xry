@@ -186,6 +186,9 @@ class ChassisControl{
   // 获得缓冲后的速度
   double GetBufferSpeed(double nowspeed, double output, int negative);
 
+  // 获得缓冲后的速度
+  double GetBufferSpeed_turn(double nowspeed, double output, int negative);
+
   // 底盘停止
   void ChassisStop();
 
@@ -279,6 +282,12 @@ class ChassisControl{
   // 直线运动函数（使用定位轮）
   void MoveBySmallWheel(double v, double val, char direction, bool task);
 
+  // 自动选择pps旋转
+  void AutoPPSTurn(double v, double val, char direction);
+
+  // 自动选择pps转至
+  void AutoPPSTurnTo(double v, double val);
+
   // 旋转函数
   void Turn(double v, double val, char direction);
 
@@ -327,7 +336,8 @@ class ChassisControl{
     bool    MoveEnd         = true;  // 记录运动是否完成
     bool    Whileing        = false; // 是否进入循环
     int     MoveId          = 0;     // 运动id记录（计数）
-    double maxinum_speed_acceleration = 0.5;  // 最大加速度
+    double maxinum_speed_acceleration = 0.4;  // 最大加速度
+    double maxinum_speed_acceleration_turn = 5;  // 最大加速度
 
     // 各类pps
 

@@ -47,9 +47,9 @@ motor RightMotor3 = motor(PORT17, ratio6_1, 0);
 motor_group RightMotorGroup = motor_group(RightMotor1, RightMotor2, RightMotor3);  // 右边边电机组
 
 
-motor ToolMotor1    = motor(PORT8, ratio6_1, 0);  // 上  f
-motor ToolMotor2    = motor(PORT9, ratio6_1, 0);  // 中  l
-motor ToolMotor3    = motor(PORT10, ratio6_1, 0);  // 下  r
+motor ToolMotor1    = motor(PORT10, ratio6_1, 0);  // 上  f
+motor ToolMotor2    = motor(PORT8, ratio6_1, 0);  // 中  l
+motor ToolMotor3    = motor(PORT9, ratio6_1, 0);  // 下  r
 motor ToolMotor4    = motor(PORT4, ratio6_1, 0);  // 
 
 digital_out digitalB = digital_out(Brain.ThreeWirePort.B);
@@ -76,8 +76,8 @@ rotation Rotation_y = rotation(PORT21, false); // 底盘定位轮y
 // aivision aiVision = aivision(PORT21, Red, Bule, Orange);
 
 // 距离传感器
-distance Distance_f = distance(PORT2);  // 前
-distance Distance_b = distance(PORT3);  // 后
+distance Distance_f = distance(PORT3);  // 前
+distance Distance_b = distance(PORT4);  // 后
 distance Distance_fl = distance(PORT21);  // 左前
 distance Distance_fr = distance(PORT21);  // 右前
 distance Distance_bl = distance(PORT21);  // 左后

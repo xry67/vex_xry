@@ -1,0 +1,180 @@
+#ifndef AUTOTOOLS_H  
+#define AUTOTOOLS_H 
+
+#include "vex.h"
+#include "robot-config.h"
+#include "ChassisControl.h"
+
+void intake_and_pushback(double angle, int intake_time, int push_time){
+
+
+    // 转至180
+    ChassisControlSTS.Over_count = 10;
+    ChassisControlSTS.TurnTo(10, NormsAngle_0_360(angle), false);
+    ChassisControlSTS.Over_count = 1;
+
+    // 吸导入
+    ToolMotor1.spin(forward, -16, voltageUnits::volt);
+    ToolMotor2.spin(forward, 15, pct);  // 递球
+    ToolMotor3.spin(forward, 3, voltageUnits::volt);
+    ChassisControlSTS.Move(5, 900, angle, 'n', true); // 1550  
+
+    // 使用距离传感器判断是否到达恒力区域 250是即将进入导入区的距离
+    while (GetDistance_front() > 250){
+      wait(10, msec);
+    }
+    ChassisControlSTS.SetStopModCoast();   // 需要保留，否则容易插不进去
+    ChassisControlSTS.StopMoving();
+    wait(100,msec);
+
+    // 恒力吸导入  pct可以保证匀速插入导入筒
+    for (int i=0; i<200; i++){
+      ChassisControlSTS.ChassisLeftControl_pct(2);
+      ChassisControlSTS.ChassisRightControl_pct(2);
+      if (GetDistance_front() < 276){
+        break;
+      }
+      wait(10, msec);
+    }
+
+    // 轻微的蠕动
+    for (int i=0; i<intake_time; i++){
+      if (GetDistance_front() > 170){
+        ChassisControlSTS.ChassisLeftControl(1.5);
+        ChassisControlSTS.ChassisRightControl(1.5);
+      }else{
+        ChassisControlSTS.ChassisLeftControl(0);
+        ChassisControlSTS.ChassisRightControl(0);
+      }
+      wait(10, msec);
+    }
+
+    // 倒车 打球
+    ChassisControlSTS.Move(7, 1500, angle, 'u', true); // 1550
+    ToolMotor2.spin(forward, 20, pct);  // 递球
+    ToolMotor3.spin(forward, 3, voltageUnits::volt);
+
+    // 提前打球
+    ChassisControlSTS.WaitPositionArrive(1100);
+
+    ToolMotor2.spin(forward, 16, voltageUnits::volt);
+    ToolMotor3.spin(forward, 16, voltageUnits::volt);
+    ChassisControlSTS.SetStopModCoast();
+    ChassisControlSTS.StopMoving();
+    // 努力进入对位
+    ChassisControlSTS.ChassisLeftControl(-0.5);
+    ChassisControlSTS.ChassisRightControl(-0.5);
+    wait(push_time, msec);
+    ChassisControlSTS.SetStopModHold();
+    ToolMotor2.spin(forward, 0, voltageUnits::volt);
+    ToolMotor3.spin(forward, 0, voltageUnits::volt);
+    digitalG.set(0);
+
+}
+
+// 等待前方距离传感器到达某个时间，然后停止运动
+void WaitFrontDistanceArriveThenStopMove(double speed, double val, double angle, double Distance){
+    
+    ChassisControlSTS.Move(speed, val, angle, 'n', true);
+    // 等待到达指定距离
+    while (GetDistance_front() > Distance){
+      if (! ChassisControlSTS.IsMoving()){
+          ChassisControlSTS.ChassisLeftControl(2);
+          ChassisControlSTS.ChassisRightControl(2);
+      }
+      wait(10, msec);
+    }
+    // 刹车
+    ChassisControlSTS.ChassisLeftControl(0);
+    ChassisControlSTS.ChassisRightControl(0);
+    ChassisControlSTS.StopMoving();
+}
+
+bool AutoIntakeFlag = true;
+
+int fun(){
+  AutoIntakeFlag = true;
+  // 分球暂停计数器
+  int ErrorBall1 = 0;
+  int ErrorBall2 = 0;
+  while (AutoIntakeFlag){
+        // 分球
+        if ((stance == 'r' && OpticalHaveBlue(Optical1)) || (stance == 'b' && OpticalHaveRed(Optical1))){
+            ErrorBall1 = 20;
+        }
+        else if ((stance == 'b' && OpticalHaveBlue(Optical1)) || (stance == 'r' && OpticalHaveRed(Optical1))){
+            ErrorBall1 = 0;
+        }
+        else{
+            ErrorBall1 = -1;
+        }
+
+        if ((stance == 'r' && OpticalHaveBlue(Optical2)) || (stance == 'b' && OpticalHaveRed(Optical2))){
+            ErrorBall2 = 20;
+        }
+        else if ((stance == 'b' && OpticalHaveBlue(Optical2)) || (stance == 'r' && OpticalHaveRed(Optical2))){
+            ErrorBall2 = 0;
+        }
+        else{
+          ErrorBall2 = -1;
+        }
+        //  分球逻辑
+        // ErrorBall1： 靠前方的颜色传感器
+        // ErrorBall2： 靠后方的颜色传感器
+        // 0   ：正确颜色的球
+        // -1  ：没有球
+        // 1~20：错误的球，检测到错球值为20
+
+        if (ErrorBall1 > 0 && ErrorBall2 > 0){
+            // 前后都是异色球
+            ToolMotor2.spin(forward, 16, voltageUnits::volt);
+        }
+        else if (ErrorBall1 > 0 && ErrorBall2 < 0){
+            // 前异色，后没球
+            ToolMotor2.spin(forward, 16, voltageUnits::volt);
+        }
+        else if (ErrorBall1 > 0 && ErrorBall2 == 0){
+            // 前异色，后同色
+            ToolMotor2.spin(forward, -16, voltageUnits::volt);
+        }
+        else if (ErrorBall1 == 0 && ErrorBall2 > 0){
+            // 前同色，后异色
+            ToolMotor2.spin(forward, 16, voltageUnits::volt);
+        }
+        else if (ErrorBall1 == 0 && ErrorBall2 == 0){
+            // 前同色，后同色
+            ToolMotor2.spin(forward, -16, voltageUnits::volt);
+        }
+        else if (ErrorBall1 == 0 && ErrorBall2 < 0){
+            // 前同色，后没球
+            ToolMotor2.spin(forward, -16, voltageUnits::volt);
+        }
+        else if (ErrorBall1 < 0 && ErrorBall2 > 0){
+            // 前没球，后异色
+            ToolMotor2.spin(forward, 16, voltageUnits::volt);
+        }
+        else if (ErrorBall1 < 0 && ErrorBall2 == 0){
+            // 前没球，后同色
+            ToolMotor2.spin(forward, -16, voltageUnits::volt);
+        }
+        else if (ErrorBall1 < 0 && ErrorBall2 < 0){
+            // 前没球，后没球
+            ToolMotor2.spin(forward, -16, voltageUnits::volt);
+        }
+        else{
+            // 不可能进来，但还是留有保底
+            ToolMotor2.spin(forward, 16, voltageUnits::volt);
+        }
+      wait(10, msec);
+    }
+    return 0;
+}
+
+void AutoIntake(){
+  vex::task t(fun);
+}
+void StopAutoIntake(){
+  AutoIntakeFlag = false;
+}
+
+#endif

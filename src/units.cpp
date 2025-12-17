@@ -100,7 +100,7 @@ bool OpticalHaveRed(vex::optical Optical){
 // 颜色传感器有一个蓝色物体？
 bool OpticalHaveBlue(vex::optical Optical){
     double H = Optical.hue();
-    if (Optical.isNearObject() && (H > 150 && H < 270)){
+    if (Optical.isNearObject() && (H > 100 && H < 270)){
         return true;
     }
     return false;
@@ -165,3 +165,4 @@ double medianOfThree(double a, double b, double c) {
 double GetNowTime(){
     return std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count();  // 运动开始时间
 }
+

@@ -52,6 +52,7 @@ extern motor ToolMotor2;  //
 extern motor ToolMotor3;  // 
 extern motor ToolMotor4;  // 
 
+extern digital_out digitalA;
 extern digital_out digitalB;
 extern digital_out digitalC;
 extern digital_out digitalD;

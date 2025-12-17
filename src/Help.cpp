@@ -1,7 +1,6 @@
 #include "vex.h"
 #include "robot-config.h"
 #include "ChassisControl.h"
-#include "ToolControl.h"
 #include "RemoteControl.h"
 
 // 该文件为帮助文件，记录各个函数的用法

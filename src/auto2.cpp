@@ -1,7 +1,6 @@
 #include "vex.h"
 #include "robot-config.h"
 #include "ChassisControl.h"
-#include "ToolControl.h"
 
 // 转向最小速度
 void auto2(){

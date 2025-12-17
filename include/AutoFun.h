@@ -32,7 +32,7 @@ class AutoFun{
 
     // 运行自动函数
     void RunAutoFun(){
-        start_time = 0;
+        start_time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count();
         Over = false; 
         fun();
         Over = true; 

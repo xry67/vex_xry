@@ -572,6 +572,8 @@ BaseWindow* AutoChoiceWindow_CompeteFun(){
 
         // 自动选项更换
         auto_index = index_i;
+        RunningAutoFun = &AutoFunctions[auto_index];
+        RunningAutoFun->Over = false;
 
         wait(100, msec);
     }

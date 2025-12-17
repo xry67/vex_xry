@@ -139,8 +139,6 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
           ErrorBall2 = -1;
         }
 
-        Brain.Screen.printAt(100, 150, " %d/////%d  ", ErrorBall1, ErrorBall2);
-
         // 底盘控制
         ChassisRomoteControlSTS.Work(); 
 
@@ -156,16 +154,16 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
         // 1 号
         if (ControlData.ButtonR1 || ControlData.ButtonR2 || ControlData.ButtonL1 || ControlData.ButtonL2){
             if (ControlData.ButtonR1){
-                ToolMotor1.spin(forward, 16, voltageUnits::volt);
+                ToolMotor1.spin(forward, -16, voltageUnits::volt);
             }
             if (ControlData.ButtonR2){
-                ToolMotor1.spin(forward, -40, pct);
+                ToolMotor1.spin(forward, 16, voltageUnits::volt);
             }
             if (ControlData.ButtonL1){
                 ToolMotor1.spin(forward, 16, voltageUnits::volt);
             }
             if (ControlData.ButtonL2){
-                ToolMotor1.spin(forward, -16, voltageUnits::volt);
+                ToolMotor1.spin(forward, -50, pct);
             }
 
         }
@@ -184,54 +182,54 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
                 // 1~20：错误的球，检测到错球值为20
 
                 if (ErrorBall1 > 0 && ErrorBall2 > 0){
-                    // 前后都是异色球，反转
-                    ToolMotor2.spin(forward, -16, voltageUnits::volt);
+                    // 前后都是异色球
+                    ToolMotor2.spin(forward, 16, voltageUnits::volt);
                 }
                 else if (ErrorBall1 > 0 && ErrorBall2 < 0){
-                    // 前异色，后没球，反转
-                    ToolMotor2.spin(forward, -16, voltageUnits::volt);
+                    // 前异色，后没球
+                    ToolMotor2.spin(forward, 16, voltageUnits::volt);
                 }
                 else if (ErrorBall1 > 0 && ErrorBall2 == 0){
-                    // 前异色，后同色，正转
-                    ToolMotor2.spin(forward, 16, voltageUnits::volt);
+                    // 前异色，后同色
+                    ToolMotor2.spin(forward, -16, voltageUnits::volt);
                 }
                 else if (ErrorBall1 == 0 && ErrorBall2 > 0){
-                    // 前同色，后异色，反转
-                    ToolMotor2.spin(forward, -16, voltageUnits::volt);
+                    // 前同色，后异色
+                    ToolMotor2.spin(forward, 16, voltageUnits::volt);
                 }
                 else if (ErrorBall1 == 0 && ErrorBall2 == 0){
-                    // 前同色，后同色，正转
-                    ToolMotor2.spin(forward, 16, voltageUnits::volt);
-                }
-                else if (ErrorBall1 == 0 && ErrorBall2 < 0){
-                    // 前同色，后没球，正转
-                    ToolMotor2.spin(forward, 16, voltageUnits::volt);
-                }
-                else if (ErrorBall1 < 0 && ErrorBall2 > 0){
-                    // 前没球，后异色，反转
+                    // 前同色，后同色
                     ToolMotor2.spin(forward, -16, voltageUnits::volt);
                 }
-                else if (ErrorBall1 < 0 && ErrorBall2 == 0){
-                    // 前没球，后同色，正转
+                else if (ErrorBall1 == 0 && ErrorBall2 < 0){
+                    // 前同色，后没球
+                    ToolMotor2.spin(forward, -16, voltageUnits::volt);
+                }
+                else if (ErrorBall1 < 0 && ErrorBall2 > 0){
+                    // 前没球，后异色
                     ToolMotor2.spin(forward, 16, voltageUnits::volt);
+                }
+                else if (ErrorBall1 < 0 && ErrorBall2 == 0){
+                    // 前没球，后同色
+                    ToolMotor2.spin(forward, -16, voltageUnits::volt);
                 }
                 else if (ErrorBall1 < 0 && ErrorBall2 < 0){
-                    // 前没球，后没球，正转
-                    ToolMotor2.spin(forward, 16, voltageUnits::volt);
+                    // 前没球，后没球
+                    ToolMotor2.spin(forward, -16, voltageUnits::volt);
                 }
                 else{
-                    // 不可能进来，但还是留有保底，正转
+                    // 不可能进来，但还是留有保底
                     ToolMotor2.spin(forward, 16, voltageUnits::volt);
                 }
             }
             if (ControlData.ButtonR2){
-                ToolMotor2.spin(forward, -40, pct);
+                ToolMotor2.spin(forward, 40, pct);
             }
             if (ControlData.ButtonL1){
-                ToolMotor2.spin(forward, -16, voltageUnits::volt);
+                ToolMotor2.spin(forward, 2, voltageUnits::volt);
             }
             if (ControlData.ButtonL2){
-                ToolMotor2.spin(forward, 20, pct);
+                ToolMotor2.spin(forward, 4, voltageUnits::volt);
             }
 
         }
@@ -242,10 +240,10 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
         // 3号
         if (ControlData.ButtonR1 || ControlData.ButtonR2 || ControlData.ButtonL1 || ControlData.ButtonL2){
             if (ControlData.ButtonR1){
-                ToolMotor3.spin(forward, -16, voltageUnits::volt);
+                ToolMotor3.spin(forward, -10, voltageUnits::volt);
             }
             if (ControlData.ButtonR2){
-                ToolMotor3.spin(forward, 40, pct);
+                ToolMotor3.spin(forward, 0, voltageUnits::volt);
             }
             if (ControlData.ButtonL1){
                 ToolMotor3.spin(forward, 16, voltageUnits::volt);
