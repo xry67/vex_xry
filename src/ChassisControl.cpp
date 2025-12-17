@@ -1002,7 +1002,7 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
       ChassisControlSTS.min_turn_speed = 1.5;
     }
     else if (abs_val < 150){
-      ChassisControlSTS.Turn_PPS = {0.0625, 0.5, 2};
+      ChassisControlSTS.Turn_PPS = {0.055, 0.5, 2};
       ChassisControlSTS.min_turn_speed = 1.5;
     }
     else{

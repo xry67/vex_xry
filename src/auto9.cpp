@@ -9,7 +9,7 @@
 // 二号：正：分球方向
 // 三号：正：中高方向
 void auto9(){
-    ChassisControlSTS.Over_count = 5;
+    ChassisControlSTS.Over_count = 1;
     ChassisInertial.setRotation(-22, deg);
     ToolMotor1.spin(forward, -16, voltageUnits::volt);
     ToolMotor2.spin(forward, -16, voltageUnits::volt);
@@ -18,8 +18,9 @@ void auto9(){
     // 前进吸球
     ChassisControlSTS.Move(10, 1400, 'n', true); 
 
-    ChassisControlSTS.WaitPositionArrive(600);
+    ChassisControlSTS.WaitPositionArrive(400);
     ChassisControlSTS.ResetMaxSpeed(3);
+    ChassisControlSTS.WaitPositionArrive(1000);
     digitalH.set(1);
     ChassisControlSTS.WaitMoveFinish();
 
@@ -38,7 +39,7 @@ void auto9(){
     ChassisControlSTS.ChassisLeftControl(-2);
     ChassisControlSTS.ChassisRightControl(-2);
     wait(300, msec);
-    ToolMotor1.spin(forward, -30, pct);
+    ToolMotor1.spin(forward, -60, pct);
     ToolMotor2.spin(forward, 4, voltageUnits::volt);
     ToolMotor3.spin(forward, 16, voltageUnits::volt);
     wait(1000, msec);
@@ -77,9 +78,7 @@ void auto9(){
     digitalH.set(1);
 
     // 转至180
-    ChassisControlSTS.Over_count = 7;
     ChassisControlSTS.AutoPPSTurnTo(10, -180);
-    ChassisControlSTS.Over_count = 5;
 
     // 吸导入
     ToolMotor1.spin(forward, -16, voltageUnits::volt);
@@ -103,7 +102,7 @@ void auto9(){
     for (int i=0; i<200; i++){
       ChassisControlSTS.ChassisLeftControl_pct(2);
       ChassisControlSTS.ChassisRightControl_pct(2);
-      if (GetDistance_front() < 200){
+      if (GetDistance_front() < 250){
         break;
       }
       wait(10, msec);
@@ -151,15 +150,14 @@ void auto9(){
     wait(1000, msec);
 
     // 钩子
-    ChassisInertial.setRotation(-180, deg);
     ChassisControlSTS.Move_PPS = {0.0182, 0.5, 2};
     ChassisControlSTS.maxinum_speed_acceleration = 0.5;
     ChassisControlSTS.Move(16, 400, 'n'); // 1550
 
     ChassisControlSTS.maxinum_speed_acceleration_turn = 0.1;
-    ChassisControlSTS.AutoPPSTurnTo(10, -226);
+    ChassisControlSTS.AutoPPSTurnTo(10, -223);
 
-    ChassisControlSTS.CurveMove(10, 780, 800, 'd', true);
+    ChassisControlSTS.CurveMove(10, 780, 850, 'd', true);
     ChassisControlSTS.WaitPositionArrive(750);
     ChassisControlSTS.StopMoving();
 
@@ -173,9 +171,8 @@ void auto9(){
     // 急刹车
     ChassisControlSTS.ChassisLeftControl(-6);
     ChassisControlSTS.ChassisRightControl(6);
-    wait(100, msec);
+    wait(500, msec);
     ChassisControlSTS.ChassisLeftControl(0);
     ChassisControlSTS.ChassisRightControl(0);
-
-
+    wait(4000, msec);
 }

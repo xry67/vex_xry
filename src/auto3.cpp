@@ -5,7 +5,7 @@
 
 double GetTurnTime(double p, double min_turn_speed){
     double start_time = GetNowTime();
-    for (int a: {150, 150, 180, 180}){
+    for (int a: {90, 90, 80, 80}){
         ChassisControlSTS.Turn_PPS = {p, 0.05, 2};
         ChassisControlSTS.min_turn_speed = min_turn_speed;
         ChassisControlSTS.Turn(16, a, 'r');
@@ -21,8 +21,8 @@ double GetTurnTime(double p, double min_turn_speed){
 
 void auto3(){
 
-//    ChassisControlSTS.Over_count = 5;
-//    GetTurnTime(0.055, 1);
+   ChassisControlSTS.Over_count = 5;
+   GetTurnTime(0.06, 1.5);
 
     // int now_angle = 0;
     // for (int a: {90, -90, 180}){
@@ -49,24 +49,24 @@ void auto3(){
 
     // }
 
-    for (int a: {500, 1000, 1500, 2000}){
-        double p=0.0082, min_move_speed = 0.75, maxinum_speed_acceleration = 0.4, StraightPid_P = 3;
-        ChassisControlSTS.Move_PPS = {p, 0.5, 2};
-        ChassisControlSTS.min_move_speed = min_move_speed;
-        ChassisControlSTS.maxinum_speed_acceleration = maxinum_speed_acceleration;
-        ChassisControlSTS.StraightPid->reset(StraightPid_P, 0, 0);
-        ChassisControlSTS.Move(10, a, 0, 'n');
-        // ChassisControlSTS.AutoPPSTurnTo(16, 180);
-        // ChassisControlSTS.AutoPPSTurnTo(16, 0);
+    // for (int a: {500, 1000, 1500, 2000}){
+    //     double p=0.0082, min_move_speed = 0.75, maxinum_speed_acceleration = 0.4, StraightPid_P = 3;
+    //     ChassisControlSTS.Move_PPS = {p, 0.5, 2};
+    //     ChassisControlSTS.min_move_speed = min_move_speed;
+    //     ChassisControlSTS.maxinum_speed_acceleration = maxinum_speed_acceleration;
+    //     ChassisControlSTS.StraightPid->reset(StraightPid_P, 0, 0);
+    //     ChassisControlSTS.Move(10, a, 0, 'n');
+    //     // ChassisControlSTS.AutoPPSTurnTo(16, 180);
+    //     // ChassisControlSTS.AutoPPSTurnTo(16, 0);
 
-        ChassisControlSTS.Move_PPS = {p, 0.5, 2};
-        ChassisControlSTS.min_move_speed = min_move_speed;
-        ChassisControlSTS.maxinum_speed_acceleration = maxinum_speed_acceleration;
-        ChassisControlSTS.StraightPid->reset(StraightPid_P, 0, 0);
-        ChassisControlSTS.Move(10, a, 0, 'u');
-        wait(1500, msec);
+    //     ChassisControlSTS.Move_PPS = {p, 0.5, 2};
+    //     ChassisControlSTS.min_move_speed = min_move_speed;
+    //     ChassisControlSTS.maxinum_speed_acceleration = maxinum_speed_acceleration;
+    //     ChassisControlSTS.StraightPid->reset(StraightPid_P, 0, 0);
+    //     ChassisControlSTS.Move(10, a, 0, 'u');
+    //     wait(1500, msec);
 
-    }
+    // }
 
     // for (int i=0; i<1000; i++){
     //     Brain.Screen.printAt(100, 150, "////%f////", RunningAutoFun->GetAutoRunTime());

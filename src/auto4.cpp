@@ -10,9 +10,9 @@ void auto4(){
     ChassisControlSTS.Move(16, 400, 'n'); // 1550
 
     ChassisControlSTS.maxinum_speed_acceleration_turn = 0.1;
-    ChassisControlSTS.AutoPPSTurnTo(10, -226);
+    ChassisControlSTS.AutoPPSTurnTo(10, -220);
 
-    ChassisControlSTS.CurveMove(10, 780, 800, 'd', true);
+    ChassisControlSTS.CurveMove(10, 680, 800, 'd', true);
     ChassisControlSTS.WaitPositionArrive(750);
     ChassisControlSTS.StopMoving();
 
