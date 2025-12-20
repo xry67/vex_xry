@@ -3,7 +3,7 @@
 #include "ChassisControl.h"
 #include "AutoTools.h"
 
-// 右0+4 横向向右摆位，记得回收钩子
+// 右0+4 横向向右摆位
 void auto6(){
     ChassisInertial.setRotation(0, degrees);
     ChassisControlSTS.Over_count = 1;
