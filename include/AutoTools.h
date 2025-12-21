@@ -1,5 +1,5 @@
-#ifndef AUTOTOOLS_H  
-#define AUTOTOOLS_H 
+#ifndef AUTOTOOLS_H
+#define AUTOTOOLS_H
 
 #include "vex.h"
 #include "robot-config.h"
@@ -11,6 +11,9 @@ void intake_and_pushback(double angle, int intake_time, int push_time);
 void WaitFrontDistanceArriveThenStopMove(double speed, double val, double angle, double Distance);
 
 void AutoIntake();
+
+// 模拟遥控器控制电机
+void SimulatedRemoteControl(std::string input);
 
 void StopAutoIntake();
 #endif
