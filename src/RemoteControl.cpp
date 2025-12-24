@@ -108,6 +108,7 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
     // 按钮上一状态记录
     bool LastRight = false;
     bool LastY = false;
+    bool LastUp = false;
 
     vex::task Task(RemoteControl_child); // 线程开启
 
@@ -354,7 +355,7 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
             }
         }
 
-        // 铲子钩子
+        // 铲子钩子（新增中桥消分）
         if (!LastRight && ControlData.ButtonRight)
         {
             digitalG.set(!digitalG.value());
@@ -363,10 +364,15 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
         {
             digitalH.set(!digitalH.value());
         }
+        if (!LastUp && ControlData.ButtonUp)
+        {
+            digitalF.set(!digitalF.value());
+        }
 
         // 变量维护
         LastRight = ControlData.ButtonRight;
         LastY = ControlData.ButtonY;
+        LastUp = ControlData.ButtonUp;
 
         ErrorBall1 = std::max(0, ErrorBall1 - 1);
         ErrorBall2 = std::max(0, ErrorBall2 - 1);

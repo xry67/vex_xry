@@ -23,7 +23,7 @@ void auto6(){
     ChassisControlSTS.Move(5, 900, 90, 'n', true); // 1550  
 
     // 使用距离传感器判断是否到达恒力区域
-    while (GetDistance_front() > 270){
+    while (GetDistance_front() > 370){
       wait(10, msec);
     }
     ChassisControlSTS.SetStopModCoast();   // 需要保留，否则容易插不进去
@@ -32,21 +32,11 @@ void auto6(){
 
     AutoIntake();
 
-    // 恒力吸导入  pct可以保证匀速插入导入筒
-    for (int i=0; i<200; i++){
-      ChassisControlSTS.ChassisLeftControl_pct(2);
-      ChassisControlSTS.ChassisRightControl_pct(2);
-      if (GetDistance_front() < 250){
-        break;
-      }
-      wait(10, msec);
-    }
-
     // 轻微的蠕动
     for (int i=0; i<50; i++){
       if (GetDistance_front() > 137){
-        ChassisControlSTS.ChassisLeftControl(2);
-        ChassisControlSTS.ChassisRightControl(2);
+        ChassisControlSTS.ChassisLeftControl(5);
+        ChassisControlSTS.ChassisRightControl(5);
       }else{
         ChassisControlSTS.ChassisLeftControl(0);
         ChassisControlSTS.ChassisRightControl(0);
@@ -91,11 +81,11 @@ void auto6(){
     ChassisControlSTS.maxinum_speed_acceleration_turn = 0.1;
     ChassisControlSTS.AutoPPSTurnTo(10, 40);
 
-    ChassisControlSTS.CurveMove(10, 680, 850, 'd', true);
+    ChassisControlSTS.CurveMove(10, 700, 800, 'd', true);
     ChassisControlSTS.WaitPositionArrive(750);
     ChassisControlSTS.StopMoving();
 
-    ChassisControlSTS.Move(10, 1000, -180, 'u', true); // 1550
+    ChassisControlSTS.Move(10, 1000, 90, 'u', true); // 1550
     ChassisControlSTS.WaitPositionArrive(550);
     ChassisControlSTS.SetStopModHold();
     ChassisControlSTS.StopMoving();
