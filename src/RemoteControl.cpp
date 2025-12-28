@@ -97,7 +97,7 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
     int HoldButtonBCount = 0;
 
     // 递球卡死检测
-    int MotorBlocked = false;
+    int MotorBlocked = true;
 
     // 时间变量
     double start_time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count();
@@ -108,7 +108,7 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
     // 按钮上一状态记录
     bool LastRight = false;
     bool LastY = false;
-    bool LastUp = false;
+    bool LastDown = false;
 
     vex::task Task(RemoteControl_child); // 线程开启
 
@@ -288,7 +288,7 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
             }
             if (ControlData.ButtonL1)
             {
-                ToolMotor2.spin(forward, 0, voltageUnits::volt);
+                ToolMotor2.spin(forward, 1, voltageUnits::volt);
             }
             if (ControlData.ButtonL2)
             {
@@ -307,7 +307,7 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
             }
             if (!MotorBlocked)
             {
-                ToolMotor2.spin(forward, 5, pct);
+                ToolMotor2.spin(forward, 0, pct);
             }
             else
             {
@@ -364,7 +364,7 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
         {
             digitalH.set(!digitalH.value());
         }
-        if (!LastUp && ControlData.ButtonUp)
+        if (!LastDown && ControlData.ButtonDown)
         {
             digitalF.set(!digitalF.value());
         }
@@ -372,7 +372,7 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
         // 变量维护
         LastRight = ControlData.ButtonRight;
         LastY = ControlData.ButtonY;
-        LastUp = ControlData.ButtonUp;
+        LastDown = ControlData.ButtonDown;
 
         ErrorBall1 = std::max(0, ErrorBall1 - 1);
         ErrorBall2 = std::max(0, ErrorBall2 - 1);

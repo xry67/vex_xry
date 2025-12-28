@@ -998,15 +998,15 @@ ChassisControl ChassisControlSTS = ChassisControl();  // sts底盘控制
     // 自动参数选择s
     double abs_val = std::abs(std::min(rval, lval));
     if (abs_val < 70){
-      ChassisControlSTS.Turn_PPS = {0.09, 0.5, 2};
-      ChassisControlSTS.min_turn_speed = 1.5;
+      ChassisControlSTS.Turn_PPS = {0.5, 0.5, 2};
+      ChassisControlSTS.min_turn_speed = 1;
     }
     else if (abs_val < 150){
-      ChassisControlSTS.Turn_PPS = {0.055, 0.5, 2};
+      ChassisControlSTS.Turn_PPS = {0.050, 0.5, 2};
       ChassisControlSTS.min_turn_speed = 1.5;
     }
     else{
-      ChassisControlSTS.Turn_PPS = {0.055, 0.5, 2};
+      ChassisControlSTS.Turn_PPS = {0.050, 0.5, 2};
       ChassisControlSTS.min_turn_speed = 1;
     }
 

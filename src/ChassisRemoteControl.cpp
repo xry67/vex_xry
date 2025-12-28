@@ -161,7 +161,7 @@ void ChassisBothHandsRomoteControl_Turn(){
     
 
     // double temp_Sensitivity_Straight = Sensitivity_Straight * std::abs(axis1 / 100.0);
-    double temp_Sensitivity_Turn = Sensitivity_Turn + std::abs((double)axis3 / 100.0) * 0.6;
+    double temp_Sensitivity_Turn = Sensitivity_Turn + std::abs((double)axis3 / 100.0) * 0.5;
 
 
     // 死区判定

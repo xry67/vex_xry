@@ -12,13 +12,12 @@ void AddAutoFun(){
     AutoFunctions.push_back(AutoFun("左0+4+钩", auto5)); 
     AutoFunctions.push_back(AutoFun("右0+4+钩", auto6));
     // AutoFunctions.push_back(AutoFun("", auto7));
-    // AutoFunctions.push_back(AutoFun("", auto7));
     AutoFunctions.push_back(AutoFun("右0+7+钩", auto8));
     AutoFunctions.push_back(AutoFun("左6+1+钩", auto9));  // 有距离传感器
-    AutoFunctions.push_back(AutoFun("右6+1+钩", auto10)); // 有距离传感器
+    // AutoFunctions.push_back(AutoFun("右6+1+钩", auto10)); // 有距离传感器
     // AutoFunctions.push_back(AutoFun("钩子", auto11));
     // AutoFunctions.push_back(AutoFun("技能赛", auto12, 60));
-    // AutoFunctions.push_back(AutoFun("测试", auto13));
+    AutoFunctions.push_back(AutoFun("测试", auto13));
     // AutoFunctions.push_back(AutoFun("", auto14));
 
 }

@@ -13,7 +13,7 @@ int aiVision_w            = 316;  // ai相机的宽度
 int aiVision_h            = 211;  // ai相机的高度
 double StraightCorrectionSpeed = 500;  // 执行修正pps最大速度
 
-double Sensitivity_Turn       = 0.9;  // 转向灵敏度
+double Sensitivity_Turn       = 0.9     ;  // 转向灵敏度
 double Sensitivity_Straight   = 1;    // 直行灵敏度
 double Sensitivity_Precision  = 0.1;  // 精密遥控比例
 int    auto_index = -1;   // 自动选择

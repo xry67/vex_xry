@@ -1,9 +1,8 @@
-#ifndef AUTOTOOLS_H
-#define AUTOTOOLS_H
-
 #include "vex.h"
 #include "robot-config.h"
 #include "ChassisControl.h"
+#include "AutoTools.h"
+#include <algorithm>
 
 void intake_and_pushback(double angle, int intake_time, int push_time)
 {
@@ -78,10 +77,108 @@ void intake_and_pushback(double angle, int intake_time, int push_time)
   digitalG.set(0);
 }
 
+void intake_and_pushback_new(double angle, int intake_time, int push_time)
+{
+  // 吸导入
+  SimulatedRemoteControl("R1");
+
+  ChassisControlSTS.Move(5, 900, angle, 'n', true); // 1550
+
+  // 使用距离传感器判断是否到达恒力区域
+  while (GetDistance_front() > 372)
+  {
+    wait(10, msec);
+  }
+  ChassisControlSTS.SetStopModCoast(); // 需要保留，否则容易插不进去
+  ChassisControlSTS.StopMoving();
+  wait(100, msec);
+
+  // AutoIntake();
+
+  // 轻微的蠕动
+  for (int i = 0; i < 200; i++)
+  {
+    ChassisControlSTS.ChassisLeftControl(5);
+    ChassisControlSTS.ChassisRightControl(5);
+
+    // 计算真正吸导入的时间
+    if (GetDistance_front() <= 200)
+    {
+      intake_time -= 10;
+    }
+
+    // 时间到，退出
+    if (intake_time <= 0)
+    {
+      break;
+    }
+
+    // 异色球，退出
+    if ((stance == 'r' && OpticalHaveBlue(Optical1)) || (stance == 'b' && OpticalHaveRed(Optical1)))
+    {
+      break;
+    }
+
+    wait(10, msec);
+  }
+
+  // StopAutoIntake();
+
+  // 倒车 打球
+  ChassisControlSTS.Move(7, 1500, angle, 'u', true); // 1550
+  ChassisControlSTS.WaitPositionArrive(500);
+
+  // 提前打球
+  ChassisControlSTS.WaitPositionArrive(1200);
+  digitalH.set(0);
+
+  SimulatedRemoteControl("L1");
+
+  ChassisControlSTS.SetStopModCoast();
+  ChassisControlSTS.StopMoving();
+  // 努力进入对位
+  ChassisControlSTS.ChassisLeftControl(-2);
+  ChassisControlSTS.ChassisRightControl(-2);
+
+  double push_start_time = GetNowTime();
+  wait(500, msec);
+  ChassisControlSTS.AutoPPSTurnTo(10, angle);
+  double turn_end_time = GetNowTime();
+
+  wait(std::max(0.0, push_time - (turn_end_time - push_start_time) * 1000), msec);
+}
+
+// 钩子
+void Hook(double angle)
+{
+  ChassisControlSTS.Move_PPS = {0.0182, 0.5, 2};
+  ChassisControlSTS.Move(16, 400, 'n'); // 1550
+
+  ChassisControlSTS.AutoPPSTurnTo(10, angle - 30);
+  ChassisControlSTS.CurveMove(10, 700, 800, 'd', true);
+  ChassisControlSTS.WaitPositionArrive(700);
+  ChassisControlSTS.StopMoving();
+
+  ChassisControlSTS.Over_count = 5;
+  ChassisControlSTS.AutoPPSTurnTo(2.3, angle);
+  SimulatedRemoteControl("Stop");
+  wait(200, msec);
+  ChassisControlSTS.ChassisLeftControl_pct(-5);
+  ChassisControlSTS.ChassisRightControl_pct(-5);
+  wait(1000, msec);
+
+  // 急刹车
+  ChassisControlSTS.ChassisLeftControl(1);
+  ChassisControlSTS.ChassisRightControl(1);
+  wait(500, msec);
+  ChassisControlSTS.ChassisLeftControl_pct(0);
+  ChassisControlSTS.ChassisRightControl_pct(0);
+  wait(400000, msec);
+}
+
 // 等待前方距离传感器到达某个时间，然后停止运动
 void WaitFrontDistanceArriveThenStopMove(double speed, double val, double angle, double Distance)
 {
-
   ChassisControlSTS.Move(speed, val, angle, 'n', true);
   // 等待到达指定距离
   while (GetDistance_front() > Distance)
@@ -251,5 +348,3 @@ void StopAutoIntake()
 {
   AutoIntakeFlag = false;
 }
-
-#endif
