@@ -315,14 +315,14 @@ void SimulatedRemoteControl(std::string input)
   else if (input == "L2" || input == "l2")
   {
     ToolMotor1.spin(forward, -50, pct);
-    ToolMotor2.spin(forward, 0, voltageUnits::volt);
+    ToolMotor2.spin(forward, 1, voltageUnits::volt);
     ToolMotor3.spin(forward, 16, voltageUnits::volt);
   }
   // 高桥
   else if (input == "L1" || input == "l1")
   {
     ToolMotor1.spin(forward, 16, voltageUnits::volt);
-    ToolMotor2.spin(forward, 0, voltageUnits::volt);
+    ToolMotor2.spin(forward, 1, voltageUnits::volt);
     ToolMotor3.spin(forward, 16, voltageUnits::volt);
   }
   // 停止

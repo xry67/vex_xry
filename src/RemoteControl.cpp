@@ -292,7 +292,7 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
             }
             if (ControlData.ButtonL2)
             {
-                ToolMotor2.spin(forward, 0, voltageUnits::volt);
+                ToolMotor2.spin(forward, 1, voltageUnits::volt);
             }
             if (ControlData.ButtonDown)
             {
