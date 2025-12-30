@@ -155,22 +155,26 @@ void Hook(double angle)
   ChassisControlSTS.Move(16, 400, 'n'); // 1550
 
   ChassisControlSTS.AutoPPSTurnTo(10, angle - 30);
-  ChassisControlSTS.CurveMove(10, 700, 800, 'd', true);
-  ChassisControlSTS.WaitPositionArrive(700);
+  ChassisControlSTS.CurveMove(10, 550, 580, 'd', true);
+  ChassisControlSTS.WaitPositionArrive(400);
   ChassisControlSTS.StopMoving();
 
   ChassisControlSTS.Over_count = 5;
-  ChassisControlSTS.AutoPPSTurnTo(2.3, angle);
+  ChassisControlSTS.Turn_PPS = {0.65, 0.2, 2};
+  ChassisControlSTS.min_turn_speed = 1.9;
+  ChassisControlSTS.TurnTo(2.7, angle, false);
+
   SimulatedRemoteControl("Stop");
   wait(200, msec);
   ChassisControlSTS.ChassisLeftControl_pct(-5);
   ChassisControlSTS.ChassisRightControl_pct(-5);
-  wait(1000, msec);
+  wait(1300, msec);
 
   // 急刹车
   ChassisControlSTS.ChassisLeftControl(1);
   ChassisControlSTS.ChassisRightControl(1);
   wait(500, msec);
+  ChassisControlSTS.ChassisStoppingHold();
   ChassisControlSTS.ChassisLeftControl_pct(0);
   ChassisControlSTS.ChassisRightControl_pct(0);
   wait(400000, msec);

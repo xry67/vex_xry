@@ -1,22 +1,45 @@
 #include "vex.h"
 #include "robot-config.h"
 #include "ChassisControl.h"
+#include "AutoTools.h"
 
-void auto7(){
+void auto7()
+{
 
-    ChassisControlSTS.Move(10, 2000, 'n', true);
+    // 前进吸球
+    ChassisControlSTS.Move(10, 1300, 'n', true);
+    SimulatedRemoteControl("R1");
+    ChassisControlSTS.WaitPositionArrive(400);
+    ChassisControlSTS.ResetMaxSpeed(3);
+    ChassisControlSTS.WaitPositionArrive(850);
+    digitalH.set(1);
+    ChassisControlSTS.WaitMoveFinish();
+    digitalH.set(0);
+    // 转前进吐球
+    ChassisControlSTS.TurnTo(16, -45, 0);
+    ChassisControlSTS.Move(7, 700, 'n', true);
+    ChassisControlSTS.WaitPositionArrive(500);
+    SimulatedRemoteControl("R2");
+    wait(2000, msec);
+    SimulatedRemoteControl("R1");
+
+    // 倒退转向
+    ChassisControlSTS.Move(7, 700, 'u');
+    ChassisControlSTS.TurnTo(16, -90, 0);
+    // 前进吸
+    ChassisControlSTS.Move(10, 2350, 'n', true);
     ChassisControlSTS.WaitPositionArrive(1000);
+    ChassisControlSTS.ResetMaxSpeed(3);
+    ChassisControlSTS.WaitMoveFinish();
+    // 转向中桥吐球
+    wait(200, msec);
+    ChassisControlSTS.TurnTo(16, -138, 0);
+    ChassisControlSTS.Move(7, 600, 'u', true);
+    ChassisControlSTS.WaitPositionArrive(550);
+    ChassisControlSTS.SetStopModCoast();
     ChassisControlSTS.StopMoving();
-
-    ChassisControlSTS.ChassisLeftControl(-5);
-    ChassisControlSTS.ChassisRightControl(-5);
-    ToolMotor1.spin(forward, 100, pct);
-    ToolMotor2.spin(forward, 100, pct);
-    ToolMotor3.spin(forward, 100, pct);
-    wait(1000, msec);
-
-    
-    ChassisControlSTS.Turn(10, 90, 'l');
-    ToolMotor1.spin(forward, 100, pct);
-
+    ChassisControlSTS.ChassisLeftControl(-2);
+    ChassisControlSTS.ChassisRightControl(-2);
+    SimulatedRemoteControl("L2");
+    wait(2500, msec);
 }

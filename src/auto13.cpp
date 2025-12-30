@@ -5,6 +5,8 @@
 
 void auto13()
 {
-  digitalH.set(1);
-  intake_and_pushback_new(0, 500, 1500);
+  ChassisControlSTS.ChassisStoppingHold();
+  ChassisControlSTS.ChassisLeftControl_pct(0);
+  ChassisControlSTS.ChassisRightControl_pct(0);
+  wait(100000, msec);
 }

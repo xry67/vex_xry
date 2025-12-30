@@ -23,7 +23,7 @@ void auto9()
   digitalH.set(1);
   ChassisControlSTS.WaitMoveFinish();
 
-  ChassisControlSTS.AutoPPSTurnTo(16, -43 - 85);
+  ChassisControlSTS.AutoPPSTurnTo(16, -43-85);
 
   // 运球
   ToolMotor1.spin(forward, -16, voltageUnits::volt);
@@ -79,7 +79,7 @@ void auto9()
   ChassisControlSTS.AutoPPSTurnTo(10, -180);
   ChassisControlSTS.Over_count = 1;
 
-  intake_and_pushback_new(-180, 500, 1500);
+  intake_and_pushback_new(-180, 450, 1500);
 
   // 钩子
   Hook(-180);

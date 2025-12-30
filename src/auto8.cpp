@@ -21,13 +21,13 @@ void auto8(){
     ChassisControlSTS.AutoPPSTurnTo(16, -25);
     // 高阶==================================================
     // 斜线到达判定距离传感器位置
-    ChassisControlSTS.Move(12, 2000, -25, 'u', true);        
-    ChassisControlSTS.WaitPositionArrive(500);
+    ChassisControlSTS.Move(12, 2000, -17, 'u', true);        
+    ChassisControlSTS.WaitPositionArrive(800);
 
     // 重新对齐至-90度
     ChassisControlSTS.ResetMaxSpeed(2);        
     ChassisControlSTS.ResetStraightAngle(-90);
-    ChassisControlSTS.WaitPositionArrive(700);
+    ChassisControlSTS.WaitPositionArrive(1100);
 
     // 等待到达指定距离
     while (GetDistance_back() > 455){
@@ -52,8 +52,8 @@ void auto8(){
     ChassisControlSTS.AutoPPSTurnTo(10, 180);
     ChassisControlSTS.Over_count = 1;
 
-    intake_and_pushback_new(180, 500, 1500);
+    intake_and_pushback_new(-180, 450, 2000);
 
     // 钩子
-    Hook(180);
+    Hook(-180);
 }
