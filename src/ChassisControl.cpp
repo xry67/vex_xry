@@ -368,6 +368,17 @@ double ChassisControl::GetVelocity_mean()
   return ans / 2;
 }
 
+// 获取当前的速度pct
+double ChassisControl::GetVelocity_pct_mean()
+{
+  double ans = 0.0;
+
+  ans += std::abs(medianOfThree(LeftMotor1.velocity(pct), LeftMotor2.velocity(pct), LeftMotor3.velocity(pct)));
+  ans += std::abs(medianOfThree(RightMotor1.velocity(pct), RightMotor2.velocity(pct), RightMotor3.velocity(pct)));
+
+  return ans / 2;
+}
+
 // 设置电机归位
 void ChassisControl::ChassisRsetPosition()
 {
@@ -976,6 +987,7 @@ void ChassisControl::Turn(double v, double val, char direction)
   double now_min_speed = min_turn_speed;
   double last_speed = 0;
   bool add_over = false;
+  double blockage_num = 0; // 阻塞补偿
 
   while (true)
   {
@@ -1045,9 +1057,14 @@ void ChassisControl::Turn(double v, double val, char direction)
     }
 
     // 过慢保护
-    if (GetVelocity_mean() <= 100)
+    if (GetVelocity_pct_mean() <= 3)
     {
-      now_min_speed += 0.007;
+      blockage_num += 0.5;
+      output += blockage_num;
+    }
+    else
+    {
+      blockage_num = 0;
     }
 
     // 超时保护

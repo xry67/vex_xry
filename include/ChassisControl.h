@@ -228,6 +228,9 @@ class ChassisControl{
   // 获取当前电机的速度
   double GetVelocity_mean();
 
+  // 获取当前的速度pct
+  double GetVelocity_pct_mean();
+
   // 等待电机编码器到达某个值
   void WaitPositionArrive(double val);
 
