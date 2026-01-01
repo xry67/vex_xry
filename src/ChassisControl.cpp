@@ -77,7 +77,7 @@ void ChassisControl::ResetPPS()
 
   // 陀螺仪
   std::map<int, std::vector<double>> Turn_PPS_Map = {{343, {0.075, 0, 3}}, {450, {0.025, 0.5, 5}}, {300, {0.042, 0.5, 5}}};
-  std::map<int, double> Min_Turn_Speed_Map = {{343, 1.10}, {450, 1.6}, {300, 1.5}};
+  std::map<int, double> Min_Turn_Speed_Map = {{343, 1.10}, {450, 1}, {300, 1.5}};
 
   min_move_speed = Min_Move_Speed_Map[ChassisSpeedConfig]; // 直行电机的最小速度
   min_turn_speed = Min_Turn_Speed_Map[ChassisSpeedConfig]; // 自转的最小速度
@@ -1059,13 +1059,18 @@ void ChassisControl::Turn(double v, double val, char direction)
     // 过慢保护
     if (GetVelocity_pct_mean() <= 3)
     {
-      blockage_num += 0.5;
-      output += blockage_num;
+      blockage_num += 0.8;
+      if (output > 0){
+        output += blockage_num;
+      }else{
+        output -= blockage_num;
+      }
     }
     else
     {
       blockage_num = 0;
     }
+    
 
     // 超时保护
     double now_time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count(); // 当前时间
@@ -1076,8 +1081,8 @@ void ChassisControl::Turn(double v, double val, char direction)
     }
 
     output = NumInterval(output, now_min_speed, v);
+    std::cout << output <<  " " << this->GetVelocity_pct_mean() << " " << current_position << "\n" << std::endl;
 
-    // std::cout << output << " " << now_min_speed << " " << output * yaw_negative  << " " << -1 * output * yaw_negative << std::endl;
     // ChassisForward(output, yaw_negative);  //  控制移动
     ChassisLeftControl(output * yaw_negative);
     ChassisRightControl(-1 * output * yaw_negative);

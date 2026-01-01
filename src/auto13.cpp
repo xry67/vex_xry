@@ -15,17 +15,11 @@ void auto13()
   //   wait(10, msec);
   // }
 
-  for (double a : {180, 130, 100, 90, 45, 30, 10})
+  for (double a : {90})
   {
-      
-    ChassisControlSTS.Turn_PPS = {0.025, 0.5, 5};
-    ChassisControlSTS.min_turn_speed = 1;
-
     ChassisInertial.setRotation(0, deg);
-    ChassisControlSTS.Turn(100, a, 'r');
-    Controller.rumble(".");
+    ChassisControlSTS.Turn(16, a, 'r');
     wait(2000, msec);
-    Brain.Screen.printAt(150, line, "%f", ChassisInertial.rotation());
     line += 20;
   }
 }
