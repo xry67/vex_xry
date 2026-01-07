@@ -76,7 +76,7 @@ void ChassisControl::ResetPPS()
   std::map<int, double> Min_Move_Speed_Map = {{343, 0.75}, {450, 0.75}, {300, 0.95}};
 
   // 陀螺仪
-  std::map<int, std::vector<double>> Turn_PPS_Map = {{343, {0.075, 0, 3}}, {450, {0.025, 0.5, 5}}, {300, {0.042, 0.5, 5}}};
+  std::map<int, std::vector<double>> Turn_PPS_Map = {{343, {0.075, 0, 3}}, {450, {0.025, 0.5, 5.5}}, {300, {0.042, 0.5, 5}}};
   std::map<int, double> Min_Turn_Speed_Map = {{343, 1.10}, {450, 1}, {300, 1.5}};
 
   min_move_speed = Min_Move_Speed_Map[ChassisSpeedConfig]; // 直行电机的最小速度
@@ -1015,6 +1015,23 @@ void ChassisControl::Turn(double v, double val, char direction)
       overcount = 0;
     }
 
+    // 过慢保护
+    if (GetVelocity_pct_mean() <= 3)
+    {
+      blockage_num += std::abs(3 - GetVelocity_pct_mean()) * 0.2;
+      if (output > 0)
+      {
+        output += blockage_num;
+      }
+      else
+      {
+        output -= blockage_num;
+      }
+    }
+    else
+    {
+    }
+
     // 贴近
     if ((output < 0 && last_speed > 0) || (output > 0 && last_speed < 0))
     {
@@ -1023,6 +1040,7 @@ void ChassisControl::Turn(double v, double val, char direction)
       if (nearcount >= 2)
       {
         now_min_speed -= 0.45;
+        blockage_num = 0;
       }
     }
 
@@ -1056,22 +1074,6 @@ void ChassisControl::Turn(double v, double val, char direction)
       stuck_time_count = 0; // 不抱死则刷新计数
     }
 
-    // 过慢保护
-    if (GetVelocity_pct_mean() <= 3)
-    {
-      blockage_num += 0.8;
-      if (output > 0){
-        output += blockage_num;
-      }else{
-        output -= blockage_num;
-      }
-    }
-    else
-    {
-      blockage_num = 0;
-    }
-    
-
     // 超时保护
     double now_time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count(); // 当前时间
     if (now_time - start_time >= move_time_out / 1000)
@@ -1081,7 +1083,8 @@ void ChassisControl::Turn(double v, double val, char direction)
     }
 
     output = NumInterval(output, now_min_speed, v);
-    std::cout << output <<  " " << this->GetVelocity_pct_mean() << " " << current_position << "\n" << std::endl;
+    std::cout << output << " " << this->GetVelocity_pct_mean() << " " << current_position << "\n"
+              << std::endl;
 
     // ChassisForward(output, yaw_negative);  //  控制移动
     ChassisLeftControl(output * yaw_negative);
