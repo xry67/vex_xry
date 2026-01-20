@@ -2,6 +2,7 @@
 #include <chrono>
 #include <algorithm> // 包含 min 和 max 函数
 #include <thread>
+#include <vector>
 #include "vex.h"
 #include "robot-config.h"
 #include "ChassisControl.h"
@@ -54,10 +55,33 @@ double GetDistance(std::string aspect)
   return 0.0;
 }
 
+double GetDistance(char aspect)
+{
+  if (aspect == 'f')
+  {
+    return GetDistance_front();
+  }
+
+  if (aspect == 'b')
+  {
+    return GetDistance_back();
+  }
+
+  if (aspect == 'l')
+  {
+    return GetDistance_left();
+  }
+
+  if (aspect == 'r')
+  {
+    return GetDistance_right();
+  }
+  return 0.0;
+}
+
 ChassisControl ChassisControlSTS = ChassisControl(); // sts底盘控制
 
-// 底盘运动控制算法
-
+// 底盘运动控制算法==================================
 ChassisControl::ChassisControl()
 {
   // pps参数设置相关
@@ -75,6 +99,9 @@ void ChassisControl::ResetPPS()
   std::map<int, std::vector<double>> Move_PPS_Map = {{343, {0.00950, 0.800, 2}}, {450, {0.0082, 0.5, 2}}, {300, {0.02, 0.800, 2}}};
   std::map<int, double> Min_Move_Speed_Map = {{343, 0.75}, {450, 0.75}, {300, 0.95}};
 
+  // 距离传感器
+  std::map<int, std::vector<double>> Distance_PPS_Map = {{343, {0.0165, 0.3, 2.5}}, {450, {0.0165, 0.3, 2.5}}, {300, {0.0165, 0.3, 2.5}}};
+
   // 陀螺仪
   std::map<int, std::vector<double>> Turn_PPS_Map = {{343, {0.075, 0, 3}}, {450, {0.025, 0.5, 5.5}}, {300, {0.042, 0.5, 5}}};
   std::map<int, double> Min_Turn_Speed_Map = {{343, 1.10}, {450, 1}, {300, 1.5}};
@@ -85,11 +112,21 @@ void ChassisControl::ResetPPS()
   StraightPid = new PPS(Straight_PPS_Map[ChassisSpeedConfig][0], Straight_PPS_Map[ChassisSpeedConfig][1], Straight_PPS_Map[ChassisSpeedConfig][2]);
   Move_PPS = Move_PPS_Map[ChassisSpeedConfig];
   Turn_PPS = Turn_PPS_Map[ChassisSpeedConfig];
+  Distance_PPS = Distance_PPS_Map[ChassisSpeedConfig];
+}
+
+// 重新设置各个PPS
+void Reset_Move_PPS(double p1, double p2, double s)
+{
+}
+void Reset_Turn_PPS(double p1, double p2, double s)
+{
 }
 
 // 重新设置当前最大速度
 void ChassisControl::ResetMaxSpeed(double now_speed)
 {
+  this->speed = now_speed;
   this->Move_max_speed = now_speed;
 }
 
@@ -405,56 +442,103 @@ void ChassisControl::MoveOver()
   Whileing = false; // 循环结束了
 }
 
-// 直线运动函数
-void ChassisControl::Move(double v, double val, char direction)
+// ================================================================================
+// 获取运动当前值
+double ChassisControl::GetNowCurrentPosition()
 {
-  this->Move(v, val, ChassisInertial.rotation(), direction);
+  if (Now_Mod == EncoderWheel)
+  {
+    return GetPositions_mean();
+  }
+  else if (Now_Mod == CurveMove_Position)
+  {
+    return GetPositions_mean();
+  }
+  else if (Now_Mod == Distance)
+  {
+    return GetDistance(this->DistanceChioce);
+  }
+  return 0;
 }
 
-// 直线运动函数（可选多线程）
-void ChassisControl::Move(double v, double val, char direction, bool task)
+// 设置为编码轮直走
+// 距离，角度，方向
+void ChassisControl::ReSetToEncoderWheel(double val_, double yaw_, char direction)
 {
-  this->Move(v, val, ChassisInertial.rotation(), direction, task);
-}
-
-// 直线运动函数
-void ChassisControl::Move(double v, double val, double yaw, char direction)
-{
-  // 最大速度
-  // 运动距离
-  // 偏转
-  // 方向
-  // 多线程
-  // PrintAt(1, "Move %f", val);
-  // PrintAt(2, "Moving...");
-  v = std::abs(v);
-  val = std::abs(val);
-
-  ChassisRsetPosition(); // 电机初始化
-
-  double dt = 0.01;
-  double stuck_time_count = 0;                                                                                    // 电机卡死时间统计
-  double start_time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count(); // 运动开始时间
-  double move_time_out = Move_time_out + (val / v * 1000);
-  int negative = 1;     // 负方向指示器
-  int yaw_negative = 1; // 负偏指示器
-
-  // 加速度测试
-  double now_speed = 0;
+  ChassisRsetPosition();                                              // 电机初始化
+  Now_Mod = EncoderWheel;                                             // 更改当前配置
+  pps = PPS(this->Move_PPS[0], this->Move_PPS[1], this->Move_PPS[2]); // PPS切换
+  this->yaw = yaw_;
+  this->val = val_;
+  this->ChassisForwardAngle(yaw);
 
   //  方向指示器
   if (direction == 'u')
   {
     negative = -1;
-    yaw_negative = 1;
-    val *= -1;
+    this->val *= -1;
   }
   else if (direction == 'n')
   {
     negative = 1;
-    yaw_negative = 1;
   }
-  else if (direction == 'p')
+  pps.setSetpoint(this->val);
+}
+
+// 设置为编码轮直走
+// 距离，方向
+void ChassisControl::ReSetToEncoderWheel(double val_, char direction)
+{
+  ChassisRsetPosition();                                              // 电机初始化
+  Now_Mod = EncoderWheel;                                             // 更改当前配置
+  pps = PPS(this->Move_PPS[0], this->Move_PPS[1], this->Move_PPS[2]); // PPS切换
+  this->ChassisForwardAngle(ChassisInertial.rotation());
+  this->val = val_;
+
+  //  方向指示器
+  if (direction == 'u')
+  {
+    negative = -1;
+    this->val *= -1;
+  }
+  else if (direction == 'n')
+  {
+    negative = 1;
+  }
+  pps.setSetpoint(this->val);
+}
+
+// 设置距离传感器
+void ChassisControl::ReSetToDistance(double val_, char DistanceChioce_)
+{
+  ChassisRsetPosition(); // 电机初始化
+  this->Now_Mod = Distance;
+  this->val = val_;
+  this->DistanceChioce = DistanceChioce_;
+  this->Distance_start_val = GetDistance(DistanceChioce_);
+
+  //  方向指示器
+  if (DistanceChioce == 'f')
+  {
+    negative = -1;
+  }
+  else if (DistanceChioce == 'b')
+  {
+    negative = 1;
+  }
+
+  pps = PPS(this->Distance_PPS[0], this->Distance_PPS[1], this->Distance_PPS[2]);
+  pps.setSetpoint(val - Distance_start_val); // 设置目标位置
+}
+
+// 设置曲线运动(位置)
+void ChassisControl::ReSetToCurveMove_Position(double r_, double TargetPosition_, char direction)
+{
+  ChassisRsetPosition(); // 电机初始化
+  Now_Mod = CurveMove_Position;
+  pps = PPS(this->Move_PPS[0], this->Move_PPS[1], this->Move_PPS[2]); // PPS切换
+  //  方向指示器
+  if (direction == 'p')
   {
     negative = 1;
     yaw_negative = 1;
@@ -468,24 +552,140 @@ void ChassisControl::Move(double v, double val, double yaw, char direction)
   {
     negative = -1;
     yaw_negative = 1;
-    val *= -1;
+    TargetPosition_ *= -1;
   }
   else if (direction == 'd')
   {
     negative = -1;
     yaw_negative = -1;
-    val *= -1;
+    TargetPosition_ *= -1;
   }
+  this->r = r_;
+  this->val = TargetPosition_;
+  pps.setSetpoint(TargetPosition_);
+  start_angle = ChassisInertial.rotation(); // 运动开始角度
+}
 
-  this->Move_max_speed = v;
+// 设置曲线运动（角度）
+void ChassisControl::ReSetToCurveMove_Angle(double r_, double TargetAngle_, char direction)
+{
+}
+
+// 获得输出
+double ChassisControl::GetOutPut()
+{
+  if (Now_Mod == EncoderWheel)
+  {
+    return EncoderWheel_OutPut();
+  }
+  else if (Now_Mod == CurveMove_Position)
+  {
+    return CurveMove_Position_OutPut();
+  }
+  else if (Now_Mod == Distance)
+  {
+    return Distance_OutPut();
+  }
+  return 0;
+}
+
+// 编码轮运动
+double ChassisControl::EncoderWheel_OutPut()
+{
+  double current_position = GetPositions_mean(); // 当前位置
+  // 直接返回 pps返回值即可
+  return pps.calculate(current_position, 0.01);
+}
+
+//  曲线运动 位置
+double ChassisControl::CurveMove_Position_OutPut()
+{
+  double current_position = GetPositions_mean(); // 当前位置
+  return pps.calculate(current_position, 0.01);
+}
+
+//  曲线运动 角度
+double ChassisControl::CurveMove_Angle_OutPut()
+{
+
+  return 0;
+}
+
+double ChassisControl::Distance_OutPut()
+{
+  double current_position = GetDistance(this->DistanceChioce) - this->Distance_start_val; // 当前位置
+  double output = pps.calculate(current_position, 0.01) * negative;
+  return output;
+}
+
+void ChassisControl::ChassisBasicMove(double now_speed)
+{
+  if (Now_Mod == EncoderWheel)
+  {
+    EncoderWheel_Move(now_speed);
+  }
+  else if (Now_Mod == CurveMove_Position)
+  {
+    CurveMove_Position_Move(now_speed);
+  }
+  else if (Now_Mod == Distance)
+  {
+    Distance_Move(now_speed);
+  }
+}
+
+// 编码轮运动
+void ChassisControl::EncoderWheel_Move(double now_speed)
+{
+  ChassisForward(now_speed); //  控制移动
+}
+
+//  曲线运动 位置
+void ChassisControl::CurveMove_Position_Move(double now_speed)
+{
+  double PI = 3.1415;
+  double current_position = GetPositions_mean();
+  double current_angle = ChassisInertial.rotation(); // 当前位置
+
+  // 计算当前理论陀螺仪角度
+  double true_angle = start_angle + current_position / (2 * PI * r) * 360 * yaw_negative;
+
+  double angle_compensation = (true_angle - current_angle);
+
+  ChassisLeftControl(now_speed * (1 + 200 / (2 * r) * yaw_negative) + angle_compensation * 0.1);
+  ChassisRightControl(now_speed * (1 - 200 / (2 * r) * yaw_negative) - angle_compensation * 0.1);
+}
+
+//  曲线运动 位置
+void ChassisControl::CurveMove_Angle_Move(double now_speed)
+{
+}
+
+// 距离传感器运动
+void ChassisControl::Distance_Move(double now_speed)
+{
+  ChassisForward(now_speed); //  控制移动
+}
+
+// 基本的运动
+void ChassisControl::BasicMove()
+{
+  ChassisRsetPosition(); // 电机初始化
+
+  double dt = 0.01;
+  double stuck_time_count = 0;                                                                                    // 电机卡死时间统计
+  double start_time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count(); // 运动开始时间
+  double move_time_out = Move_time_out;
+  int negative = 1; // 负方向指示器
+
+  // 加速度测试
+  double now_speed = 0;
+
+  this->Move_max_speed = this->speed; // 获取最大速度
 
   // 直线修正指示器
-  this->StraightAngle = yaw;
-  ChassisControl::ChassisStraight(yaw);
-
-  PPS pps(this->Move_PPS[0], this->Move_PPS[1], this->Move_PPS[2]); // 创建PPS控制器实例
-
-  pps.setSetpoint(val); // 设置目标位置
+  this->StraightAngle = this->yaw;
+  ChassisControl::ChassisStraight(this->StraightAngle);
 
   // 多线程阻断等待
   while (MoveEnd == false)
@@ -504,12 +704,13 @@ void ChassisControl::Move(double v, double val, double yaw, char direction)
 
   while (true)
   {
-    Whileing = true;                               // 表示正在循环了
-    double current_position = GetPositions_mean(); // 当前位置
+    Whileing = true;                                   // 表示正在循环了
+    double current_position = GetNowCurrentPosition(); // 当前位置
     // Brain.Screen.printAt( 10, 50, "current_position %f", current_position);
     this->ChassisForwardAngle(this->StraightAngle);
 
-    double output = pps.calculate(current_position, dt); // 补偿
+    double output = this->GetOutPut(); // 补偿
+    // std::cout << output << " " << val << std::endl;
 
     if (std::abs(current_position - val) <= move_allowable_error && std::abs(output) <= min_move_speed * 10)
     {
@@ -517,7 +718,6 @@ void ChassisControl::Move(double v, double val, double yaw, char direction)
       if (overcount == Over_count)
       {
         // PrintAt(2, " ->到位");
-        // std::cout <<"daowei" <<std::endl;
         break;
       }
     }
@@ -529,7 +729,6 @@ void ChassisControl::Move(double v, double val, double yaw, char direction)
     // 贴近
     if ((output < 0 && last_speed > 0) || (output > 0 && last_speed < 0))
     {
-      // Brain.Screen.printAt(10, 80, "----%d-------", nearcount);
       nearcount += 1;
       if (nearcount >= 2)
       {
@@ -543,8 +742,6 @@ void ChassisControl::Move(double v, double val, double yaw, char direction)
       // PrintAt(2, " ->打断");
       break;
     }
-
-    // std::cout <<  ";;;;;;;" << GetVelocity_mean() << std::endl;
 
     // 电机抱死保护
     if (GetVelocity_mean() <= Stuck_threshold)
@@ -586,16 +783,39 @@ void ChassisControl::Move(double v, double val, double yaw, char direction)
 
     last_speed = now_speed;
 
-    // std::cout << "output----" << output  << " " << current_position << std::endl;
+    std::cout << now_speed << " " << current_position << std::endl;
     now_speed = NumInterval(now_speed, now_min_speed, this->Move_max_speed);
-    ChassisForward(now_speed); //  控制移动
+    this->ChassisBasicMove(now_speed);
 
     wait(dt * 1000.0, msec);
   }
   MoveOver();
-  // PrintAt(3, "%f",  GetPositions_mean());
-  // std::cout << "ans: " << GetPositions_mean() << std::endl;
 }
+
+// ==============================================================================
+// 获得当前的pps算法输出（编码轮-直走）
+// double get
+
+// 直线运动函数
+void ChassisControl::Move(double v, double val, char direction)
+{
+  this->Move(v, val, ChassisInertial.rotation(), direction);
+}
+
+// 直线运动函数（可选多线程）
+void ChassisControl::Move(double v, double val, char direction, bool task)
+{
+  this->Move(v, val, ChassisInertial.rotation(), direction, task);
+}
+
+// 直线运动函数
+void ChassisControl::Move(double v, double val, double yaw, char direction)
+{
+  this->ResetMaxSpeed(v);
+  this->ReSetToEncoderWheel(val, yaw, direction);
+  this->BasicMove();
+}
+
 // 直线运动函数(可选多线程)
 void ChassisControl::Move(double v, double val, double yaw, char direction, bool task)
 {
@@ -621,170 +841,9 @@ void ChassisControl::Move(double v, double val, double yaw, char direction, bool
 // 曲线移动
 void ChassisControl::CurveMove(double v, double r, double TargetPosition, char direction)
 {
-  ChassisRsetPosition(); // 电机初始化
-
-  double dt = 0.01;
-  double stuck_time_count = 0;                                                                                    // 电机卡死时间统计
-  double start_time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count(); // 运动开始时间
-  double move_time_out = Move_time_out + (TargetPosition / v * 1000);
-  int negative = 1;     // 负方向指示器
-  int yaw_negative = 1; // 负偏指示器
-  double PI = 3.1415;
-
-  // 加速度测试
-  double now_speed = 0;
-
-  //  方向指示器
-  if (direction == 'p')
-  {
-    negative = 1;
-    yaw_negative = 1;
-  }
-  else if (direction == 'q')
-  {
-    negative = 1;
-    yaw_negative = -1;
-  }
-  else if (direction == 'b')
-  {
-    negative = -1;
-    yaw_negative = 1;
-    TargetPosition *= -1;
-  }
-  else if (direction == 'd')
-  {
-    negative = -1;
-    yaw_negative = -1;
-    TargetPosition *= -1;
-  }
-
-  PPS pps(this->Move_PPS[0], this->Move_PPS[1], this->Move_PPS[2]); // 创建PPS控制器实例
-
-  pps.setSetpoint(TargetPosition); // 设置目标位置
-
-  // 多线程阻断等待
-  while (MoveEnd == false)
-  {
-    wait(10, msec);
-    Moveing = false;
-  }
-
-  Moveing = true;    // 当前在运动
-  MoveEnd = false;   // 运动没有完成
-  int overcount = 0; // 成功到位计数器
-  int nearcount = 0; // 贴近计数
-  double now_min_speed = min_move_speed;
-  double last_speed = 0;
-  bool add_over = false;
-
-  double start_angle = ChassisInertial.rotation();
-
-  while (true)
-  {
-    Whileing = true;                                   // 表示正在循环了
-    double current_angle = ChassisInertial.rotation(); // 当前位置
-    double true_angle = 0;
-    double current_position = GetPositions_mean();
-
-    // 计算当前理论陀螺仪角度
-    true_angle = start_angle + current_position / (2 * PI * r) * 360 * yaw_negative;
-    std::cout << true_angle << std::endl;
-    ChassisForwardAngle(true_angle);
-
-    double output = pps.calculate(current_position, dt); // 补偿
-
-    ChassisForwardAngle(true_angle);
-
-    if (std::abs(current_position - TargetPosition) <= move_allowable_error && std::abs(output) <= min_move_speed * 10)
-    {
-      overcount += 1;
-      if (overcount == Over_count)
-      {
-        // PrintAt(2, " ->到位");
-        // std::cout <<"daowei" <<std::endl;
-        break;
-      }
-    }
-    else
-    {
-      overcount = 0;
-    }
-
-    // 贴近
-    if ((output < 0 && last_speed > 0) || (output > 0 && last_speed < 0))
-    {
-      // Brain.Screen.printAt(10, 80, "----%d-------", nearcount);
-      nearcount += 1;
-      if (nearcount >= 2)
-      {
-        now_min_speed -= 0.1;
-      }
-    }
-
-    // 多线程保护
-    if (Moveing == false)
-    {
-      // PrintAt(2, " ->打断");
-      break;
-    }
-
-    // std::cout <<  ";;;;;;;" << GetVelocity_mean() << std::endl;
-
-    // 电机抱死保护
-    if (GetVelocity_mean() <= Stuck_threshold)
-    {
-      stuck_time_count += dt * 1000.0; // 计算抱死时间
-      if (stuck_time_count >= Stuck_time_out)
-      {
-        // PrintAt(2, " ->抱死");
-        break;
-      }
-      now_min_speed += 0.1;
-    }
-    else
-    {
-      // stuck_time_count = 0; // 不抱死则刷新计数
-    }
-
-    // 超时保护
-    double now_time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count(); // 当前时间
-    if (now_time - start_time >= move_time_out / 1000)
-    {
-      // PrintAt(2, " ->超时");
-      break;
-    }
-
-    // 加速度设置
-    if (!add_over)
-    {
-      now_speed = GetBufferSpeed(now_speed, output, negative);
-      if (std::abs(now_speed) < std::abs(last_speed))
-      {
-        add_over = true;
-      }
-    }
-    else
-    {
-      now_speed = output;
-    }
-
-    last_speed = now_speed;
-
-    // std::cout << "output----" << output  << " " << current_position << std::endl;
-    now_speed = NumInterval(now_speed, now_min_speed, v);
-    // ChassisForward(now_speed);  //  控制移动
-
-    double angle_compensation = (true_angle - current_angle);
-
-    ChassisLeftControl(now_speed * (1 + 200 / (2 * r) * yaw_negative) + angle_compensation * 0.1);
-    ChassisRightControl(now_speed * (1 - 200 / (2 * r) * yaw_negative) - angle_compensation * 0.1);
-
-    //  ChassisLeftControl(now_speed * (1 + 820 / (2 * r) * yaw_negative));
-    // ChassisRightControl(now_speed * (1 - 820 / (2 * r) * yaw_negative));
-
-    wait(dt * 1000.0, msec);
-  }
-  MoveOver();
+  this->ResetMaxSpeed(v);
+  this->ReSetToCurveMove_Position(r, TargetPosition, direction);
+  this->BasicMove();
 }
 
 // 曲线移动可选多线程
@@ -807,131 +866,6 @@ void ChassisControl::CurveMove(double v, double r, double TargetPosition, char d
   {
     CurveMove(v, r, TargetPosition, direction);
   }
-}
-
-// 组合运动
-void ChassisControl::ComboMove(std::vector<ComboMoveParams> MoveParams)
-{
-  // PrintAt(1, "CMove ");
-  // PrintAt(2, "Moving...");
-  ChassisRsetPosition(); // 电机初始化
-
-  double dt = 0.01;
-  double stuck_time_count = 0;                                                                                    // 电机卡死时间统计
-  double start_time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count(); // 运动开始时间
-  double move_time_out = Move_time_out + (MoveParams[0].val / MoveParams[0].v * 1000);
-  bool over = false; // 记录是否异常退出
-
-  for (ComboMoveParams Params : MoveParams)
-  {
-
-    int negative = 1;     // 负方向指示器
-    int yaw_negative = 1; // 负偏指示器
-    double v = Params.v;
-    double yaw = Params.yaw;
-    double val = Params.val;
-
-    //  方向指示器
-    if (Params.direction == 'u')
-    {
-      negative = -1;
-      yaw_negative = 1;
-      yaw = 0;
-      val *= -1;
-    }
-    else if (Params.direction == 'n')
-    {
-      negative = 1;
-      yaw_negative = 1;
-      yaw = 0;
-    }
-    else if (Params.direction == 'p')
-    {
-      negative = 1;
-      yaw_negative = 1;
-    }
-    else if (Params.direction == 'q')
-    {
-      negative = 1;
-      yaw_negative = -1;
-    }
-    else if (Params.direction == 'b')
-    {
-      negative = -1;
-      yaw_negative = 1;
-      val *= -1;
-    }
-    else if (Params.direction == 'd')
-    {
-      negative = -1;
-      yaw_negative = -1;
-      val *= -1;
-    }
-    // 直线修正指示器
-    if (abs(yaw) < 0.01)
-    {
-      ChassisControl::ChassisStraight(ChassisInertial.rotation());
-    }
-
-    // 调用函数
-    if (Params.func != nullptr)
-    {
-      Params.func();
-    }
-
-    while (true)
-    {
-      double current_position = GetPositions_mean(); // 当前位置
-
-      if (negative == 1)
-      {
-        if (current_position > val)
-        {
-          break;
-        }
-      }
-      else
-      {
-        if (current_position < val)
-        {
-          break;
-        }
-      }
-
-      // 电机抱死保护
-      if (GetVelocity_mean() <= Stuck_threshold)
-      {
-        stuck_time_count += dt * 1000.0; // 计算抱死时间
-        if (stuck_time_count >= Stuck_time_out)
-        {
-          // PrintAt(2, " ->抱死");
-          over = true;
-          break;
-        }
-      }
-
-      // 超时保护/
-      double now_time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count(); // 当前时间
-      if (now_time - start_time >= move_time_out / 1000)
-      {
-        // PrintAt(2, " ->超时");
-        over = true;
-        break;
-      }
-      // Brain.Screen.printAt(100, 50, "====%f", yaw * yaw_negative);
-      ChassisForward(v * negative); //  控制移动
-      wait(dt * 1000.0, msec);
-    }
-
-    // 异常退出
-    if (over)
-    {
-      break;
-    }
-  }
-  MoveOver();
-  // PrintAt(3, "%f",  GetPositions_mean());
-  // std::cout << "ans: " << GetPositions_mean() << std::endl;
 }
 
 // 旋转函数
@@ -1015,23 +949,6 @@ void ChassisControl::Turn(double v, double val, char direction)
       overcount = 0;
     }
 
-    // 过慢保护
-    if (GetVelocity_pct_mean() <= 3)
-    {
-      blockage_num += std::abs(3 - GetVelocity_pct_mean()) * 0.2;
-      if (output > 0)
-      {
-        output += blockage_num;
-      }
-      else
-      {
-        output -= blockage_num;
-      }
-    }
-    else
-    {
-    }
-
     // 贴近
     if ((output < 0 && last_speed > 0) || (output > 0 && last_speed < 0))
     {
@@ -1041,6 +958,24 @@ void ChassisControl::Turn(double v, double val, char direction)
       {
         now_min_speed -= 0.45;
         blockage_num = 0;
+      }
+    }
+
+    // 过慢保护
+    if (GetVelocity_pct_mean() <= 3)
+    {
+      blockage_num += std::abs(3 - GetVelocity_pct_mean()) * 0.2;
+    }
+
+    if (nearcount <= 0)
+    {
+      if (output > 0)
+      {
+        output += blockage_num;
+      }
+      else
+      {
+        output -= blockage_num;
       }
     }
 
@@ -1097,6 +1032,7 @@ void ChassisControl::Turn(double v, double val, char direction)
   MoveOver();
   // PrintAt(3, " %d", (int)ChassisInertial.rotation());
 }
+
 // 旋转函数(可选多线程)
 void ChassisControl::Turn(double v, double val, char direction, bool task)
 {
@@ -1275,142 +1211,15 @@ void ChassisControl::StopMoving()
 }
 
 // 使用距离传感器移动
-void ChassisControl::MoveToDistance(double v, double val, std::string DistanceChioce)
+void ChassisControl::MoveToDistance(double v, double val, char DistanceChioce)
 {
-  // 最大速度
-  // 运动距离
-  // 偏转
-  // 方向
-  // 多线程
-  ChassisRsetPosition(); // 电机初始化
-  // PrintAt(1, "MoveTD %f", val);
-  // PrintAt(2, "Moving...");
-
-  double start_val = GetDistance(DistanceChioce);
-  double dt = 0.01;
-  double stuck_time_count = 0;                                                                                    // 电机卡死时间统计
-  double start_time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count(); // 运动开始时间
-  double move_time_out = Move_time_out + (std::abs(start_val - val) / v * 1000);
-  int negative = 1; // 负方向指示器
-
-  // 加速度测试
-  double now_speed = 0;
-
-  //  方向指示器
-  if (DistanceChioce == "front")
-  {
-    negative = -1;
-  }
-  else if (DistanceChioce == "back")
-  {
-    negative = 1;
-  }
-  double start_position = GetDistance(DistanceChioce); // 当前位置
-  PPS pps(0.0165, 0.3, 2.5);                           // 创建PPS控制器实例。
-  pps.setSetpoint(val - start_position);               // 设置目标位置
-
-  // 多线程阻断等待
-  while (MoveEnd == false)
-  {
-    wait(10, msec);
-    Moveing = false;
-  }
-
-  // 直线修正指示器
-  ChassisControl::ChassisStraight(ChassisInertial.rotation());
-
-  Moveing = true;    // 当前在运动
-  MoveEnd = false;   // 运动没有完成
-  int overcount = 0; // 成功到位计数器
-  int nearcount = 0; // 贴近计数
-  double now_min_speed = min_move_speed;
-  double last_speed = 0;
-
-  while (true)
-  {
-    double current_position = GetDistance(DistanceChioce) - start_position; // 当前位置
-    double output = pps.calculate(current_position, dt) * negative;         // 补偿
-
-    // 检查目标是否达到
-    if (std::abs(current_position - val + start_position) <= 4 && std::abs(output) <= Stuck_threshold)
-    {
-      overcount += 1;
-      if (overcount == Over_count)
-      {
-        // PrintAt(2, " ->到位");
-        break;
-      }
-    }
-    else
-    {
-      overcount = 0;
-    }
-
-    // 贴近
-    if ((output < 0 && last_speed > 0) || (output > 0 && last_speed < 0))
-    {
-      // Brain.Screen.printAt(10, 80, "----%d-------", nearcount);
-      nearcount += 1;
-      if (nearcount >= 2)
-      {
-        now_min_speed -= 0.1;
-      }
-    }
-
-    // 多线程保护
-    if (Moveing == false)
-    {
-      // PrintAt(2, " ->打断");
-      break;
-    }
-
-    // // 算法收敛保护
-    // if (abs(output) <= Stuck_threshold){
-    //   PrintAt(2, " ->收敛");
-    //   break;
-    // }
-
-    // 电机抱死保护
-    if (GetVelocity_mean() <= Stuck_threshold)
-    {
-      stuck_time_count += dt * 1000.0; // 计算抱死时间
-      if (stuck_time_count >= Stuck_time_out)
-      {
-        // PrintAt(2, " ->抱死");
-        break;
-      }
-      now_min_speed += 0.1;
-    }
-    else
-    {
-      stuck_time_count = 0; // 不抱死则刷新计数
-    }
-
-    // 超时保护
-    double now_time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count(); // 当前时间
-    if (now_time - start_time >= move_time_out / 1000)
-    {
-      // PrintAt(2, " ->超时");
-      break;
-    }
-
-    last_speed = output;
-    now_speed = GetBufferSpeed(now_speed, output, negative);
-    // std::cout << "output----" << output << std::endl;
-    now_speed = NumInterval(now_speed, now_min_speed, v);
-    ChassisForward(now_speed); //  控制移动
-
-    wait(dt * 1000.0, msec);
-  }
-
-  ChassisStop();
-  Moveing = false; // 运动停止了
-  MoveEnd = true;  // 运动完成
-                   // PrintAt(3, "%f", GetDistance(DistanceChioce));
+  this->ResetMaxSpeed(v);
+  this->ReSetToDistance(val, DistanceChioce);
+  this->BasicMove();
 }
 
 // 使用距离传感器移动(可选多线程)
-void ChassisControl::MoveToDistance(double v, double val, std::string DistanceChioce, bool task)
+void ChassisControl::MoveToDistance(double v, double val, char DistanceChioce, bool task)
 {
   if (task == true)
   {
@@ -1641,336 +1450,6 @@ void ChassisControl::FollowTarget(double v, double val, bool task)
   }
 }
 
-// // 追随某个目标
-// void ChassisControl::FollowTarget(double v, double val){
-//   // 最大速度
-//     // 运动距离
-//     // 偏转
-//     // 方向
-//     // 多线程
-//     // ChassisRsetPosition();  // 电机初始化
-//     // PrintAt(1, "FollowT %f", val);
-//     // PrintAt(2, "Moving...");
-
-//     Rotation_x.resetPosition();       // 定位轮初始化
-
-//     double dt = 0.01;
-//     double stuck_time_count = 0;  // 电机卡死时间统计
-//     double start_time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count();  // 运动开始时间
-//     double move_time_out = Move_time_out + (val / v * 1000);
-//     int    negative = 1;   // 负方向指示器
-//     int yaw_negative= 1;   // 负偏指示器
-
-//     PPS pps(0.00900, 0.0, 0.0); // 创建PPS控制器实例
-//     pps.setSetpoint(val); // 设置目标位置
-
-//     PPS pps_target(0.03, 0.0, 0.0); // 创建PPS控制器实例
-//     pps_target.setSetpoint(aiVision_w / 2 + (Target.Align * aiVision_w / 2)); // 设置目标位置
-
-//     // 多线程阻断等待
-//     while (MoveEnd == false){
-//         wait(10, msec);
-//         Moveing = false;
-//     }
-
-//     Moveing = true;  // 当前在运动
-//     MoveEnd = false; // 运动没有完成
-
-//     // 设置目标位置
-//     bool have_target = false;
-//     have_target = Target.SetTarget();
-
-//     // 加速度测试
-//     double now_speed = 0.0;
-//     int overcount = 0;  // 成功到位计数器
-
-//     int nearcount = 0; // 贴近计数
-//     double now_min_speed = min_move_speed;
-//     double last_speed = 0;
-
-//     while (true) {
-//         double current_position = Rotation_x.position(deg);  // 当前位置
-//         double output = pps.calculate(current_position, dt);  // 前进补偿
-
-//         // 视觉传感器
-//         aiVision.takeSnapshot(*(Target.Color));  // 当前视觉传感器的数据
-//         double output_target = 0.0;
-
-//         // 获取相机元素
-//         if (aiVision.objectCount > 0 && have_target){
-//           int TargetCenterX = Target.GetTargetCenterX();
-
-//           output_target = pps_target.calculate(TargetCenterX, dt) * -1;  // 前进补偿
-//           // Brain.Screen.printAt( 10, 10, "target %d, %d", aiVision.largestObject.centerX, 5);
-
-//           if (output_target > 0){
-//             output_target = std::min(v / 2, output_target);
-//           }else{
-//             output_target = std::max(v / 2 * -1, output_target);
-//           }
-//           // Brain.Screen.printAt( 10, 90, "output_target %f", output_target);
-//         }
-
-//         // 检查目标是否达到
-//         if (std::abs(current_position - val) <= 7.5 && std::abs(output) <= Stuck_threshold) {
-//           overcount += 1;
-//           if (overcount == Over_count){
-//             // PrintAt(2, " ->到位");
-//             // std::cout <<"daowei" <<std::endl;
-//             break;
-//           }
-//         }else{
-//           overcount = 0;
-//         }
-
-//         // 贴近
-//         if ((output < 0 && last_speed > 0) || (output > 0 && last_speed < 0)){
-//           // Brain.Screen.printAt(10, 80, "----%d-------", nearcount);
-//           nearcount += 1;
-//           if (nearcount >= 2){
-//             now_min_speed -= 0.1;
-//           }
-//         }
-
-//         // 多线程保护
-//         if (Moveing == false){
-//             // PrintAt(2, " ->打断");
-//             break;
-//         }
-
-//         // // 算法收敛保护
-//         // if (abs(output) <= Stuck_threshold){
-//         //   PrintAt(2, " ->收敛");
-//         //   break;
-//         // }
-
-//         // 电机抱死保护
-//         if (GetVelocity_mean() <= Stuck_threshold){
-//             stuck_time_count += dt * 1000.0;  // 计算抱死时间
-//             if (stuck_time_count >= Stuck_time_out){
-//               // PrintAt(2, " ->抱死");
-//               break;
-//             }
-//             now_min_speed += 0.1;
-//         }
-//         else{
-//           stuck_time_count = 0; // 不抱死则刷新计数
-//         }
-
-//         // 超时保护
-//         double now_time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count();// 当前时间
-//         if (now_time - start_time >= move_time_out / 1000){
-//             // PrintAt(2, " ->超时");
-//             break;
-//         }
-
-//         // if (std::abs(output_target) < 0.5){
-//         //   output_target = 0.0;
-//         // }
-
-//         last_speed = output;
-//         now_speed = GetBufferSpeed(now_speed, output, negative);
-//         now_speed = NumInterval(now_speed, now_min_speed, v);
-
-//         ChassisLeftControl(NumInterval(now_speed + output_target, 0, v * 2));
-//         ChassisRightControl(NumInterval(now_speed - output_target, 0, v * 2));
-
-//         wait(dt * 1000.0, msec);
-//     }
-
-//     ChassisStop();
-//     // PrintAt(3, "%f", abs(ChassisInertial.rotation()));
-//     Moveing = false;  // 运动停止了
-//     MoveEnd = true; // 运动完成
-
-// }
-
-// // 旋转到指定对象
-// void ChassisControl::TurnToTarget(double v, double val, char direction){
-// 最大速度
-// 运动距离
-// 方向
-// ChassisInertial.resetRotation();  // 陀螺仪初始化
-
-// PrintAt(1, "Turn %f", val);
-// PrintAt(2, "Moving...");
-
-//     double taget_angle = 0.0;
-//     double start_angle   = ChassisInertial.rotation();
-//     double dt = 0.01;
-//     double stuck_time_count = 0;  // 电机卡死时间统计
-//     double start_time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count();  // 运动开始时间
-//     double move_time_out = Move_time_out + (val / v * 1000) * 1000;
-//     int yaw_negative= 1;   // 负偏指示器
-
-//     //  方向指示器
-//     if (direction == 'q' || direction == 'b' || direction == 'l'){
-//         yaw_negative = -1;
-//         taget_angle  = start_angle - val;
-//     }
-//     else if (direction == 'p' || direction == 'd' || direction == 'r'){
-//         yaw_negative = 1;
-//         taget_angle  = start_angle + val;
-//     }
-
-//     PPS pps(0.1, 0, 0); // 创建PPS控制器实例
-//     pps.setSetpoint(taget_angle); // 设置目标位置
-
-//     // 多线程阻断等待
-//     while (MoveEnd == false){
-//         wait(10, msec);
-//         Moveing = false;
-//     }
-
-//     Moveing = true;  // 当前在运动
-//     MoveEnd = false; // 运动没有完成
-
-//     int overcount = 0; // 到位计数
-//     int nearcount = 0; // 贴近计数
-//     double now_min_speed = min_turn_speed;
-//     double last_speed = 0;
-
-//     bool use_taget = false;
-
-//     while (true) {
-//         double current_position = ChassisInertial.rotation();  // 当前位置
-//         double output = pps.calculate(current_position, dt) * yaw_negative;  // 补偿
-
-//         // 目标角度附近找到了目标物体
-//         if (abs(current_position - taget_angle) <= 30 and Target.SetTarget()){
-//           break;
-//         }
-
-//         // 检查目标是否达到
-//         if (std::abs(current_position - taget_angle) <= 1 && std::abs(output) < Stuck_threshold) {
-//           overcount += 1;
-//           if (overcount == Over_count){
-//             // PrintAt(2, " ->到位");
-//             // std::cout <<"daowei" <<std::endl;
-//             break;
-//           }
-//         }
-//         else{
-//           overcount = 0;
-//         }
-
-//         // 贴近
-//         if ((output < 0 && last_speed > 0) || (output > 0 && last_speed < 0)){
-//           // Brain.Screen.printAt(10, 80, "----%d-------", nearcount);
-//           nearcount += 1;
-//           if (nearcount >= 2){
-//             now_min_speed -= 0.1;
-//           }
-//         }
-
-//         // 多线程保护
-//         if (Moveing == false){
-//             // PrintAt(2, " ->打断");
-//             break;
-//         }
-
-//         // 算法收敛保护
-//         // if (abs(output) <= Stuck_threshold){
-//         //   PrintAt(2, " ->收敛");
-//         //   break;
-//         // }
-
-//         // 电机抱死保护
-//         if (GetVelocity_mean() <= Stuck_threshold){
-//             stuck_time_count += dt * 1000.0;  // 计算抱死时间
-//             if (stuck_time_count >= Stuck_time_out){
-//               // PrintAt(2, " ->抱死");
-//               break;
-//             }
-//             now_min_speed += 0.1;
-//         }
-//         else{
-//           stuck_time_count = 0; // 不抱死则刷新计数
-//         }
-
-//         // 超时保护
-//         double now_time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count();// 当前时间
-//         if (now_time - start_time >= move_time_out / 1000){
-//             // PrintAt(2, " ->超时");
-//             break;
-//         }
-
-//         output = NumInterval(output, now_min_speed, v);
-//         ChassisForward(output, yaw_negative);  //  控制移动
-//         last_speed = output;
-
-//         wait(dt * 1000.0, msec);
-//     }
-
-//     if (Target.SetTarget()){
-//       PPS pps_target(0.04, 0.0, 0.0); // 创建PPS控制器实例
-//       int tagetX = aiVision_w / 2 + (Target.Align * aiVision_w / 2);
-//       tagetX = aiVision_w / 2;
-//       pps_target.setSetpoint(tagetX); // 设置目标位置
-
-//       overcount = 0;
-//       while (true) {
-//           aiVision.takeSnapshot(*(Target.Color));  // 当前视觉传感器的数据
-//           int TargetCenterX = Target.GetTargetCenterX();
-//           double output= pps_target.calculate(TargetCenterX, dt) * -1;  // 前进补偿
-
-//           // 检查目标是否达到
-//           if (std::abs(TargetCenterX - tagetX) <= 1 && std::abs(output) < Stuck_threshold) {
-//             overcount += 1;
-//             if (overcount == Over_count){
-//               // PrintAt(2, " ->到位");
-//               // std::cout <<"daowei" <<std::endl;
-//               break;
-//             }
-//           }
-
-//           // 多线程保护
-//           if (Moveing == false){
-//               // PrintAt(2, " ->打断");
-//               break;
-//           }
-
-//           // 算法收敛保护
-//           // if (abs(output) <= Stuck_threshold){
-//           //   PrintAt(2, " ->收敛");
-//           //   break;
-//           // }
-
-//           // 电机抱死保护
-//           if (GetVelocity_mean() <= Stuck_threshold){
-//               stuck_time_count += dt * 1000.0;  // 计算抱死时间
-//               if (stuck_time_count >= Stuck_time_out){
-//                 // PrintAt(2, " ->抱死");
-//                 break;
-//               }
-//           }
-//           else{
-//             stuck_time_count = 0; // 不抱死则刷新计数
-//           }
-
-//           // 超时保护
-//           double now_time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count();// 当前时间
-//           if (now_time - start_time >= move_time_out / 1000){
-//               // PrintAt(2, " ->超时");
-//               break;
-//           }
-
-//           // 控制小车运动
-//           output = NumInterval(output, min_turn_speed, v);
-//           ChassisLeftControl(output);
-//           ChassisRightControl(-1 * output);
-
-//           wait(dt * 1000.0, msec);
-//       }
-
-//     }
-
-//     ChassisStop();
-//     // PrintAt(3, " %f", ChassisInertial.rotation());
-//     Moveing = false;  // 运动停止了
-//     MoveEnd = true; // 运动完成
-// }
-
 //  多线程运动（直线）友元函数
 int MoveTask(void *args)
 {
@@ -2033,7 +1512,7 @@ int MoveToDistancetTask(void *args)
   ChassisControl *self = params->self;                 // 当前类
   double v = params->v;                                // 速度
   double val = params->val;                            // 路径长度
-  std::string DistanceChioce = params->DistanceChioce; // 前后距离传感器选择
+  char DistanceChioce = params->DistanceChioce; // 前后距离传感器选择
 
   self->MoveToDistance(v, val, DistanceChioce);
 

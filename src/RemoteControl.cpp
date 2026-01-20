@@ -47,7 +47,6 @@ bool ChangeStance()
     return false;
 }
 
-// 遥控额外线程控制 刘老师版本
 int RemoteControl_child()
 {
     return 0;
@@ -57,8 +56,8 @@ int RemoteControl_child()
 void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_name, double timeout)
 {
 
-    // digitalH  铲子
-    // digitalG  钩子
+    // digitalH  后方 起来
+    // digitalG  中间 高桥
 
     PrintInLine(1);
     if (stance == 'r')
@@ -183,40 +182,30 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
             if (ControlData.ButtonR1)
             {
                 ToolMotor1.spin(forward, -16, voltageUnits::volt);
+                digitalG.set(0);
+                digitalH.set(1);
             }
             if (ControlData.ButtonR2)
             {
                 ToolMotor1.spin(forward, 16, voltageUnits::volt);
+                digitalG.set(0);
+                digitalH.set(1);
             }
             if (ControlData.ButtonL1)
             {
-                ToolMotor1.spin(forward, 16, voltageUnits::volt);
-                MotorBlocked = false;
+                ToolMotor1.spin(forward, -16, voltageUnits::volt);
+                digitalG.set(0);
             }
             if (ControlData.ButtonL2)
             {
-                ToolMotor1.spin(forward, -50, pct);
+                ToolMotor1.spin(forward, 0, voltageUnits::volt);
+                digitalG.set(1);
             }
-            if (ControlData.ButtonDown)
-            {
-                ToolMotor1.spin(forward, -20, pct);
-                MotorBlocked = true; // 取消递球
-            }
+            digitalH.set(0);
         }
         else
         {
-            if (ToolMotor1.torque() > 0.3 && std::abs(ToolMotor1.velocity(dps)) < 50)
-            {
-                MotorBlocked = true;
-            }
-            if (!MotorBlocked)
-            {
-                ToolMotor1.spin(forward, 2, voltageUnits::volt);
-            }
-            else
-            {
-                ToolMotor1.spin(forward, 0, voltageUnits::volt);
-            }
+            ToolMotor1.spin(forward, 0, voltageUnits::volt);
         }
 
         // 2号
@@ -224,95 +213,24 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
         {
             if (ControlData.ButtonR1)
             {
-                //  分球逻辑
-                // ErrorBall1： 靠前方的颜色传感器
-                // ErrorBall2： 靠后方的颜色传感器
-                // 0   ：正确颜色的球
-                // -1  ：没有球
-                // 1~20：错误的球，检测到错球值为20
-
-                if (ErrorBall1 > 0 && ErrorBall2 > 0)
-                {
-                    // 前后都是异色球
-                    ToolMotor2.spin(forward, 16, voltageUnits::volt);
-                }
-                else if (ErrorBall1 > 0 && ErrorBall2 < 0)
-                {
-                    // 前异色，后没球
-                    ToolMotor2.spin(forward, 16, voltageUnits::volt);
-                }
-                else if (ErrorBall1 > 0 && ErrorBall2 == 0)
-                {
-                    // 前异色，后同色
-                    ToolMotor2.spin(forward, -16, voltageUnits::volt);
-                }
-                else if (ErrorBall1 == 0 && ErrorBall2 > 0)
-                {
-                    // 前同色，后异色
-                    ToolMotor2.spin(forward, 16, voltageUnits::volt);
-                }
-                else if (ErrorBall1 == 0 && ErrorBall2 == 0)
-                {
-                    // 前同色，后同色
-                    ToolMotor2.spin(forward, -16, voltageUnits::volt);
-                }
-                else if (ErrorBall1 == 0 && ErrorBall2 < 0)
-                {
-                    // 前同色，后没球
-                    ToolMotor2.spin(forward, -16, voltageUnits::volt);
-                }
-                else if (ErrorBall1 < 0 && ErrorBall2 > 0)
-                {
-                    // 前没球，后异色
-                    ToolMotor2.spin(forward, 16, voltageUnits::volt);
-                }
-                else if (ErrorBall1 < 0 && ErrorBall2 == 0)
-                {
-                    // 前没球，后同色
-                    ToolMotor2.spin(forward, -16, voltageUnits::volt);
-                }
-                else if (ErrorBall1 < 0 && ErrorBall2 < 0)
-                {
-                    // 前没球，后没球
-                    ToolMotor2.spin(forward, -16, voltageUnits::volt);
-                }
-                else
-                {
-                    // 不可能进来，但还是留有保底
-                    ToolMotor2.spin(forward, 16, voltageUnits::volt);
-                }
+                ToolMotor2.spin(forward, -16, voltageUnits::volt);
             }
             if (ControlData.ButtonR2)
             {
-                ToolMotor2.spin(forward, 40, pct);
+                ToolMotor2.spin(forward, 16, voltageUnits::volt);
             }
             if (ControlData.ButtonL1)
             {
-                ToolMotor2.spin(forward, 1, voltageUnits::volt);
+                ToolMotor2.spin(forward, -16, voltageUnits::volt);
             }
             if (ControlData.ButtonL2)
-            {
-                ToolMotor2.spin(forward, 1, voltageUnits::volt);
-            }
-            if (ControlData.ButtonDown)
             {
                 ToolMotor2.spin(forward, -16, voltageUnits::volt);
             }
         }
         else
         {
-            if (ToolMotor2.torque() > 0.3 && std::abs(ToolMotor2.velocity(dps)) < 50)
-            {
-                MotorBlocked = true;
-            }
-            if (!MotorBlocked)
-            {
-                ToolMotor2.spin(forward, 0, pct);
-            }
-            else
-            {
-                ToolMotor2.spin(forward, 0, voltageUnits::volt);
-            }
+            ToolMotor2.spin(forward, 0, voltageUnits::volt);
         }
 
         // 3号
@@ -320,53 +238,32 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
         {
             if (ControlData.ButtonR1)
             {
-                ToolMotor3.spin(forward, -10, voltageUnits::volt);
+                ToolMotor3.setStopping(brake);
+                ToolMotor3.spin(forward, 0, voltageUnits::volt);
             }
             if (ControlData.ButtonR2)
             {
-                ToolMotor3.spin(forward, 2, voltageUnits::volt);
+                ToolMotor3.setStopping(brake);
+                ToolMotor3.spin(forward, 0, voltageUnits::volt);
             }
             if (ControlData.ButtonL1)
             {
-                ToolMotor3.spin(forward, 16, voltageUnits::volt);
+                ToolMotor3.spin(forward, -16, voltageUnits::volt);
             }
             if (ControlData.ButtonL2)
             {
                 ToolMotor3.spin(forward, 16, voltageUnits::volt);
             }
-            if (ControlData.ButtonDown)
-            {
-                ToolMotor3.spin(forward, -10, voltageUnits::volt);
-            }
         }
         else
         {
-            if (ToolMotor3.torque() > 0.3 && std::abs(ToolMotor3.velocity(dps)) < 50)
-            {
-                MotorBlocked = true;
-            }
-            if (!MotorBlocked)
-            {
-                ToolMotor3.spin(forward, 30, pct);
-            }
-            else
-            {
-                ToolMotor3.spin(forward, 0, voltageUnits::volt);
-            }
+            ToolMotor3.setStopping(coast);
+            ToolMotor3.spin(forward, 0, voltageUnits::volt);
         }
 
-        // 铲子钩子（新增中桥消分）
-        if (!LastRight && ControlData.ButtonRight)
+        if (ControlData.ButtonDown)
         {
-            digitalG.set(!digitalG.value());
-        }
-        if (!LastY && ControlData.ButtonY)
-        {
-            digitalH.set(!digitalH.value());
-        }
-        if (!LastDown && ControlData.ButtonDown)
-        {
-            digitalF.set(!digitalF.value());
+            digitalH.set(1);
         }
 
         // 变量维护
