@@ -58,6 +58,8 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
 
     // digitalH  后方 起来
     // digitalG  中间 高桥
+    // F         钩子 下来
+    // E         铲子 收起来
 
     PrintInLine(1);
     if (stance == 'r')
@@ -183,13 +185,13 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
             {
                 ToolMotor1.spin(forward, -16, voltageUnits::volt);
                 digitalG.set(0);
-                digitalH.set(1);
+                digitalH.set(0);
             }
             if (ControlData.ButtonR2)
             {
                 ToolMotor1.spin(forward, 16, voltageUnits::volt);
                 digitalG.set(0);
-                digitalH.set(1);
+                digitalH.set(0);
             }
             if (ControlData.ButtonL1)
             {
@@ -198,10 +200,10 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
             }
             if (ControlData.ButtonL2)
             {
-                ToolMotor1.spin(forward, 0, voltageUnits::volt);
+                ToolMotor1.spin(forward, -16, voltageUnits::volt);
                 digitalG.set(1);
             }
-            digitalH.set(0);
+            // digitalH.set(0);
         }
         else
         {
@@ -238,13 +240,12 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
         {
             if (ControlData.ButtonR1)
             {
-                ToolMotor3.setStopping(brake);
-                ToolMotor3.spin(forward, 0, voltageUnits::volt);
+                ToolMotor3.stop();
+                ToolMotor3.setStopping(hold);
             }
             if (ControlData.ButtonR2)
             {
-                ToolMotor3.setStopping(brake);
-                ToolMotor3.spin(forward, 0, voltageUnits::volt);
+                ToolMotor3.spin(forward, 16, voltageUnits::volt);
             }
             if (ControlData.ButtonL1)
             {
@@ -264,6 +265,16 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
         if (ControlData.ButtonDown)
         {
             digitalH.set(1);
+        }
+
+        if (!LastY && ControlData.ButtonY)
+        {
+            digitalE.set(!digitalE.value());
+        }
+
+        if (!LastRight && ControlData.ButtonRight)
+        {
+            digitalF.set(!digitalF.value());
         }
 
         // 变量维护

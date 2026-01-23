@@ -204,10 +204,13 @@ public:
     void ComboMove(std::vector<ComboMoveParams> MoveParams);
 
     // 直线运动函数（使用距离传感器）
-    void MoveToDistance(double v, double val, char DistanceChioce);
+    void MoveToDistance(double v, double val, double yaw, char DistanceChioce);
 
-    // 直线运动函数(使用距离传感器)
-    void MoveToDistance(double v, double val, char DistanceChioce, bool task);
+    // 使用距离传感器移动(可选多线程)
+    void MoveToDistance(double v, double val, double yaw, char DistanceChioce, bool task);
+
+    // 设置距离传感器
+    void ReSetToDistance(double val_, double yaw_, char DistanceChioce_);
 
     // 直线运动函数（使用定位轮）
     void MoveBySmallWheel(double v, double val, double yaw, char direction);
@@ -274,7 +277,7 @@ public:
     bool MoveEnd = true;                        // 记录运动是否完成
     bool Whileing = false;                      // 是否进入循环
     int MoveId = 0;                             // 运动id记录（计数）
-    double maxinum_speed_acceleration = 0.4;    // 最大加速度
+    double maxinum_speed_acceleration = 0.25;   // 最大加速度
     double maxinum_speed_acceleration_turn = 5; // 最大加速度
 
     // 运动状态记录
@@ -305,6 +308,7 @@ public:
     double turn_allowable_error = 1.5; // 旋转允许误差
 
     // 距离传感器
+    int Distance_negative;
     char DistanceChioce;
     std::vector<double> Distance_PPS;
 
@@ -358,6 +362,7 @@ struct MoveToDistanceParams
     ChassisControl *self;
     double v;
     double val;
+    double yaw;
     char DistanceChioce;
 };
 

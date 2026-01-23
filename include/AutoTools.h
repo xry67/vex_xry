@@ -7,6 +7,10 @@
 
 void intake_and_pushback(double angle, int intake_time, int push_time);
 
+void move_intake_time(double angle, double intake_time);
+
+void Move_u_Long(double angle);
+
 // 与intake_and_pushback相比没有转向
 void intake_and_pushback_new(double angle, int intake_time, int push_time);
 

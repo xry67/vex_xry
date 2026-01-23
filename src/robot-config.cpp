@@ -5,66 +5,65 @@
 
 using namespace vex;
 
-int ControllerScreenWidth = 210;  // 屏幕宽度
-int PowerLimit            = 25;   // 电量低警示
-double blindCA            = 5;    // 摇杆死区
-char stance               = 'r';  // 站位选择
-int aiVision_w            = 316;  // ai相机的宽度 
-int aiVision_h            = 211;  // ai相机的高度
-double StraightCorrectionSpeed = 500;  // 执行修正pps最大速度
+int ControllerScreenWidth = 210;      // 屏幕宽度
+int PowerLimit = 25;                  // 电量低警示
+double blindCA = 5;                   // 摇杆死区
+char stance = 'r';                    // 站位选择
+int aiVision_w = 316;                 // ai相机的宽度
+int aiVision_h = 211;                 // ai相机的高度
+double StraightCorrectionSpeed = 500; // 执行修正pps最大速度
 
-double Sensitivity_Turn       = 0.9     ;  // 转向灵敏度
-double Sensitivity_Straight   = 1;    // 直行灵敏度
-double Sensitivity_Precision  = 0.1;  // 精密遥控比例
-int    auto_index = -1;   // 自动选择
+double Sensitivity_Turn = 0.9;      // 转向灵敏度
+double Sensitivity_Straight = 1;    // 直行灵敏度
+double Sensitivity_Precision = 0.1; // 精密遥控比例
+int auto_index = -1;                // 自动选择
 
-double TrackSpeed   = 18;  // 履带速度
+double TrackSpeed = 18; // 履带速度
 
 // 遥控期间自动追踪的灵敏度
 double Auto_Turn_To_Target_Speed = 50;
 
 // 自动程序加入
 std::vector<AutoFun> AutoFunctions;
-AutoFun *RunningAutoFun;  // 当前自动路径
+AutoFun *RunningAutoFun; // 当前自动路径
 
 // 遥控模式加入
-std::vector<ChassisRomoteControlParams> ChassisRomoteControlList;  // 遥控列表
-ChassisRomoteControl ChassisRomoteControlSTS;                      // 遥控控制
+std::vector<ChassisRomoteControlParams> ChassisRomoteControlList; // 遥控列表
+ChassisRomoteControl ChassisRomoteControlSTS;                     // 遥控控制
 
 //  硬件定义
-brain Brain; 
+brain Brain;
 controller Controller = controller();
 competition Competition;
 
 motor LeftMotor1 = motor(PORT1, ratio6_1, 1);
 motor LeftMotor2 = motor(PORT2, ratio6_1, 1);
 motor LeftMotor3 = motor(PORT3, ratio6_1, 1);
-motor_group LeftMotorGroup = motor_group(LeftMotor1, LeftMotor2, LeftMotor3);  // 左边电机组
+motor_group LeftMotorGroup = motor_group(LeftMotor1, LeftMotor2, LeftMotor3); // 左边电机组
 
 motor RightMotor1 = motor(PORT4, ratio6_1, 0);
 motor RightMotor2 = motor(PORT5, ratio6_1, 0);
 motor RightMotor3 = motor(PORT6, ratio6_1, 0);
-motor_group RightMotorGroup = motor_group(RightMotor1, RightMotor2, RightMotor3);  // 右边边电机组
+motor_group RightMotorGroup = motor_group(RightMotor1, RightMotor2, RightMotor3); // 右边边电机组
 
+motor ToolMotor1 = motor(PORT10, ratio6_1, 0); // 上  f
+motor ToolMotor2 = motor(PORT8, ratio6_1, 1);  // 中  l
+motor ToolMotor3 = motor(PORT9, ratio6_1, 0);  // 下  r
+motor ToolMotor4 = motor(PORT4, ratio6_1, 0);  //
 
-motor ToolMotor1    = motor(PORT10, ratio6_1, 0);  // 上  f
-motor ToolMotor2    = motor(PORT8, ratio6_1, 1);  // 中  l
-motor ToolMotor3    = motor(PORT9, ratio6_1, 0);  // 下  r
-motor ToolMotor4    = motor(PORT4, ratio6_1, 0);  // 
-
+digital_out digitalA = digital_out(Brain.ThreeWirePort.A);
 digital_out digitalB = digital_out(Brain.ThreeWirePort.B);
 digital_out digitalC = digital_out(Brain.ThreeWirePort.C);
-digital_out digitalD = digital_out(Brain.ThreeWirePort.D); // 
-digital_out digitalE = digital_out(Brain.ThreeWirePort.E); // 
+digital_out digitalD = digital_out(Brain.ThreeWirePort.D); //
+digital_out digitalE = digital_out(Brain.ThreeWirePort.E); //
 digital_out digitalF = digital_out(Brain.ThreeWirePort.F);
-digital_out digitalH = digital_out(Brain.ThreeWirePort.H);  // 抬升
-digital_out digitalG = digital_out(Brain.ThreeWirePort.G);  // 抬升
+digital_out digitalH = digital_out(Brain.ThreeWirePort.H); // 抬升
+digital_out digitalG = digital_out(Brain.ThreeWirePort.G); // 抬升
 
-
-optical Optical1 = optical(PORT6);  // 颜色传感器
+optical Optical1 = optical(PORT18); // 颜色传感器
 optical Optical2 = optical(PORT5);  // 颜色传感器
 
-inertial ChassisInertial = inertial(PORT1);  // 底盘陀螺仪
+inertial ChassisInertial = inertial(PORT1); // 底盘陀螺仪
 
 rotation Rotation_x = rotation(PORT21, true);  // 底盘定位轮x
 rotation Rotation_y = rotation(PORT21, false); // 底盘定位轮y
@@ -76,23 +75,23 @@ rotation Rotation_y = rotation(PORT21, false); // 底盘定位轮y
 // aivision aiVision = aivision(PORT21, Red, Bule, Orange);
 
 // 距离传感器
-distance Distance_f = distance(PORT3);  // 前
-distance Distance_b = distance(PORT4);  // 后
-distance Distance_fl = distance(PORT21);  // 左前
-distance Distance_fr = distance(PORT21);  // 右前
-distance Distance_bl = distance(PORT21);  // 左后
-distance Distance_br = distance(PORT21);  // 右后
-distance Distance_l  = distance(PORT21);  // 左
-distance Distance_r  = distance(PORT2);  // 右
+distance Distance_f = distance(PORT16);  // 前
+distance Distance_b = distance(PORT19);  // 后
+distance Distance_fl = distance(PORT21); // 左前
+distance Distance_fr = distance(PORT21); // 右前
+distance Distance_bl = distance(PORT21); // 左后
+distance Distance_br = distance(PORT21); // 右后
+distance Distance_l = distance(PORT18);  // 左
+distance Distance_r = distance(PORT17);  // 右
 
 // 设别列表
-std::vector<char*> MotorNames = {"L1", "L2", "L3", "R1", "R2", "R3", "T1", "T2", "T3"};
-std::vector<motor> Motors = {LeftMotor1, LeftMotor2, LeftMotor3, 
-                                RightMotor1, RightMotor2, RightMotor3, ToolMotor1, ToolMotor2, ToolMotor3};
+std::vector<char *> MotorNames = {"L1", "L2", "L3", "R1", "R2", "R3", "T1", "T2", "T3"};
+std::vector<motor> Motors = {LeftMotor1, LeftMotor2, LeftMotor3,
+                             RightMotor1, RightMotor2, RightMotor3, ToolMotor1, ToolMotor2, ToolMotor3};
 
-std::vector<char*> DistanceNames = {"Fl", "Fr", "Bl", "Nr", "L", "R"};
-std::vector<distance> Distances = {Distance_fl, Distance_fr, Distance_bl, 
-                                Distance_br, Distance_l, Distance_r};
+std::vector<char *> DistanceNames = {"Fl", "Fr", "Bl", "Nr", "L", "R"};
+std::vector<distance> Distances = {Distance_fl, Distance_fr, Distance_bl,
+                                   Distance_br, Distance_l, Distance_r};
 
 // 记忆模式相关
 std::string FileName = "save.txt";

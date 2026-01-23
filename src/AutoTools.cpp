@@ -57,14 +57,10 @@ void intake_and_pushback(double angle, int intake_time, int push_time)
 
   // 倒车 打球
   ChassisControlSTS.Move(7, 1500, angle, 'u', true); // 1550
-  ToolMotor2.spin(forward, 20, pct);                 // 递球
-  ToolMotor3.spin(forward, 3, voltageUnits::volt);
 
   // 提前打球
   ChassisControlSTS.WaitPositionArrive(1100);
 
-  ToolMotor2.spin(forward, 16, voltageUnits::volt);
-  ToolMotor3.spin(forward, 16, voltageUnits::volt);
   ChassisControlSTS.SetStopModCoast();
   ChassisControlSTS.StopMoving();
   // 努力进入对位
@@ -74,53 +70,81 @@ void intake_and_pushback(double angle, int intake_time, int push_time)
   ChassisControlSTS.SetStopModHold();
   ToolMotor2.spin(forward, 0, voltageUnits::volt);
   ToolMotor3.spin(forward, 0, voltageUnits::volt);
-  digitalG.set(0);
+}
+
+void move_intake_time(double angle, double intake_time)
+{
+  // AutoIntake();
+  ChassisControlSTS.ChassisForwardAngle(angle);
+
+  while (GetDistance_front() > 280)
+  {
+    ChassisControlSTS.ChassisForward(4);
+    wait(10, msec);
+  }
+
+  bool now_mod = 1;
+
+  // 轻微的蠕动
+  for (int i = 0; i < intake_time / 10; i++)
+  {
+    // GetDistance_front() > 217
+
+    if (now_mod)
+    {
+      ChassisControlSTS.ChassisForward(4);
+    }
+    else
+    {
+      ChassisControlSTS.ChassisForward(-1);
+    }
+
+    // if (i % 25 == 0)
+    // {
+    //   now_mod ^= 1;
+    // }
+
+    wait(10, msec);
+  }
+}
+
+void Move_u_Long(double angle)
+{
+  // ChassisControlSTS.Move(10, 1000, angle + 2, 'n'); // 1550
+  ChassisControlSTS.Move(5, 700, angle + (GetDistance_left() - 430) * 0.15, 'u', true); // 1550
+  ChassisControlSTS.WaitPositionArrive(400);
+  ChassisControlSTS.ResetStraightAngle(angle);
+  while (ChassisControlSTS.IsMoving())
+  {
+    if (std::abs(ChassisControlSTS.GetVelocity_pct_mean()) < 3)
+    {
+      ChassisControlSTS.StopMoving();
+    }
+    wait(10, msec);
+  }
+  ChassisControlSTS.WaitMoveFinish();
 }
 
 void intake_and_pushback_new(double angle, int intake_time, int push_time)
 {
+  // 左侧最优距离：500
   // 吸导入
   SimulatedRemoteControl("R1");
 
-  ChassisControlSTS.Move(5, 900, angle, 'n', true); // 1550
+  // ChassisControlSTS.Move(10, 1000, angle + 2, 'n'); // 1550
+  ChassisControlSTS.Move(5, 1700, angle + (470 - GetDistance_left()) * 0.12, 'n', true); // 1550
+  ChassisControlSTS.WaitPositionArrive(500);
+  ChassisControlSTS.ResetStraightAngle(angle);
 
   // 使用距离传感器判断是否到达恒力区域
-  while (GetDistance_front() > 372)
+  while (GetDistance_front() > 350)
   {
     wait(10, msec);
   }
   ChassisControlSTS.SetStopModCoast(); // 需要保留，否则容易插不进去
   ChassisControlSTS.StopMoving();
-  wait(100, msec);
 
-  // AutoIntake();
-
-  // 轻微的蠕动
-  for (int i = 0; i < 200; i++)
-  {
-    ChassisControlSTS.ChassisLeftControl(5);
-    ChassisControlSTS.ChassisRightControl(5);
-
-    // 计算真正吸导入的时间
-    if (GetDistance_front() <= 200)
-    {
-      intake_time -= 10;
-    }
-
-    // 时间到，退出
-    if (intake_time <= 0)
-    {
-      break;
-    }
-
-    // 异色球，退出
-    if ((stance == 'r' && OpticalHaveBlue(Optical1)) || (stance == 'b' && OpticalHaveRed(Optical1)))
-    {
-      break;
-    }
-
-    wait(10, msec);
-  }
+  move_intake_time(angle, intake_time);
 
   // StopAutoIntake();
 
@@ -130,22 +154,26 @@ void intake_and_pushback_new(double angle, int intake_time, int push_time)
 
   // 提前打球
   ChassisControlSTS.WaitPositionArrive(1200);
-  digitalH.set(0);
+  digitalE.set(0);
+
+  while (ChassisControlSTS.IsMoving())
+  {
+    if (std::abs(ChassisControlSTS.GetVelocity_pct_mean()) < 3)
+    {
+      ChassisControlSTS.StopMoving();
+      break;
+    }
+    wait(10, msec);
+  }
 
   SimulatedRemoteControl("L1");
 
   ChassisControlSTS.SetStopModCoast();
   ChassisControlSTS.StopMoving();
   // 努力进入对位
-  ChassisControlSTS.ChassisLeftControl(-2);
-  ChassisControlSTS.ChassisRightControl(-2);
-
-  double push_start_time = GetNowTime();
-  wait(500, msec);
-  ChassisControlSTS.AutoPPSTurnTo(10, angle);
-  double turn_end_time = GetNowTime();
-
-  wait(std::max(0.0, push_time - (turn_end_time - push_start_time) * 1000), msec);
+  ChassisControlSTS.ChassisForwardAngle(angle);
+  ChassisControlSTS.ChassisForward(-2);
+  wait(push_time, msec);
 }
 
 // 钩子
@@ -306,41 +334,57 @@ void SimulatedRemoteControl(std::string input)
   {
     ToolMotor1.spin(forward, -16, voltageUnits::volt);
     ToolMotor2.spin(forward, -16, voltageUnits::volt);
-    ToolMotor3.spin(forward, -10, voltageUnits::volt);
+    ToolMotor3.stop();
+    ToolMotor3.setStopping(hold);
+    digitalG.set(0);
+    digitalH.set(0);
   }
   // 底桥
   else if (input == "R2" || input == "r2")
   {
     ToolMotor1.spin(forward, 16, voltageUnits::volt);
-    ToolMotor2.spin(forward, 40, pct);
-    ToolMotor3.spin(forward, 2, voltageUnits::volt);
+    ToolMotor2.spin(forward, 16, voltageUnits::volt);
+    ToolMotor3.spin(forward, 16, voltageUnits::volt);
+    digitalG.set(0);
+    digitalH.set(0);
+    // ToolMotor2.spin(forward, 0, voltageUnits::volt);
   }
   // 中桥
   else if (input == "L2" || input == "l2")
   {
-    ToolMotor1.spin(forward, -50, pct);
-    ToolMotor2.spin(forward, 1, voltageUnits::volt);
+    ToolMotor1.spin(forward, -16, voltageUnits::volt);
+    ToolMotor2.spin(forward, -16, voltageUnits::volt);
     ToolMotor3.spin(forward, 16, voltageUnits::volt);
+    digitalG.set(1);
+  }
+  // 中桥
+  else if (input == "L2-" || input == "l2-")
+  {
+    ToolMotor1.spin(forward, -16, voltageUnits::volt);
+    ToolMotor2.spin(forward, -16, voltageUnits::volt);
+    ToolMotor3.spin(forward, 16, voltageUnits::volt);
+    digitalG.set(1);
   }
   // 高桥
   else if (input == "L1" || input == "l1")
   {
-    ToolMotor1.spin(forward, 16, voltageUnits::volt);
-    ToolMotor2.spin(forward, 1, voltageUnits::volt);
-    ToolMotor3.spin(forward, 16, voltageUnits::volt);
+    ToolMotor1.spin(forward, -16, voltageUnits::volt);
+    ToolMotor2.spin(forward, -16, voltageUnits::volt);
+    ToolMotor3.spin(forward, -16, voltageUnits::volt);
+    digitalG.set(0);
   }
   // 停止
   else if (input == "STOP" || input == "Stop" || input == "stop")
   {
     ToolMotor1.spin(forward, 0, voltageUnits::volt);
     ToolMotor2.spin(forward, 0, voltageUnits::volt);
+    ToolMotor3.spin(forward, 0, voltageUnits::volt);
   }
   // 递球
   else
   {
     ToolMotor1.spin(forward, 2, voltageUnits::volt);
     ToolMotor2.spin(forward, 5, pct);
-    ToolMotor3.spin(forward, 30, pct);
   }
 }
 

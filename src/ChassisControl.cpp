@@ -97,14 +97,14 @@ void ChassisControl::ResetPPS()
 
   // 编码器
   std::map<int, std::vector<double>> Move_PPS_Map = {{343, {0.00950, 0.800, 2}}, {450, {0.0082, 0.5, 2}}, {300, {0.02, 0.800, 2}}};
-  std::map<int, double> Min_Move_Speed_Map = {{343, 0.75}, {450, 0.75}, {300, 0.95}};
+  std::map<int, double> Min_Move_Speed_Map = {{343, 0.75}, {450, 0.95}, {300, 0.95}};
 
   // 距离传感器
-  std::map<int, std::vector<double>> Distance_PPS_Map = {{343, {0.0165, 0.3, 2.5}}, {450, {0.0165, 0.3, 2.5}}, {300, {0.0165, 0.3, 2.5}}};
+  std::map<int, std::vector<double>> Distance_PPS_Map = {{343, {0.0165, 0.3, 2.5}}, {450, {0.019, 0.3, 1}}, {300, {0.0165, 0.3, 2.5}}};
 
   // 陀螺仪
-  std::map<int, std::vector<double>> Turn_PPS_Map = {{343, {0.075, 0, 3}}, {450, {0.025, 0.5, 5.5}}, {300, {0.042, 0.5, 5}}};
-  std::map<int, double> Min_Turn_Speed_Map = {{343, 1.10}, {450, 1}, {300, 1.5}};
+  std::map<int, std::vector<double>> Turn_PPS_Map = {{343, {0.075, 0, 3}}, {450, {0.022, 0.45, 5}}, {300, {0.042, 0.5, 5}}};
+  std::map<int, double> Min_Turn_Speed_Map = {{343, 1.10}, {450, 1.6}, {300, 1.5}};
 
   min_move_speed = Min_Move_Speed_Map[ChassisSpeedConfig]; // 直行电机的最小速度
   min_turn_speed = Min_Turn_Speed_Map[ChassisSpeedConfig]; // 自转的最小速度
@@ -514,6 +514,7 @@ void ChassisControl::ReSetToDistance(double val_, char DistanceChioce_)
   ChassisRsetPosition(); // 电机初始化
   this->Now_Mod = Distance;
   this->val = val_;
+  this->yaw = ChassisInertial.rotation();
   this->DistanceChioce = DistanceChioce_;
   this->Distance_start_val = GetDistance(DistanceChioce_);
 
@@ -525,6 +526,46 @@ void ChassisControl::ReSetToDistance(double val_, char DistanceChioce_)
   else if (DistanceChioce == 'b')
   {
     negative = 1;
+  }
+
+  pps = PPS(this->Distance_PPS[0], this->Distance_PPS[1], this->Distance_PPS[2]);
+  pps.setSetpoint(val - Distance_start_val); // 设置目标位置
+}
+
+// 设置距离传感器
+void ChassisControl::ReSetToDistance(double val_, double yaw_, char DistanceChioce_)
+{
+  ChassisRsetPosition(); // 电机初始化
+  this->Now_Mod = Distance;
+  this->val = val_;
+  this->yaw = yaw_;
+  this->DistanceChioce = DistanceChioce_;
+  this->Distance_start_val = GetDistance(DistanceChioce_);
+
+  //  方向指示器
+  if (DistanceChioce == 'f')
+  {
+    Distance_negative = -1;
+    if (GetDistance_front() > val_)
+    {
+      negative = 1;
+    }
+    else
+    {
+      negative = -1;
+    }
+  }
+  else if (DistanceChioce == 'b')
+  {
+    Distance_negative = 1;
+    if (GetDistance_back() > val_)
+    {
+      negative = -1;
+    }
+    else
+    {
+      negative = 1;
+    }
   }
 
   pps = PPS(this->Distance_PPS[0], this->Distance_PPS[1], this->Distance_PPS[2]);
@@ -614,7 +655,7 @@ double ChassisControl::CurveMove_Angle_OutPut()
 double ChassisControl::Distance_OutPut()
 {
   double current_position = GetDistance(this->DistanceChioce) - this->Distance_start_val; // 当前位置
-  double output = pps.calculate(current_position, 0.01) * negative;
+  double output = pps.calculate(current_position, 0.01) * Distance_negative;
   return output;
 }
 
@@ -676,7 +717,7 @@ void ChassisControl::BasicMove()
   double stuck_time_count = 0;                                                                                    // 电机卡死时间统计
   double start_time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count(); // 运动开始时间
   double move_time_out = Move_time_out;
-  int negative = 1; // 负方向指示器
+  // int negative = 1; // 负方向指示器
 
   // 加速度测试
   double now_speed = 0;
@@ -953,18 +994,18 @@ void ChassisControl::Turn(double v, double val, char direction)
     if ((output < 0 && last_speed > 0) || (output > 0 && last_speed < 0))
     {
       // Brain.Screen.printAt(10, 80, "----%d-------", nearcount);
+      blockage_num = 0;
       nearcount += 1;
       if (nearcount >= 2)
       {
         now_min_speed -= 0.45;
-        blockage_num = 0;
       }
     }
 
     // 过慢保护
     if (GetVelocity_pct_mean() <= 3)
     {
-      blockage_num += std::abs(3 - GetVelocity_pct_mean()) * 0.2;
+      blockage_num += std::abs(3 - GetVelocity_pct_mean()) * 0.1;
     }
 
     if (nearcount <= 0)
@@ -1018,8 +1059,7 @@ void ChassisControl::Turn(double v, double val, char direction)
     }
 
     output = NumInterval(output, now_min_speed, v);
-    std::cout << output << " " << this->GetVelocity_pct_mean() << " " << current_position << "\n"
-              << std::endl;
+    // std::cout << output << " " << this->GetVelocity_pct_mean() << " " << current_position << "\n" << std::endl;
 
     // ChassisForward(output, yaw_negative);  //  控制移动
     ChassisLeftControl(output * yaw_negative);
@@ -1211,15 +1251,15 @@ void ChassisControl::StopMoving()
 }
 
 // 使用距离传感器移动
-void ChassisControl::MoveToDistance(double v, double val, char DistanceChioce)
+void ChassisControl::MoveToDistance(double v, double val, double yaw, char DistanceChioce)
 {
   this->ResetMaxSpeed(v);
-  this->ReSetToDistance(val, DistanceChioce);
+  this->ReSetToDistance(val, yaw, DistanceChioce);
   this->BasicMove();
 }
 
 // 使用距离传感器移动(可选多线程)
-void ChassisControl::MoveToDistance(double v, double val, char DistanceChioce, bool task)
+void ChassisControl::MoveToDistance(double v, double val, double yaw, char DistanceChioce, bool task)
 {
   if (task == true)
   {
@@ -1227,6 +1267,7 @@ void ChassisControl::MoveToDistance(double v, double val, char DistanceChioce, b
     Params->self = this;
     Params->v = v;
     Params->val = val;
+    Params->yaw = yaw;
     Params->DistanceChioce = DistanceChioce;
 
     void *p = Params;
@@ -1234,7 +1275,7 @@ void ChassisControl::MoveToDistance(double v, double val, char DistanceChioce, b
   }
   else
   {
-    MoveToDistance(v, val, DistanceChioce);
+    MoveToDistance(v, val, yaw, DistanceChioce);
   }
 }
 
@@ -1509,12 +1550,13 @@ int TurnTask(void *args)
 int MoveToDistancetTask(void *args)
 {
   MoveToDistanceParams *params = (MoveToDistanceParams *)args;
-  ChassisControl *self = params->self;                 // 当前类
-  double v = params->v;                                // 速度
-  double val = params->val;                            // 路径长度
+  ChassisControl *self = params->self; // 当前类
+  double v = params->v;                // 速度
+  double val = params->val;            // 路径长度
+  double yaw = params->yaw;
   char DistanceChioce = params->DistanceChioce; // 前后距离传感器选择
 
-  self->MoveToDistance(v, val, DistanceChioce);
+  self->MoveToDistance(v, val, yaw, DistanceChioce);
 
   // delete args;
   return 0;
