@@ -58,7 +58,7 @@ void FromGoToMiddleBridge_To_Intake(double angle)
 {
   // 去导入
   ChassisControlSTS.Move(12, 2800, angle + 45, 'n', true); // 1550
-  ChassisControlSTS.WaitPositionArrive(900);
+  ChassisControlSTS.WaitPositionArrive(1200);
   ChassisControlSTS.ResetMaxSpeed(2);
   ChassisControlSTS.WaitPositionArrive(1500);
 
@@ -66,7 +66,7 @@ void FromGoToMiddleBridge_To_Intake(double angle)
   ChassisControlSTS.ResetMaxSpeed(2);
   ChassisControlSTS.ResetStraightAngle(angle + 90);
   ChassisControlSTS.WaitPositionArrive(1900);
-  ChassisControlSTS.ResetMaxSpeed(3);
+  ChassisControlSTS.ResetMaxSpeed(5);
   ChassisControlSTS.ReSetToDistance(470, angle + 90, 'f');
   ChassisControlSTS.WaitMoveFinish();
   digitalE.set(1);
@@ -298,7 +298,6 @@ void auto13()
       digitalE.set(1);
       break;
     }
-    break;
     wait(10, msec);
   }
   while (ChassisControlSTS.IsMoving())
@@ -322,10 +321,6 @@ void auto13()
     if (i > 50)
     {
       digitalE.set(0);
-    }
-    if (GetDistance_front() < 1600)
-    {
-      break;
     }
     ChassisControlSTS.ChassisForward(6);
     wait(10, msec);
