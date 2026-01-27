@@ -100,10 +100,10 @@ void ChassisControl::ResetPPS()
   std::map<int, double> Min_Move_Speed_Map = {{343, 0.75}, {450, 0.95}, {300, 0.95}};
 
   // 距离传感器
-  std::map<int, std::vector<double>> Distance_PPS_Map = {{343, {0.0165, 0.3, 2.5}}, {450, {0.019, 0.3, 1}}, {300, {0.0165, 0.3, 2.5}}};
+  std::map<int, std::vector<double>> Distance_PPS_Map = {{343, {0.0165, 0.3, 2.5}}, {450, {0.017, 0.3, 1}}, {300, {0.0165, 0.3, 2.5}}};
 
   // 陀螺仪
-  std::map<int, std::vector<double>> Turn_PPS_Map = {{343, {0.075, 0, 3}}, {450, {0.022, 0.45, 5}}, {300, {0.042, 0.5, 5}}};
+  std::map<int, std::vector<double>> Turn_PPS_Map = {{343, {0.075, 0, 3}}, {450, {0.024, 0.45, 5.8}}, {300, {0.042, 0.5, 5}}};
   std::map<int, double> Min_Turn_Speed_Map = {{343, 1.10}, {450, 1.6}, {300, 1.5}};
 
   min_move_speed = Min_Move_Speed_Map[ChassisSpeedConfig]; // 直行电机的最小速度
@@ -759,6 +759,7 @@ void ChassisControl::BasicMove()
       if (overcount == Over_count)
       {
         // PrintAt(2, " ->到位");
+        std::cout << "daowei" << std::endl;
         break;
       }
     }
@@ -781,6 +782,7 @@ void ChassisControl::BasicMove()
     if (Moveing == false)
     {
       // PrintAt(2, " ->打断");
+      std::cout << "daduan" << std::endl;
       break;
     }
 
@@ -791,6 +793,7 @@ void ChassisControl::BasicMove()
       if (stuck_time_count >= Stuck_time_out)
       {
         // PrintAt(2, " ->抱死");
+        std::cout << "baosi" << std::endl;
         break;
       }
       now_min_speed += 0.1;
@@ -805,6 +808,7 @@ void ChassisControl::BasicMove()
     if (now_time - start_time >= move_time_out / 1000)
     {
       // PrintAt(2, " ->超时");
+      std::cout << "chaoshi" << std::endl;
       break;
     }
 
@@ -1272,6 +1276,7 @@ void ChassisControl::MoveToDistance(double v, double val, double yaw, char Dista
 
     void *p = Params;
     vex::task Task(MoveToDistancetTask, p);
+    this->WaitMoveStart();
   }
   else
   {

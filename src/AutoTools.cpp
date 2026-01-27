@@ -4,6 +4,92 @@
 #include "AutoTools.h"
 #include <algorithm>
 
+// 半场长度：1790 mm
+// 管道半长 280 mm
+double w = 340; // 宽度
+double h = 450; //  长度
+double f_h = h / 2 - 100;
+double b_h = h / 2 - 70;
+double l_w = w / 2 - 30;
+double r_w = w / 2 - 30 - 95;
+
+double GetMoveLen(double Right_d, double Front_d)
+{
+  return sqrt(2) * (1790 - Right_d);
+}
+
+void GoToMiddleBridge_Below(double angle)
+{
+
+  ChassisControlSTS.Over_count = 10;
+  ChassisControlSTS.TurnTo(10, angle, 0);
+  ChassisControlSTS.Over_count = 5;
+  // 735
+  // 1208
+
+  double Left_d = GetDistance_left() + l_w;
+  double Back_d = GetDistance_back() + b_h;
+
+  ChassisControlSTS.MoveToDistance(5, Left_d, angle, 'f');
+
+  ChassisControlSTS.TurnTo(10, angle + 45, 0);
+
+  digitalB.set(0);
+  digitalC.set(0);
+
+  ChassisControlSTS.Move(10, GetMoveLen(Left_d, Back_d) * 735 / 1208 * 1.5, angle + 45, 'n', 1);
+  ChassisControlSTS.WaitPositionArrive(GetMoveLen(Left_d, Back_d) * 735 / 1208 * 0.7);
+  ChassisControlSTS.ResetMaxSpeed(3);
+  ChassisControlSTS.ReSetToEncoderWheel(1500, angle + 45, 'n');
+  while (ChassisControlSTS.IsMoving())
+  {
+    if (ChassisControlSTS.GetVelocity_pct_mean() <= 3)
+    {
+      ChassisControlSTS.StopMoving();
+      break;
+    }
+    wait(10, msec);
+  }
+  ChassisControlSTS.SetStopModCoast();
+  ChassisControlSTS.WaitMoveFinish();
+}
+
+void GoToMiddleBridge(double angle)
+{
+
+  ChassisControlSTS.Over_count = 10;
+  ChassisControlSTS.TurnTo(10, angle, 0);
+  ChassisControlSTS.Over_count = 5;
+  // 735
+  // 1208
+
+  double Right_d = GetDistance_right() + r_w;
+  double Front_d = GetDistance_front() + f_h;
+
+  ChassisControlSTS.MoveToDistance(5, Right_d, angle, 'f');
+
+  ChassisControlSTS.TurnTo(10, angle + 45, 0);
+
+  digitalB.set(0);
+  digitalC.set(0);
+
+  ChassisControlSTS.Move(10, GetMoveLen(Right_d, Front_d) * 735 / 1208 * 1.5, angle + 45, 'u', 1);
+  ChassisControlSTS.WaitPositionArrive(GetMoveLen(Right_d, Front_d) * 735 / 1208 * 0.7);
+  ChassisControlSTS.ResetMaxSpeed(3);
+  ChassisControlSTS.ReSetToEncoderWheel(1500, angle + 45, 'u');
+  while (ChassisControlSTS.IsMoving())
+  {
+    if (ChassisControlSTS.GetVelocity_pct_mean() <= 3)
+    {
+      ChassisControlSTS.StopMoving();
+      break;
+    }
+    wait(10, msec);
+  }
+  ChassisControlSTS.SetStopModCoast();
+  ChassisControlSTS.WaitMoveFinish();
+}
+
 void intake_and_pushback(double angle, int intake_time, int push_time)
 {
 
@@ -19,10 +105,15 @@ void intake_and_pushback(double angle, int intake_time, int push_time)
   ChassisControlSTS.Move(5, 900, angle, 'n', true); // 1550
 
   // 使用距离传感器判断是否到达恒力区域 250是即将进入导入区的距离
-  while (GetDistance_front() > 250)
+  for (int i = 0; i < 200; i++)
   {
+    if (GetDistance_front() <= 250)
+    {
+      break;
+    }
     wait(10, msec);
   }
+
   ChassisControlSTS.SetStopModCoast(); // 需要保留，否则容易插不进去
   ChassisControlSTS.StopMoving();
   wait(100, msec);
@@ -77,13 +168,25 @@ void move_intake_time(double angle, double intake_time)
   // AutoIntake();
   ChassisControlSTS.ChassisForwardAngle(angle);
 
-  while (GetDistance_front() > 280)
+  bool now_mod = 1;
+  int k = 10;
+
+  for (int i = 0; i < 200; i++)
   {
     ChassisControlSTS.ChassisForward(4);
+    if (GetDistance_front() <= 280)
+    {
+      break;
+    }
+
+    if (GetDistance_front() > 280 && std::abs(ChassisControlSTS.GetVelocity_pct_mean()) < 5)
+    {
+      k = 25;
+      intake_time += 1000;
+      break;
+    }
     wait(10, msec);
   }
-
-  bool now_mod = 1;
 
   // 轻微的蠕动
   for (int i = 0; i < intake_time / 10; i++)
@@ -99,13 +202,32 @@ void move_intake_time(double angle, double intake_time)
       ChassisControlSTS.ChassisForward(-1);
     }
 
-    // if (i % 25 == 0)
+    // if (i % k == 0)
     // {
     //   now_mod ^= 1;
     // }
 
     wait(10, msec);
   }
+}
+
+void Move_u_Long_r(double angle)
+{
+  // ChassisControlSTS.Move(10, 1000, angle + 2, 'n'); // 1550
+  // Brain.Screen.printAt(150, 150, "%f", GetDistance_right());
+  ChassisControlSTS.Move(5, 1000, angle - (GetDistance_right() - 430) * 0.15, 'u', true); // 1550
+  // ChassisControlSTS.Move(5, 700, angle, 'u', true); // 1550
+  ChassisControlSTS.WaitPositionArrive(400);
+  ChassisControlSTS.ResetStraightAngle(angle);
+  while (ChassisControlSTS.IsMoving())
+  {
+    if (std::abs(ChassisControlSTS.GetVelocity_pct_mean()) < 3)
+    {
+      ChassisControlSTS.StopMoving();
+    }
+    wait(10, msec);
+  }
+  ChassisControlSTS.WaitMoveFinish();
 }
 
 void Move_u_Long(double angle)
@@ -123,6 +245,57 @@ void Move_u_Long(double angle)
     wait(10, msec);
   }
   ChassisControlSTS.WaitMoveFinish();
+}
+
+void intake_and_pushback_new_r(double angle, int intake_time, int push_time)
+{
+  // 左侧最优距离：500
+  // 吸导入
+  SimulatedRemoteControl("R1");
+
+  // ChassisControlSTS.Move(10, 1000, angle + 2, 'n'); // 1550
+  ChassisControlSTS.Move(5, 1700, angle + (GetDistance_right() - 470) * 0.12, 'n', true); // 1550
+  ChassisControlSTS.WaitPositionArrive(500);
+  ChassisControlSTS.ResetStraightAngle(angle);
+
+  // 使用距离传感器判断是否到达恒力区域
+  while (GetDistance_front() > 350)
+  {
+    wait(10, msec);
+  }
+  ChassisControlSTS.SetStopModCoast(); // 需要保留，否则容易插不进去
+  ChassisControlSTS.StopMoving();
+
+  move_intake_time(angle, intake_time);
+
+  // StopAutoIntake();
+
+  // 倒车 打球
+  ChassisControlSTS.Move(7, 1500, angle, 'u', true); // 1550
+  ChassisControlSTS.WaitPositionArrive(500);
+
+  // 提前打球
+  ChassisControlSTS.WaitPositionArrive(1200);
+  digitalE.set(0);
+
+  while (ChassisControlSTS.IsMoving())
+  {
+    if (std::abs(ChassisControlSTS.GetVelocity_pct_mean()) < 3)
+    {
+      ChassisControlSTS.StopMoving();
+      break;
+    }
+    wait(10, msec);
+  }
+
+  SimulatedRemoteControl("L1");
+
+  ChassisControlSTS.SetStopModCoast();
+  ChassisControlSTS.StopMoving();
+  // 努力进入对位
+  ChassisControlSTS.ChassisForwardAngle(angle);
+  ChassisControlSTS.ChassisForward(-2);
+  wait(push_time, msec);
 }
 
 void intake_and_pushback_new(double angle, int intake_time, int push_time)
@@ -338,15 +511,17 @@ void SimulatedRemoteControl(std::string input)
     ToolMotor3.setStopping(hold);
     digitalG.set(0);
     digitalH.set(0);
+    digitalD.set(0);
   }
   // 底桥
   else if (input == "R2" || input == "r2")
   {
-    ToolMotor1.spin(forward, 16, voltageUnits::volt);
+    ToolMotor1.spin(forward, 6.5, voltageUnits::volt);
     ToolMotor2.spin(forward, 16, voltageUnits::volt);
     ToolMotor3.spin(forward, 16, voltageUnits::volt);
     digitalG.set(0);
     digitalH.set(0);
+    digitalD.set(1);
     // ToolMotor2.spin(forward, 0, voltageUnits::volt);
   }
   // 中桥
@@ -356,6 +531,7 @@ void SimulatedRemoteControl(std::string input)
     ToolMotor2.spin(forward, -16, voltageUnits::volt);
     ToolMotor3.spin(forward, 16, voltageUnits::volt);
     digitalG.set(1);
+    digitalD.set(0);
   }
   // 中桥
   else if (input == "L2-" || input == "l2-")
@@ -364,6 +540,7 @@ void SimulatedRemoteControl(std::string input)
     ToolMotor2.spin(forward, -16, voltageUnits::volt);
     ToolMotor3.spin(forward, 16, voltageUnits::volt);
     digitalG.set(1);
+    digitalD.set(0);
   }
   // 高桥
   else if (input == "L1" || input == "l1")
@@ -372,6 +549,7 @@ void SimulatedRemoteControl(std::string input)
     ToolMotor2.spin(forward, -16, voltageUnits::volt);
     ToolMotor3.spin(forward, -16, voltageUnits::volt);
     digitalG.set(0);
+    digitalD.set(0);
   }
   // 停止
   else if (input == "STOP" || input == "Stop" || input == "stop")

@@ -5,111 +5,317 @@
 #include "RemoteControl.h"
 #include "AutoTools.h"
 
-void auto12(){
-    double best_vertical_d = 620; // 竖直方向，接近墙壁距离
-    double best_horizontal_d = 475; // 水平方向，接近墙壁距离
-    double uniform_start_end_d = 0; // 恒力开始距离
-    double uniform_speed_end_d = 0; // 恒力结束距离
-    double best_intake_d = 0; // 导入最佳距离
-
-    ChassisInertial.setRotation(0, degrees);
-
-    // 第一个导入桶
-    WaitFrontDistanceArriveThenStopMove(12, 1690, 0, best_horizontal_d);
-    digitalG.set(1);
-    wait(100,msec);   // 需要保留等待时间，否则自转的旋转中心会由于惯性发生改变
-    intake_and_pushback(90, 200, 3000);
-    ChassisControlSTS.Move(12, 350, 90, 'n');        
-    ChassisControlSTS.TurnTo(12, 180, false);
-    ChassisControlSTS.Move(12, 639, 'n');
-    ChassisControlSTS.TurnTo(12, 270, false);
-
-
-    // 第二个导入桶
-    ToolMotor2.spin(forward, 10, pct);  // 递球
-    ToolMotor3.spin(forward, -3, voltageUnits::volt);
-
-    WaitFrontDistanceArriveThenStopMove(16, 4061, 270, best_vertical_d);
-    wait(200,msec);
-    ChassisControlSTS.TurnTo(12, 360, false);
-    WaitFrontDistanceArriveThenStopMove(3, 319, 360, best_horizontal_d);
-    digitalG.set(1);
-    wait(100,msec);   // 需要保留等待时间，否则自转的旋转中心会由于惯性发生改变
-    intake_and_pushback(270, 200, 3000);
-    ChassisControlSTS.Move(12, 450, 270, 'n');        
-    ChassisControlSTS.TurnTo(12, 180, false);
-
-    // 第三个导入桶
-    ToolMotor2.spin(forward, 20, pct);  // 递球
-    ToolMotor3.spin(forward, -3, voltageUnits::volt);
-    
-    WaitFrontDistanceArriveThenStopMove(16, 4160, 180, best_horizontal_d);
-    digitalG.set(1);
-    wait(100,msec);   // 需要保留等待时间，否则自转的旋转中心会由于惯性发生改变
-    intake_and_pushback(270, 200, 3000);
-    ChassisControlSTS.Move(12, 350, 270, 'n');  
-    ChassisControlSTS.TurnTo(12, 0, false);
-    ChassisControlSTS.Move(12, 669, 'n');
-    ChassisControlSTS.TurnTo(12, 90, false); // 实际角度 360 + 90
-
-    // 第四个导入桶
-    ToolMotor2.spin(forward, 20, pct);  // 递球
-    ToolMotor3.spin(forward, -3, voltageUnits::volt);
-
-    WaitFrontDistanceArriveThenStopMove(16, 4061, 360 + 90, best_vertical_d);
-    wait(200,msec);
-    ChassisControlSTS.TurnTo(12, 180, false);
-    WaitFrontDistanceArriveThenStopMove(3, 259, 360 + 180, best_horizontal_d);
-    digitalG.set(1);
-    wait(100,msec);   // 需要保留等待时间，否则自转的旋转中心会由于惯性发生改变
-    intake_and_pushback(360 + 90, 200, 3000);
-    
-    ChassisControlSTS.Move(12, 350, 360 + 90, 'n');        
-    ChassisControlSTS.Move(8, 2000, 390, 'n', true);
-    ChassisControlSTS.WaitPositionArrive(1000);
-    ChassisControlSTS.ResetStraightAngle(360);
-    ChassisControlSTS.SetStopModCoast();
-    ChassisControlSTS.WaitPositionArrive(1800);
-    ChassisControlSTS.StopMoving();
-
-    ToolMotor1.spin(forward, -16, voltageUnits::volt);
-    ToolMotor2.spin(forward, 100, pct);  // 递球
-    ToolMotor3.spin(forward, 16, voltageUnits::volt);
-    ChassisControlSTS.ChassisLeftControl(-8);
-    ChassisControlSTS.ChassisRightControl(-8);
-    wait(250, msec);
-    ChassisControlSTS.SetStopModHold();
-    ChassisControlSTS.ChassisLeftControl(1);
-    ChassisControlSTS.ChassisRightControl(1);
-    wait(100, msec);
-    ChassisControlSTS.ChassisLeftControl_pct(0);
-    ChassisControlSTS.ChassisRightControl_pct(0);
-    wait(500, msec);
-
-    ChassisControlSTS.ChassisLeftControl(8);
-    ChassisControlSTS.ChassisRightControl(8);
+void auto12()
+{
+    ChassisControlSTS.Over_count = 4;
+    SimulatedRemoteControl("R1");
     wait(1600, msec);
-    ChassisControlSTS.ChassisLeftControl(0);
-    ChassisControlSTS.ChassisRightControl(0);
-    wait(1000, msec);
+    ChassisControlSTS.ChassisForwardAngle(0);
+    // for (int i = 0; i < 10; i++)
+    // {
+    //     ChassisControlSTS.ChassisForward(-4);
+    //     wait(10, msec);
+    // }
+    for (int i = 0; i < 40; i++)
+    {
+        ChassisControlSTS.ChassisLeftControl(8);
+        ChassisControlSTS.ChassisRightControl(8);
+
+        wait(10, msec);
+    }
+    for (int i = 0; i < 15; i++)
+    {
+        ChassisControlSTS.ChassisForward(6);
+        wait(50, msec);
+        ChassisControlSTS.ChassisForward(-2);
+        wait(50, msec);
+    }
+    // for (int i = 0; i < 12; i++)
+    // {
+    //     ChassisControlSTS.ChassisForward(-4);
+    //     wait(10, msec);
+    // }10
+
+    for (int i = 0; i < 4; i++)
+    {
+
+        ChassisControlSTS.ChassisLeftControl(-5);
+        ChassisControlSTS.ChassisRightControl(7);
+        wait(60, msec);
+        ChassisControlSTS.ChassisLeftControl(7);
+        ChassisControlSTS.ChassisRightControl(-5);
+        wait(60, msec);
+    }
+
+    wait(10, msec);
+    for (int i = 0; i < 55; i++)
+    {
+        ChassisControlSTS.ChassisForward(-10);
+        wait(10, msec);
+    }
+    ChassisControlSTS.MoveToDistance(10, 600, 0, 'f');
+    ChassisControlSTS.TurnTo(10, -90, 0);
+    wait(200, msec);
+    ChassisControlSTS.MoveToDistance(10, 1230, -90, 'f');
+    ChassisControlSTS.TurnTo(10, -180, 0);
+
+    ChassisControlSTS.MoveToDistance(7, 1010, -180, 'b', 1);
+    wait(200, msec);
+    while (ChassisControlSTS.IsMoving())
+    {
+        if (GetDistance_back() > 800)
+        {
+            ChassisControlSTS.ResetMaxSpeed(2);
+            break;
+        }
+        wait(10, msec);
+    }
+    ChassisControlSTS.WaitMoveFinish();
+
+    ChassisControlSTS.TurnTo(10, -180 - 45, 0);
+    ChassisControlSTS.Move(6, 800, -180 - 45, 'n', 1);
+    wait(500, msec);
+    while (ChassisControlSTS.IsMoving())
+    {
+        if (ChassisControlSTS.GetVelocity_pct_mean() <= 3)
+        {
+            ChassisControlSTS.StopMoving();
+            break;
+        }
+        wait(10, msec);
+    }
+    ChassisControlSTS.WaitMoveFinish();
+    SimulatedRemoteControl("R2");
+    wait(3000, msec);
+
+    //  第一个导入桶----------------------------
+    ChassisControlSTS.Move(7, 2800, -180 - 45, 'u', 1);
+    ChassisControlSTS.WaitPositionArrive(1350);
+    ChassisControlSTS.ResetMaxSpeed(2);
+    ChassisControlSTS.WaitPositionArrive(1500);
+    // 重新对其至-90度
+    ChassisControlSTS.ResetMaxSpeed(2);
+    ChassisControlSTS.ResetStraightAngle(-180 - 90);
+    ChassisControlSTS.WaitPositionArrive(1900);
+    ChassisControlSTS.ResetMaxSpeed(5);
+    ChassisControlSTS.ReSetToDistance(450, -180 - 90, 'b');
+    ChassisControlSTS.WaitMoveFinish();
+
+    digitalE.set(1);
+    wait(300, msec);
+    // 转至180
+    ChassisControlSTS.TurnTo(10, 0, 0);
+
+    SimulatedRemoteControl("R1");
+
+    ChassisControlSTS.Move(5, 900, -360, 'n', true); // 1550
+
+    // 使用距离传感器判断是否到达恒力区域
+    while (GetDistance_front() > 372)
+    {
+        wait(10, msec);
+    }
+    ChassisControlSTS.SetStopModCoast(); // 需要保留，否则容易插不进去
+    ChassisControlSTS.StopMoving();
+    wait(100, msec);
+
+    move_intake_time(-360, 2000);
+
+    // 去第二个导入桶----------------------------------------------------------
+    ChassisControlSTS.Move(8, 6000, -360 + 50, 'u', 1);
+    ChassisControlSTS.WaitPositionArrive(600);
+    ChassisControlSTS.ResetStraightAngle(-358);
+    digitalE.set(0);
+    ChassisControlSTS.WaitPositionArrive(4000);
+    while (ChassisControlSTS.IsMoving())
+    {
+        if (GetDistance_back() < 950)
+        {
+            break;
+        }
+        wait(10, msec);
+    }
+    ChassisControlSTS.ResetMaxSpeed(3);
+    ChassisControlSTS.ResetStraightAngle(-90 - 360);
+    while (1)
+    {
+        if (ChassisInertial.rotation() < -45 - 360)
+        {
+            break;
+        }
+        wait(10, msec);
+    }
+    ChassisControlSTS.ReSetToDistance(470, -90 - 360, 'f');
+
+    ChassisControlSTS.WaitMoveFinish();
+    wait(300, msec);
+
+    ChassisControlSTS.TurnTo(10, 180, 0);
+
+    // 倒车 打球-===========================-====-=
+    Move_u_Long_r(-180 - 360);
+    SimulatedRemoteControl("L1");
+
+    // 努力进入对位
+    ChassisControlSTS.ChassisForwardAngle(-180 - 360);
+    ChassisControlSTS.ChassisForward(-2);
+    digitalE.set(1);
+    wait(1500, msec);
+    intake_and_pushback_new_r(-180 - 360, 2500, 1500);
+
+    ChassisInertial.setRotation(-360 - 180, deg);
+    // 去停泊
+    ChassisControlSTS.Move(10, 1000, -180 - 30 - 360, 'n', true); // 1550
+    ChassisControlSTS.WaitPositionArrive(800);
+    ChassisControlSTS.ResetMaxSpeed(5);
+    ChassisControlSTS.ReSetToCurveMove_Position(700, 500, 'q');
+    ChassisControlSTS.WaitPositionArrive(450);
+    ChassisControlSTS.ReSetToEncoderWheel(1500, -360 - 180 - 65, 'n');
+    ChassisControlSTS.WaitPositionArrive(600);
+    ChassisControlSTS.ResetStraightAngle(-180 - 75 - 360);
+    ChassisControlSTS.ResetMaxSpeed(3);
+    SimulatedRemoteControl("R1");
+    ChassisControlSTS.ReSetToEncoderWheel(1100, -180 - 80 - 360, 'n');
+
+    // while (ChassisControlSTS.IsMoving())
+    // {
+    //     if (GetDistance_back() > 900)
+    //     {
+    //         ChassisControlSTS.ResetMaxSpeed(2);
+    //         break;
+    //     }
+    //     wait(10, msec);
+    // }
+    while (ChassisControlSTS.IsMoving())
+    {
+        if (std::abs(ChassisControlSTS.GetVelocity_pct_mean()) < 5)
+        {
+
+            // ChassisControlSTS.StopMoving();
+            digitalE.set(1);
+            ChassisControlSTS.ReSetToEncoderWheel(110, -180 - 80 - 360, 'u');
+            break;
+        }
+        wait(10, msec);
+    }
+
+    ChassisControlSTS.WaitMoveFinish();
+    digitalE.set(1);
+
+    ChassisControlSTS.ChassisForwardAngle(-180 - 92 - 360);
+    for (int i = 0; i < 200; i++)
+    {
+        if (i > 150)
+        {
+            digitalE.set(0);
+        }
+
+        if (i > 80)
+        {
+            ChassisControlSTS.ChassisForwardAngle(-180 - 100 - 360);
+        }
+        ChassisControlSTS.ChassisForward(6.5);
+        wait(10, msec);
+    }
+
+    // SimulatedRemoteControl("stop");
+
+    // 去第三个导入桶-----------------------
+    ChassisControlSTS.Move(6, 4000, -180 - 170 - 360, 'n', 1);
+    ChassisControlSTS.WaitPositionArrive(800);
+    ChassisControlSTS.ResetStraightAngle(-180 - 90 - 360);
+    ChassisControlSTS.WaitPositionArrive(1500);
+    ChassisControlSTS.ResetMaxSpeed(3);
+    ChassisControlSTS.ReSetToDistance(450, -180 - 90 - 360, 'f');
+
+    ChassisControlSTS.WaitMoveFinish();
+    wait(100, msec);
+    digitalE.set(1);
+    ChassisControlSTS.TurnTo(10, 180, 0);
+
+    // 吸导入
+    SimulatedRemoteControl("R1");
+
+    ChassisControlSTS.Move(5, 900, -180 - 360, 'n', true); // 1550
+
+    // 使用距离传感器判断是否到达恒力区域
+    while (GetDistance_front() > 372)
+    {
+        wait(10, msec);
+    }
+    ChassisControlSTS.SetStopModCoast(); // 需要保留，否则容易插不进去
+    ChassisControlSTS.StopMoving();
+    wait(100, msec);
+
+    move_intake_time(-180 - 360, 2500);
+
+    // 去第四个导入桶
+    ChassisControlSTS.Move(8, 6000, -180 + 50 - 360, 'u', 1);
+    ChassisControlSTS.WaitPositionArrive(600);
+    ChassisControlSTS.ResetStraightAngle(-180 + 2 - 360);
+    digitalE.set(0);
+    ChassisControlSTS.WaitPositionArrive(4000);
+    while (ChassisControlSTS.IsMoving())
+    {
+        if (GetDistance_back() < 900)
+        {
+            break;
+        }
+        wait(10, msec);
+    }
+    ChassisControlSTS.ResetMaxSpeed(3);
+    ChassisControlSTS.ResetStraightAngle(-180 - 90 - 360);
+    while (1)
+    {
+        if (ChassisInertial.rotation() < -45 - 180 - 360)
+        {
+            break;
+        }
+        wait(10, msec);
+    }
+    ChassisControlSTS.ReSetToDistance(480, -90 - 180 - 360, 'f');
+
+    ChassisControlSTS.WaitMoveFinish();
+    wait(300, msec);
+
+    ChassisControlSTS.TurnTo(10, 0, 0);
+
+    // 倒车 打球-===========================-====-=
+    Move_u_Long_r(-360 - 360);
+    SimulatedRemoteControl("L1");
+    // 努力进入对位
+    ChassisControlSTS.ChassisForwardAngle(-360 - 360);
+    ChassisControlSTS.ChassisForward(-2);
+    digitalE.set(1);
+    wait(1500, msec);
+
+    intake_and_pushback_new_r(-360 - 360, 2500, 1500);
+
+    // 去停泊
+    ChassisControlSTS.Move(10, 1000, -180 - 30 - 360 - 180, 'n', true); // 1550
+    ChassisControlSTS.WaitPositionArrive(800);
+    ChassisControlSTS.ResetMaxSpeed(5);
+    ChassisControlSTS.ReSetToCurveMove_Position(700, 500, 'q');
+    ChassisControlSTS.WaitPositionArrive(450);
+    ChassisControlSTS.ReSetToEncoderWheel(1500, -360 - 180 - 65 - 180, 'n');
+    ChassisControlSTS.WaitPositionArrive(600);
+    ChassisControlSTS.ResetStraightAngle(-180 - 75 - 360 - 180);
+    SimulatedRemoteControl("R1");
+    ChassisControlSTS.SetStopModCoast();
+    ChassisControlSTS.StopMoving();
+    ChassisControlSTS.ChassisForwardAngle(-180 - 92 - 360 - 180);
+    for (int i = 0; i < 150; i++)
+    {
+        if (i > 150)
+        {
+            digitalE.set(0);
+        }
+
+        if (i > 80)
+        {
+            ChassisControlSTS.ChassisForwardAngle(-180 - 100 - 360 - 180);
+        }
+        ChassisControlSTS.ChassisForward(8);
+        wait(10, msec);
+    }
 }
-
-// void auto12(){
-
-//     vex::thread  Task = thread(auto12_child);
-
-//     double start_time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count();  // 运动开始时间
-//     double end_time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count();  // 运动开始时间
-
-//     while (end_time - start_time < 60){
-//         end_time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count();  // 运动开始时间
-//         if (Controller.ButtonB.pressing() && Controller.ButtonA.pressing()){
-//             break;
-//         }
-//         wait(10, msec); 
-//     }
-//     Task.interrupt(); // 中止线程
-//     RestoreInitial(); // 停止所有
-//     RemoteControl();
-// }   
-

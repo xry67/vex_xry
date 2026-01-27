@@ -4,55 +4,6 @@
 #include "AutoTools.h"
 #include <vector>
 
-// 半场长度：1790 mm
-// 管道半长 280 mm
-double w = 340; // 宽度
-double h = 450; //  长度
-double f_h = h / 2 - 100;
-double b_h = h / 2 - 70;
-double l_w = w / 2 - 30;
-double r_w = w / 2 - 30 - 95;
-
-double GetMoveLen(double Right_d, double Front_d)
-{
-  return sqrt(2) * (1790 - Right_d);
-}
-
-void GoToMiddleBridge(double angle)
-{
-
-  ChassisControlSTS.Over_count = 10;
-  ChassisControlSTS.TurnTo(10, angle, 0);
-  ChassisControlSTS.Over_count = 5;
-  // 735
-  // 1208
-
-  double Right_d = GetDistance_right() + r_w;
-  double Front_d = GetDistance_front() + f_h;
-
-  ChassisControlSTS.MoveToDistance(5, Right_d, angle, 'f');
-
-  ChassisControlSTS.TurnTo(10, angle + 45, 0);
-
-  digitalB.set(0);
-  digitalC.set(0);
-
-  ChassisControlSTS.Move(10, GetMoveLen(Right_d, Front_d) * 735 / 1208 * 1.5, angle + 45, 'u', 1);
-  ChassisControlSTS.WaitPositionArrive(GetMoveLen(Right_d, Front_d) * 735 / 1208 * 0.7);
-  ChassisControlSTS.ResetMaxSpeed(3);
-  ChassisControlSTS.ReSetToEncoderWheel(1500, angle + 45, 'u');
-  while (ChassisControlSTS.IsMoving())
-  {
-    if (ChassisControlSTS.GetVelocity_pct_mean() <= 3)
-    {
-      ChassisControlSTS.StopMoving();
-      break;
-    }
-    wait(10, msec);
-  }
-  ChassisControlSTS.SetStopModCoast();
-  ChassisControlSTS.WaitMoveFinish();
-}
 
 void FromGoToMiddleBridge_To_Intake(double angle)
 {
@@ -94,9 +45,17 @@ void auto13()
   ChassisControlSTS.TurnTo(16, -90 - 45, 0);
   ToolMotor1.spin(forward, -16, voltageUnits::volt);
   ChassisControlSTS.Move(16, 700, -90 - 45, 'u', 1); // 1550
-  ChassisControlSTS.WaitPositionArrive(600);
+  ChassisControlSTS.WaitPositionArrive(200);
   ChassisControlSTS.SetStopModCoast();
-  ChassisControlSTS.StopMoving();
+  while (ChassisControlSTS.IsMoving())
+  {
+    if (ChassisControlSTS.GetVelocity_pct_mean() <= 3)
+    {
+      ChassisControlSTS.StopMoving();
+      break;
+    }
+    wait(10, msec);
+  }
   ChassisControlSTS.ChassisLeftControl(-2);
   ChassisControlSTS.ChassisRightControl(-2);
   SimulatedRemoteControl("L2");
@@ -202,7 +161,7 @@ void auto13()
   ChassisControlSTS.ChassisForwardAngle(85);
   for (int i = 0; i < 200; i++)
   {
-    if (i > 100)
+    if (i > 200)
     {
       digitalE.set(0);
     }

@@ -300,12 +300,12 @@ public:
     std::vector<double> Move_PPS;
     std::vector<double> MoveBySmallWheel_PPS;
     double min_move_speed = 0;        // 电机的最小速度
-    double move_allowable_error = 10; // 直行允许误差
+    double move_allowable_error = 15; // 直行允许误差
 
     // 旋转相关参数
     std::vector<double> Turn_PPS;
     double min_turn_speed = 0;         // 自转的最小速度
-    double turn_allowable_error = 1.5; // 旋转允许误差
+    double turn_allowable_error = 2; // 旋转允许误差 1.5
 
     // 距离传感器
     int Distance_negative;
