@@ -16,9 +16,9 @@ void AddAutoFun()
     // AutoFunctions.push_back(AutoFun("左3+4+钩", auto9)); // 有距离传感器
     // AutoFunctions.push_back(AutoFun("右3+4+钩", auto10)); // 有距离传感器
     // AutoFunctions.push_back(AutoFun("钩子", auto11));
-    AutoFunctions.push_back(AutoFun("技能赛", auto12, 999999));
-    AutoFunctions.push_back(AutoFun("测试", auto13, 999999999));
-    AutoFunctions.push_back(AutoFun("//", auto14));
+    AutoFunctions.push_back(AutoFun("技能赛", auto12, 70));
+    AutoFunctions.push_back(AutoFun("测试", auto13, 70));
+    AutoFunctions.push_back(AutoFun("//", auto14, 9999999999999999));
 }
 
 // 比赛的自动函数

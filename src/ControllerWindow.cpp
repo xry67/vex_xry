@@ -122,12 +122,17 @@ int RunAutoFunAndUpdataToControl()
         now_time = GetNowTime(); // 运动开始时间
         if (Controller.ButtonX.pressing() && Controller.ButtonA.pressing())
         {
+            Controller.rumble(".");
             break;
         }
         wait(10, msec);
     }
-    ChassisControlSTS.StopMoving();
+    // ChassisControlSTS.StopMoving();
     Task.interrupt(); // 中止线程
+    if (ChassisControlSTS.IsMoving())
+    {
+        ChassisControlSTS.StopMoving();
+    }
     double end_time = GetNowTime();
     ChassisControlSTS.ChassisStoppingCoast(); // 底盘停止抱死
     RestoreInitial();

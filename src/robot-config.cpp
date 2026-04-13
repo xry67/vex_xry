@@ -41,15 +41,15 @@ motor LeftMotor2 = motor(PORT2, ratio6_1, 1);
 motor LeftMotor3 = motor(PORT3, ratio6_1, 1);
 motor_group LeftMotorGroup = motor_group(LeftMotor1, LeftMotor2, LeftMotor3); // 左边电机组
 
-motor RightMotor1 = motor(PORT4, ratio6_1, 0);
+motor RightMotor1 = motor(PORT15, ratio6_1, 0);
 motor RightMotor2 = motor(PORT5, ratio6_1, 0);
 motor RightMotor3 = motor(PORT6, ratio6_1, 0);
 motor_group RightMotorGroup = motor_group(RightMotor1, RightMotor2, RightMotor3); // 右边边电机组
 
 motor ToolMotor1 = motor(PORT10, ratio6_1, 0); // 上  f
-motor ToolMotor2 = motor(PORT8, ratio6_1, 1);  // 中  l
-motor ToolMotor3 = motor(PORT9, ratio6_1, 0);  // 下  r
-motor ToolMotor4 = motor(PORT4, ratio6_1, 0);  //
+motor ToolMotor2 = motor(PORT8, ratio6_1, 0);  // 中  l
+motor ToolMotor3 = motor(PORT9, ratio6_1, 1);  // 下  r
+motor ToolMotor4 = motor(PORT21, ratio6_1, 0); //
 
 digital_out digitalA = digital_out(Brain.ThreeWirePort.A);
 digital_out digitalB = digital_out(Brain.ThreeWirePort.B);
@@ -81,8 +81,8 @@ distance Distance_fl = distance(PORT21); // 左前
 distance Distance_fr = distance(PORT21); // 右前
 distance Distance_bl = distance(PORT21); // 左后
 distance Distance_br = distance(PORT21); // 右后
-distance Distance_l = distance(PORT18);  // 左
-distance Distance_r = distance(PORT17);  // 右
+distance Distance_l = distance(PORT17);  // 左
+distance Distance_r = distance(PORT18);  // 右
 
 // 设别列表
 std::vector<char *> MotorNames = {"L1", "L2", "L3", "R1", "R2", "R3", "T1", "T2", "T3"};

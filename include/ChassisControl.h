@@ -273,7 +273,7 @@ public:
     double Stuck_threshold = 10;                // 电机卡死认定阈值，单位dps
     double Move_max_speed = 0.0;                // 直行最大速度
     int Over_count = 10;                        // 到位计数当前次数后，才会退出
-    bool Moveing = true;                        // 记录是否在运动
+    bool Moveing = false;                       // 记录是否在运动
     bool MoveEnd = true;                        // 记录运动是否完成
     bool Whileing = false;                      // 是否进入循环
     int MoveId = 0;                             // 运动id记录（计数）
@@ -304,7 +304,7 @@ public:
 
     // 旋转相关参数
     std::vector<double> Turn_PPS;
-    double min_turn_speed = 0;         // 自转的最小速度
+    double min_turn_speed = 0;       // 自转的最小速度
     double turn_allowable_error = 2; // 旋转允许误差 1.5
 
     // 距离传感器

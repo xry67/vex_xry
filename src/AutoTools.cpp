@@ -173,7 +173,7 @@ void move_intake_time(double angle, double intake_time)
 
   for (int i = 0; i < 200; i++)
   {
-    ChassisControlSTS.ChassisForward(4);
+    ChassisControlSTS.ChassisForward(3.2);
     if (GetDistance_front() <= 280)
     {
       break;
@@ -215,9 +215,10 @@ void Move_u_Long_r(double angle)
 {
   // ChassisControlSTS.Move(10, 1000, angle + 2, 'n'); // 1550
   // Brain.Screen.printAt(150, 150, "%f", GetDistance_right());
-  ChassisControlSTS.Move(5, 1000, angle - (GetDistance_right() - 430) * 0.15, 'u', true); // 1550
+  // ChassisControlSTS.Move(5, 1000, angle - (GetDistance_right() - 440) * 0.15, 'u', true); // 1550
+  ChassisControlSTS.Move(5, 1000, angle, 'u', true); // 1550
   // ChassisControlSTS.Move(5, 700, angle, 'u', true); // 1550
-  ChassisControlSTS.WaitPositionArrive(400);
+  ChassisControlSTS.WaitPositionArrive(300);
   ChassisControlSTS.ResetStraightAngle(angle);
   while (ChassisControlSTS.IsMoving())
   {
@@ -254,7 +255,7 @@ void intake_and_pushback_new_r(double angle, int intake_time, int push_time)
   SimulatedRemoteControl("R1");
 
   // ChassisControlSTS.Move(10, 1000, angle + 2, 'n'); // 1550
-  ChassisControlSTS.Move(5, 1700, angle + (GetDistance_right() - 470) * 0.12, 'n', true); // 1550
+  ChassisControlSTS.Move(5, 1700, angle + (GetDistance_right() - 470) * 0.1, 'n', true); // 1550
   ChassisControlSTS.WaitPositionArrive(500);
   ChassisControlSTS.ResetStraightAngle(angle);
 
@@ -289,6 +290,7 @@ void intake_and_pushback_new_r(double angle, int intake_time, int push_time)
   }
 
   SimulatedRemoteControl("L1");
+  AutoIntake();
 
   ChassisControlSTS.SetStopModCoast();
   ChassisControlSTS.StopMoving();
@@ -296,6 +298,7 @@ void intake_and_pushback_new_r(double angle, int intake_time, int push_time)
   ChassisControlSTS.ChassisForwardAngle(angle);
   ChassisControlSTS.ChassisForward(-2);
   wait(push_time, msec);
+  StopAutoIntake();
 }
 
 void intake_and_pushback_new(double angle, int intake_time, int push_time)
@@ -406,95 +409,27 @@ bool AutoIntakeFlag = true;
 int fun()
 {
   AutoIntakeFlag = true;
-  // 分球暂停计数器
-  int ErrorBall1 = 0;
-  int ErrorBall2 = 0;
+  ToolMotor1.spin(forward, -16, voltageUnits::volt);
+  ToolMotor2.spin(forward, -16, voltageUnits::volt);
+  ToolMotor3.spin(forward, -16, voltageUnits::volt);
+  digitalG.set(0);
+  digitalD.set(0);
+  wait(500, msec);
+
   while (AutoIntakeFlag)
   {
-    // 分球
-    if ((stance == 'r' && OpticalHaveBlue(Optical1)) || (stance == 'b' && OpticalHaveRed(Optical1)))
+    if (std::abs(ToolMotor3.velocity(pct)) <= 5 || std::abs(ToolMotor2.velocity(pct)) <= 5 || std::abs(ToolMotor1.velocity(pct)) <= 5)
     {
-      ErrorBall1 = 20;
-    }
-    else if ((stance == 'b' && OpticalHaveBlue(Optical1)) || (stance == 'r' && OpticalHaveRed(Optical1)))
-    {
-      ErrorBall1 = 0;
-    }
-    else
-    {
-      ErrorBall1 = -1;
+      ToolMotor1.spin(forward, 16, voltageUnits::volt);
+      ToolMotor2.spin(forward, 16, voltageUnits::volt);
+      ToolMotor3.spin(forward, 16, voltageUnits::volt);
+      wait(100, msec);
     }
 
-    if ((stance == 'r' && OpticalHaveBlue(Optical2)) || (stance == 'b' && OpticalHaveRed(Optical2)))
-    {
-      ErrorBall2 = 20;
-    }
-    else if ((stance == 'b' && OpticalHaveBlue(Optical2)) || (stance == 'r' && OpticalHaveRed(Optical2)))
-    {
-      ErrorBall2 = 0;
-    }
-    else
-    {
-      ErrorBall2 = -1;
-    }
-    //  分球逻辑
-    // ErrorBall1： 靠前方的颜色传感器
-    // ErrorBall2： 靠后方的颜色传感器
-    // 0   ：正确颜色的球
-    // -1  ：没有球
-    // 1~20：错误的球，检测到错球值为20
-
-    if (ErrorBall1 > 0 && ErrorBall2 > 0)
-    {
-      // 前后都是异色球
-      ToolMotor2.spin(forward, 16, voltageUnits::volt);
-    }
-    else if (ErrorBall1 > 0 && ErrorBall2 < 0)
-    {
-      // 前异色，后没球
-      ToolMotor2.spin(forward, 16, voltageUnits::volt);
-    }
-    else if (ErrorBall1 > 0 && ErrorBall2 == 0)
-    {
-      // 前异色，后同色
-      ToolMotor2.spin(forward, -16, voltageUnits::volt);
-    }
-    else if (ErrorBall1 == 0 && ErrorBall2 > 0)
-    {
-      // 前同色，后异色
-      ToolMotor2.spin(forward, 16, voltageUnits::volt);
-    }
-    else if (ErrorBall1 == 0 && ErrorBall2 == 0)
-    {
-      // 前同色，后同色
-      ToolMotor2.spin(forward, -16, voltageUnits::volt);
-    }
-    else if (ErrorBall1 == 0 && ErrorBall2 < 0)
-    {
-      // 前同色，后没球
-      ToolMotor2.spin(forward, -16, voltageUnits::volt);
-    }
-    else if (ErrorBall1 < 0 && ErrorBall2 > 0)
-    {
-      // 前没球，后异色
-      ToolMotor2.spin(forward, 16, voltageUnits::volt);
-    }
-    else if (ErrorBall1 < 0 && ErrorBall2 == 0)
-    {
-      // 前没球，后同色
-      ToolMotor2.spin(forward, -16, voltageUnits::volt);
-    }
-    else if (ErrorBall1 < 0 && ErrorBall2 < 0)
-    {
-      // 前没球，后没球
-      ToolMotor2.spin(forward, -16, voltageUnits::volt);
-    }
-    else
-    {
-      // 不可能进来，但还是留有保底
-      ToolMotor2.spin(forward, 16, voltageUnits::volt);
-    }
-    wait(10, msec);
+    ToolMotor1.spin(forward, -16, voltageUnits::volt);
+    ToolMotor2.spin(forward, -16, voltageUnits::volt);
+    ToolMotor3.spin(forward, -16, voltageUnits::volt);
+    wait(100, msec);
   }
   return 0;
 }
@@ -507,16 +442,24 @@ void SimulatedRemoteControl(std::string input)
   {
     ToolMotor1.spin(forward, -16, voltageUnits::volt);
     ToolMotor2.spin(forward, -16, voltageUnits::volt);
-    ToolMotor3.stop();
-    ToolMotor3.setStopping(hold);
+    ToolMotor3.spin(forward, 2, voltageUnits::volt);
     digitalG.set(0);
     digitalH.set(0);
     digitalD.set(0);
   }
   // 底桥
-  else if (input == "R2" || input == "r2")
+  else if (input == "R2.5" || input == "r2.5")
   {
     ToolMotor1.spin(forward, 6.5, voltageUnits::volt);
+    ToolMotor2.spin(forward, 16, voltageUnits::volt);
+    ToolMotor3.spin(forward, 16, voltageUnits::volt);
+    digitalH.set(0);
+    // ToolMotor2.spin(forward, 0, voltageUnits::volt);
+  }
+  // 底桥
+  else if (input == "R2" || input == "r2")
+  {
+    ToolMotor1.spin(forward, 5.5, voltageUnits::volt);
     ToolMotor2.spin(forward, 16, voltageUnits::volt);
     ToolMotor3.spin(forward, 16, voltageUnits::volt);
     digitalG.set(0);
@@ -532,6 +475,7 @@ void SimulatedRemoteControl(std::string input)
     ToolMotor3.spin(forward, 16, voltageUnits::volt);
     digitalG.set(1);
     digitalD.set(0);
+    digitalH.set(0);
   }
   // 中桥
   else if (input == "L2-" || input == "l2-")
@@ -541,6 +485,7 @@ void SimulatedRemoteControl(std::string input)
     ToolMotor3.spin(forward, 16, voltageUnits::volt);
     digitalG.set(1);
     digitalD.set(0);
+    digitalH.set(0);
   }
   // 高桥
   else if (input == "L1" || input == "l1")
@@ -550,6 +495,7 @@ void SimulatedRemoteControl(std::string input)
     ToolMotor3.spin(forward, -16, voltageUnits::volt);
     digitalG.set(0);
     digitalD.set(0);
+    digitalH.set(0);
   }
   // 停止
   else if (input == "STOP" || input == "Stop" || input == "stop")
@@ -557,6 +503,7 @@ void SimulatedRemoteControl(std::string input)
     ToolMotor1.spin(forward, 0, voltageUnits::volt);
     ToolMotor2.spin(forward, 0, voltageUnits::volt);
     ToolMotor3.spin(forward, 0, voltageUnits::volt);
+    digitalH.set(0);
   }
   // 递球
   else

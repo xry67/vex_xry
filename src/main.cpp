@@ -7,14 +7,15 @@
 
 using namespace vex;
 
-int main() {
+int main()
+{
+  digitalH.set(1);
   std::cout << "-------------------->" << std::endl;
-  vexcodeInit();   // 机器人初始化
-  
-  Competition.autonomous(AutoControl);        // 自动程序加入
+  vexcodeInit(); // 机器人初始化
+
+  Competition.autonomous(AutoControl); // 自动程序加入
 
   // 程序运行
   MainWindow main_window = MainWindow();
   main_window.Run();
-  
 }

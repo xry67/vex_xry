@@ -49,6 +49,12 @@ bool ChangeStance()
 
 int RemoteControl_child()
 {
+    while (1)
+    {
+
+        wait(10, msec);
+    }
+
     return 0;
 }
 
@@ -170,101 +176,6 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
         ChassisRomoteControlSTS.Work();
 
         ChangeStance();
-
-        // R1 吸球
-        // R2 底层吐球
-        // L1 高层吐球
-        // L2 中层吐球
-        // Y  铲子
-        // 右 钩子
-
-        // 1 号
-        if (ControlData.ButtonR1 || ControlData.ButtonR2 || ControlData.ButtonL1 || ControlData.ButtonL2 || ControlData.ButtonDown)
-        {
-            if (ControlData.ButtonR1)
-            {
-                ToolMotor1.spin(forward, -16, voltageUnits::volt);
-                digitalG.set(0);
-                digitalH.set(0);
-                digitalD.set(0);
-            }
-            if (ControlData.ButtonR2)
-            {
-                digitalD.set(1);
-                ToolMotor1.spin(forward, 6.5, voltageUnits::volt);
-                digitalG.set(0);
-                digitalH.set(0);
-            }
-            if (ControlData.ButtonL1)
-            {
-                ToolMotor1.spin(forward, -16, voltageUnits::volt);
-                digitalG.set(0);
-                digitalD.set(0);
-            }
-            if (ControlData.ButtonL2)
-            {
-                ToolMotor1.spin(forward, -16, voltageUnits::volt);
-                digitalG.set(1);
-                digitalD.set(0);
-            }
-            // digitalH.set(0);
-        }
-        else
-        {
-            ToolMotor1.spin(forward, 0, voltageUnits::volt);
-        }
-
-        // 2号
-        if (ControlData.ButtonR1 || ControlData.ButtonR2 || ControlData.ButtonL1 || ControlData.ButtonL2 || ControlData.ButtonDown)
-        {
-            if (ControlData.ButtonR1)
-            {
-                ToolMotor2.spin(forward, -16, voltageUnits::volt);
-            }
-            if (ControlData.ButtonR2)
-            {
-                ToolMotor2.spin(forward, 16, voltageUnits::volt);
-            }
-            if (ControlData.ButtonL1)
-            {
-                ToolMotor2.spin(forward, -16, voltageUnits::volt);
-            }
-            if (ControlData.ButtonL2)
-            {
-                ToolMotor2.spin(forward, -16, voltageUnits::volt);
-            }
-        }
-        else
-        {
-            ToolMotor2.spin(forward, 0, voltageUnits::volt);
-        }
-
-        // 3号
-        if (ControlData.ButtonR1 || ControlData.ButtonR2 || ControlData.ButtonL1 || ControlData.ButtonL2 || ControlData.ButtonDown)
-        {
-            if (ControlData.ButtonR1)
-            {
-                ToolMotor3.stop();
-                ToolMotor3.setStopping(hold);
-            }
-            if (ControlData.ButtonR2)
-            {
-                ToolMotor3.spin(forward, 16, voltageUnits::volt);
-            }
-            if (ControlData.ButtonL1)
-            {
-                ToolMotor3.spin(forward, -16, voltageUnits::volt);
-            }
-            if (ControlData.ButtonL2)
-            {
-                ToolMotor3.spin(forward, 16, voltageUnits::volt);
-            }
-        }
-        else
-        {
-            ToolMotor3.setStopping(coast);
-            ToolMotor3.spin(forward, 0, voltageUnits::volt);
-        }
 
         if (ControlData.ButtonDown)
         {

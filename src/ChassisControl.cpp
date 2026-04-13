@@ -483,6 +483,7 @@ void ChassisControl::ReSetToEncoderWheel(double val_, double yaw_, char directio
     negative = 1;
   }
   pps.setSetpoint(this->val);
+  move_allowable_error = 15;
 }
 
 // 设置为编码轮直走
@@ -506,6 +507,7 @@ void ChassisControl::ReSetToEncoderWheel(double val_, char direction)
     negative = 1;
   }
   pps.setSetpoint(this->val);
+  move_allowable_error = 15;
 }
 
 // 设置距离传感器
@@ -521,15 +523,18 @@ void ChassisControl::ReSetToDistance(double val_, char DistanceChioce_)
   //  方向指示器
   if (DistanceChioce == 'f')
   {
+    Distance_negative = -1;
     negative = -1;
   }
   else if (DistanceChioce == 'b')
   {
+    Distance_negative = 1;
     negative = 1;
   }
 
   pps = PPS(this->Distance_PPS[0], this->Distance_PPS[1], this->Distance_PPS[2]);
   pps.setSetpoint(val - Distance_start_val); // 设置目标位置
+  move_allowable_error = 10;
 }
 
 // 设置距离传感器
@@ -570,6 +575,7 @@ void ChassisControl::ReSetToDistance(double val_, double yaw_, char DistanceChio
 
   pps = PPS(this->Distance_PPS[0], this->Distance_PPS[1], this->Distance_PPS[2]);
   pps.setSetpoint(val - Distance_start_val); // 设置目标位置
+  move_allowable_error = 10;
 }
 
 // 设置曲线运动(位置)
@@ -605,6 +611,7 @@ void ChassisControl::ReSetToCurveMove_Position(double r_, double TargetPosition_
   this->val = TargetPosition_;
   pps.setSetpoint(TargetPosition_);
   start_angle = ChassisInertial.rotation(); // 运动开始角度
+  move_allowable_error = 15;
 }
 
 // 设置曲线运动（角度）
@@ -804,7 +811,8 @@ void ChassisControl::BasicMove()
     }
 
     // 超时保护
-    double now_time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count(); // 当前时间
+    double now_time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count(); //
+    Brain.Screen.printAt(150, 150, "%f", now_time);
     if (now_time - start_time >= move_time_out / 1000)
     {
       // PrintAt(2, " ->超时");
@@ -856,6 +864,7 @@ void ChassisControl::Move(double v, double val, char direction, bool task)
 // 直线运动函数
 void ChassisControl::Move(double v, double val, double yaw, char direction)
 {
+  move_allowable_error = 15;
   this->ResetMaxSpeed(v);
   this->ReSetToEncoderWheel(val, yaw, direction);
   this->BasicMove();
@@ -886,6 +895,7 @@ void ChassisControl::Move(double v, double val, double yaw, char direction, bool
 // 曲线移动
 void ChassisControl::CurveMove(double v, double r, double TargetPosition, char direction)
 {
+  move_allowable_error = 15;
   this->ResetMaxSpeed(v);
   this->ReSetToCurveMove_Position(r, TargetPosition, direction);
   this->BasicMove();
@@ -1239,6 +1249,7 @@ void ChassisControl::WaitMoveFinish()
 // 获取当前是否在运动
 bool ChassisControl::IsMoving()
 {
+  // Brain.Screen.printAt(100, 170, "1111%d %d %d", Moveing, MoveEnd, Whileing);
   return (Moveing == true) || (MoveEnd == false) || (Whileing == true);
 }
 
@@ -1248,8 +1259,10 @@ void ChassisControl::StopMoving()
   // 多线程阻断等待
   while (this->MoveEnd == false)
   {
-    wait(10, msec);
+
     this->Moveing = false;
+    // Brain.Screen.printAt(100, 190, "%d %d %d", Moveing, MoveEnd, Whileing);
+    wait(10, msec);
   }
   this->WaitMoveFinish();
 }
@@ -1257,6 +1270,7 @@ void ChassisControl::StopMoving()
 // 使用距离传感器移动
 void ChassisControl::MoveToDistance(double v, double val, double yaw, char DistanceChioce)
 {
+  move_allowable_error = 10;
   this->ResetMaxSpeed(v);
   this->ReSetToDistance(val, yaw, DistanceChioce);
   this->BasicMove();

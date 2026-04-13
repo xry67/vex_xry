@@ -13,7 +13,7 @@ void auto6()
   digitalH.set(1);
   wait(100, msec); // 需要保留等待时间，否则自转的旋转中心会由于惯性发生改变
   // 转至180
-  ChassisControlSTS.AutoPPSTurnTo(10, 90);
+  ChassisControlSTS.TurnTo(10, 90, 0);
 
   intake_and_pushback_new(90, 450, 1500);
 
