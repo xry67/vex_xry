@@ -5,7 +5,7 @@
 // 自动函数增加
 void AddAutoFun()
 {
-    // AutoFunctions.push_back(AutoFun("直走最小速度", auto1));
+    AutoFunctions.push_back(AutoFun("底盘测试", auto1));
     // AutoFunctions.push_back(AutoFun("转向最小速度", auto2));
     // AutoFunctions.push_back(AutoFun("测试", auto3, 9999999999999));  // 无距离传感器
     // AutoFunctions.push_back(AutoFun("钩子", auto4));  // 无距离传感器

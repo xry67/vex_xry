@@ -1,5 +1,5 @@
-#ifndef UNITS_H  
-#define UNITS_H 
+#ifndef UNITS_H
+#define UNITS_H
 
 #include <vector>
 #include "vex.h"
@@ -9,25 +9,25 @@
 void PrintInLine(int line);
 
 // 使字符串居中
-void CenterStr(char* str);
+void CenterStr(char *str);
 
 // 获得数字序列字符串
-std::vector<char*> generateNumberStrings(int start, int end);
+std::vector<char *> generateNumberStrings(int start, int end);
 
 // 获得字母序列
-std::vector<char*> generateAlphabetStrings(char start, char end);
+std::vector<char *> generateAlphabetStrings(char start, char end);
 
 // 输出到某一行并且打印文字
-void PrintAt(int line, char* str);
+void PrintAt(int line, char *str);
 
 // 输出到某一行并且打印文字
-void PrintAt(int line, char* str, int num);
+void PrintAt(int line, char *str, int num);
 
 // 输出到某一行并且打印文字
-void PrintAt(int line, char* str, float num);
+void PrintAt(int line, char *str, float num);
 
 // 输出到某一行并且打印文字
-void PrintAt(int line, char* str, double num);
+void PrintAt(int line, char *str, double num);
 
 // 将角度规范到-180到180
 double NormsAngle(double val);
@@ -38,16 +38,16 @@ double NormsAngle_0_360(double val);
 // 等待转圈的字符
 class WaitStr
 {
-    private:
-        std::vector<char*> str = {"-", "/", "|", "\\"};
-        int index = 0;
+private:
+    std::vector<char *> str = {"-", "/", "|", "\\"};
+    int index = 0;
 
-    public:
-        char* GetNextStr(){
-            index = (index + 1) % str.size();
-            return str[index];
-        }
-
+public:
+    char *GetNextStr()
+    {
+        index = (index + 1) % str.size();
+        return str[index];
+    }
 };
 
 // 颜色传感器有一个红色物体？
@@ -55,6 +55,12 @@ bool OpticalHaveRed(vex::optical Optical);
 
 // 颜色传感器有一个蓝色物体？
 bool OpticalHaveBlue(vex::optical Optical);
+
+// 颜色传感器有一个红色物体？
+bool OpticalHaveRed_notNear(vex::optical Optical);
+
+// 颜色传感器有一个蓝色物体？
+bool OpticalHaveBlue_notNear(vex::optical Optical);
 
 // 方向向量转换为角度
 double calculateAngle(int x, int y);

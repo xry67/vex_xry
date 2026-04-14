@@ -146,11 +146,11 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
         }
 
         // 分球
-        if ((stance == 'r' && OpticalHaveBlue(Optical1)) || (stance == 'b' && OpticalHaveRed(Optical1)))
+        if ((stance == 'r' && OpticalHaveBlue_notNear(Optical1)) || (stance == 'b' && OpticalHaveRed_notNear(Optical1)))
         {
             ErrorBall1 = 20;
         }
-        else if ((stance == 'b' && OpticalHaveBlue(Optical1)) || (stance == 'r' && OpticalHaveRed(Optical1)))
+        else if ((stance == 'b' && OpticalHaveBlue_notNear(Optical1)) || (stance == 'r' && OpticalHaveRed_notNear(Optical1)))
         {
             ErrorBall1 = 0;
         }
@@ -159,11 +159,11 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
             ErrorBall1 = -1;
         }
 
-        if ((stance == 'r' && OpticalHaveBlue(Optical2)) || (stance == 'b' && OpticalHaveRed(Optical2)))
+        if ((stance == 'r' && OpticalHaveBlue_notNear(Optical2)) || (stance == 'b' && OpticalHaveRed_notNear(Optical2)))
         {
             ErrorBall2 = 20;
         }
-        else if ((stance == 'b' && OpticalHaveBlue(Optical2)) || (stance == 'r' && OpticalHaveRed(Optical2)))
+        else if ((stance == 'b' && OpticalHaveBlue_notNear(Optical2)) || (stance == 'r' && OpticalHaveRed_notNear(Optical2)))
         {
             ErrorBall2 = 0;
         }
@@ -172,24 +172,81 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
             ErrorBall2 = -1;
         }
 
+        // Brain.Screen.printAt(100, 50, "%f  %f", Optical1.hue(), Optical2.hue());
+
+        int Negative = 1;
+        if (ErrorBall2 > 0 && ErrorBall1 > 0)
+        {
+            Negative = -1;
+            // Controller.rumble(".");
+        }
+        else if (ErrorBall2 > 0 && ErrorBall1 == 0)
+        {
+            Negative = 1;
+        }
+        else if (ErrorBall2 == 0 && ErrorBall1 > 0)
+        {
+            Negative = 1;
+        }
+        if (ErrorBall2 == 0 || ErrorBall1 == 0)
+        {
+            Negative = 1;
+        }
+
         // 底盘控制
         ChassisRomoteControlSTS.Work();
 
         ChangeStance();
 
-        if (ControlData.ButtonDown)
+        // 上方电机
+        if (ControlData.ButtonR1)
         {
-            digitalH.set(1);
+            digitalB.set(1);
+            ToolMotor1.spin(forward, -16, volt);
+            ToolMotor2.spin(forward, -16, volt);
+            ToolMotor3.spin(forward, -16 * Negative, volt);
+        }
+        else if (ControlData.ButtonR2)
+        {
+            digitalB.set(0);
+            ToolMotor1.spin(forward, 16, volt);
+            ToolMotor2.spin(forward, 16, volt);
+            ToolMotor3.spin(forward, 16, volt);
+        }
+        else if (ControlData.ButtonL1)
+        {
+            digitalB.set(1);
+            ToolMotor1.spin(forward, 16, volt);
+            ToolMotor2.spin(forward, 16, volt);
+            ToolMotor3.spin(forward, 16, volt);
+        }
+        else if (ControlData.ButtonL2)
+        {
+            digitalB.set(1);
+            ToolMotor1.spin(forward, -16, volt);
+            ToolMotor2.spin(forward, 16, volt);
+            ToolMotor3.spin(forward, 16, volt);
+        }
+        else
+        {
+            ToolMotor1.spin(forward, 0, volt);
+            ToolMotor2.spin(forward, 0, volt);
+            ToolMotor3.spin(forward, 0, volt);
+        }
+
+        if (!LastDown && ControlData.ButtonDown)
+        {
+            digitalD.set(!digitalD.value());
         }
 
         if (!LastY && ControlData.ButtonY)
         {
-            digitalE.set(!digitalE.value());
+            digitalC.set(!digitalC.value());
         }
 
         if (!LastRight && ControlData.ButtonRight)
         {
-            digitalF.set(!digitalF.value());
+            digitalA.set(!digitalA.value());
         }
 
         // 变量维护
