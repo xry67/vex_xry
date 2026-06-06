@@ -112,10 +112,6 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
     double out_time = 0;
     double last_time = start_time;
 
-    // 按钮上一状态记录
-    bool LastRight = false;
-    bool LastY = false;
-    bool LastDown = false;
 
     vex::task Task(RemoteControl_child); // 线程开启
 
@@ -145,117 +141,16 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
             ControlData.save(outFile);
         }
 
-        // 分球
-        if ((stance == 'r' && OpticalHaveBlue_notNear(Optical1)) || (stance == 'b' && OpticalHaveRed_notNear(Optical1)))
-        {
-            ErrorBall1 = 20;
-        }
-        else if ((stance == 'b' && OpticalHaveBlue_notNear(Optical1)) || (stance == 'r' && OpticalHaveRed_notNear(Optical1)))
-        {
-            ErrorBall1 = 0;
-        }
-        else
-        {
-            ErrorBall1 = -1;
-        }
-
-        if ((stance == 'r' && OpticalHaveBlue_notNear(Optical2)) || (stance == 'b' && OpticalHaveRed_notNear(Optical2)))
-        {
-            ErrorBall2 = 20;
-        }
-        else if ((stance == 'b' && OpticalHaveBlue_notNear(Optical2)) || (stance == 'r' && OpticalHaveRed_notNear(Optical2)))
-        {
-            ErrorBall2 = 0;
-        }
-        else
-        {
-            ErrorBall2 = -1;
-        }
-
-        // Brain.Screen.printAt(100, 50, "%f  %f", Optical1.hue(), Optical2.hue());
-
-        int Negative = 1;
-        if (ErrorBall2 > 0 && ErrorBall1 > 0)
-        {
-            Negative = -1;
-            // Controller.rumble(".");
-        }
-        else if (ErrorBall2 > 0 && ErrorBall1 == 0)
-        {
-            Negative = 1;
-        }
-        else if (ErrorBall2 == 0 && ErrorBall1 > 0)
-        {
-            Negative = 1;
-        }
-        if (ErrorBall2 == 0 || ErrorBall1 == 0)
-        {
-            Negative = 1;
-        }
-
         // 底盘控制
         ChassisRomoteControlSTS.Work();
-
         ChangeStance();
 
-        // 上方电机
-        if (ControlData.ButtonR1)
-        {
-            digitalB.set(1);
-            ToolMotor1.spin(forward, -16, volt);
-            ToolMotor2.spin(forward, -16, volt);
-            ToolMotor3.spin(forward, -16 * Negative, volt);
-        }
-        else if (ControlData.ButtonR2)
-        {
-            digitalB.set(0);
-            ToolMotor1.spin(forward, 16, volt);
-            ToolMotor2.spin(forward, 16, volt);
-            ToolMotor3.spin(forward, 16, volt);
-        }
-        else if (ControlData.ButtonL1)
-        {
-            digitalB.set(1);
-            ToolMotor1.spin(forward, 16, volt);
-            ToolMotor2.spin(forward, 16, volt);
-            ToolMotor3.spin(forward, 16, volt);
-        }
-        else if (ControlData.ButtonL2)
-        {
-            digitalB.set(1);
-            ToolMotor1.spin(forward, -16, volt);
-            ToolMotor2.spin(forward, 16, volt);
-            ToolMotor3.spin(forward, 16, volt);
-        }
-        else
-        {
-            ToolMotor1.spin(forward, 0, volt);
-            ToolMotor2.spin(forward, 0, volt);
-            ToolMotor3.spin(forward, 0, volt);
-        }
 
-        if (!LastDown && ControlData.ButtonDown)
-        {
-            digitalD.set(!digitalD.value());
-        }
+        // if (!LastDown && ControlData.ButtonDown)
+        // {
+        //     digitalD.set(!digitalD.value());
+        // }
 
-        if (!LastY && ControlData.ButtonY)
-        {
-            digitalC.set(!digitalC.value());
-        }
-
-        if (!LastRight && ControlData.ButtonRight)
-        {
-            digitalA.set(!digitalA.value());
-        }
-
-        // 变量维护
-        LastRight = ControlData.ButtonRight;
-        LastY = ControlData.ButtonY;
-        LastDown = ControlData.ButtonDown;
-
-        ErrorBall1 = std::max(0, ErrorBall1 - 1);
-        ErrorBall2 = std::max(0, ErrorBall2 - 1);
 
         // 退出
         if (!Competition.isFieldControl() && ControlData.ButtonB)
