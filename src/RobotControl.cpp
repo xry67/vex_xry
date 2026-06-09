@@ -1,4 +1,5 @@
 #include <vector>
+#include <cstdlib>
 #include "vex.h"
 #include "robot-config.h"
 #include "RobotControl.h"

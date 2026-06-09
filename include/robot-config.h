@@ -7,6 +7,7 @@
 #include "AutoFun.h"
 #include "PPS.h"
 #include "ChassisRemoteControl.h"
+#include "ClawController.h"
 #include <map>
 
 using namespace vex;
@@ -24,7 +25,8 @@ extern double Sensitivity_Straight;  // 直行灵敏度
 extern double Sensitivity_Precision; // 精密遥控比例
 extern int auto_index;               // 自动选择
 
-extern double TrackSpeed; // 履带速度
+extern bool claw_reversal; // 爪子反转状态(true正，false反)
+extern int claw_mod;       // 爪子模式(0关闭，1半开，2打开)
 
 // 遥控期间自动追踪的灵敏度
 extern double Auto_Turn_To_Target_Speed;
@@ -50,6 +52,7 @@ extern motor ToolMotor1; //
 extern motor ToolMotor2; //
 extern motor ToolMotor3; //
 extern motor ToolMotor4; //
+extern motor ToolMotor5;
 
 extern digital_out digitalA;
 extern digital_out digitalB;
@@ -78,6 +81,8 @@ extern distance Distance_bl; // 左后
 extern distance Distance_br; // 右后
 extern distance Distance_l;  // 左
 extern distance Distance_r;  // 右
+
+extern ClawController clawController;
 
 // 视觉传感器
 // extern aivision::colordesc Red;

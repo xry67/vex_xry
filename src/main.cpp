@@ -9,7 +9,6 @@ using namespace vex;
 
 int main()
 {
-  digitalH.set(1);
   std::cout << "-------------------->" << std::endl;
   vexcodeInit(); // 机器人初始化
 

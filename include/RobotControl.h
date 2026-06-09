@@ -18,6 +18,7 @@ int InertialCalibrating();
 // 检测是否飘值
 bool CheckInertialCalibrationFailed(double time, double max_error);
 
+
 #endif
 
 

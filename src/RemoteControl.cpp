@@ -48,24 +48,21 @@ bool ChangeStance()
 }
 
 int RemoteControl_child()
-{
+{ 
+    bool LastB = false;
     while (1)
     {
 
+
+        LastB = ControlData.ButtonB;
         wait(10, msec);
     }
 
     return 0;
 }
 
-// 三代车，双颜色传感器
 void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_name, double timeout)
 {
-
-    // digitalH  后方 起来
-    // digitalG  中间 高桥
-    // F         钩子 下来
-    // E         铲子 收起来
 
     PrintInLine(1);
     if (stance == 'r')
@@ -112,6 +109,10 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
     double out_time = 0;
     double last_time = start_time;
 
+    bool LastX = false;
+    bool LastB = false;
+    bool LastL1 = false;
+    bool LastL2 = false;
 
     vex::task Task(RemoteControl_child); // 线程开启
 
@@ -145,12 +146,45 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
         ChassisRomoteControlSTS.Work();
         ChangeStance();
 
+        // intake
+        if (ControlData.ButtonR1){
+          ToolMotor1.spin(forward, 13, volt);
+          ToolMotor2.spin(forward, 13, volt);
+        }else{
+          ToolMotor1.spin(forward, 0, volt);
+          ToolMotor2.spin(forward, 0, volt);
+        }
 
-        // if (!LastDown && ControlData.ButtonDown)
-        // {
-        //     digitalD.set(!digitalD.value());
-        // }
+        // 爪子
+        if (LastL1 && !ControlData.ButtonL1)
+        {
+            clawController.changeMod(0);
+        }
+        if (LastL2 && !ControlData.ButtonL2)
+        {
+            clawController.changeMod(2);
+        }
 
+        // 反转
+        if (LastB && !ControlData.ButtonB)
+        {
+            clawController.reversal();
+        }
+
+        // 抬升
+        if (ControlData.axis2 > 5 || ControlData.axis2 < -5)
+        {
+            ToolMotor5.spin(forward, -ControlData.axis2, pct);
+        }
+        else
+        {
+            ToolMotor5.spin(forward, 0, pct);
+        }
+
+        if (!LastX && ControlData.ButtonX)
+        {
+            digitalH.set(!digitalH.value());
+        }
 
         // 退出
         if (!Competition.isFieldControl() && ControlData.ButtonB)
@@ -176,6 +210,12 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
         {
             wait(50, msec);
         }
+
+
+        LastX = ControlData.ButtonX;
+        LastB = ControlData.ButtonB;
+        LastL1 = ControlData.ButtonL1;
+        LastL2 = ControlData.ButtonL2;
     }
 }
 
