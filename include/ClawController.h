@@ -84,8 +84,9 @@ public:
     {
       mod_motor.setStopping(hold);
     }
-    else if (claw_mod == 1)
+    else if (claw_mod == 1 && (abs(mod_motor.position(vex::rotationUnits::deg) - (claw_close_position + claw_open_position) / 2) >= 10))
     {
+      mod_motor.spin(forward, ((claw_close_position + claw_open_position) / 3 - mod_motor.position(vex::rotationUnits::deg)) * 0.2, volt);
     }
     else if (claw_mod == 2)
     {

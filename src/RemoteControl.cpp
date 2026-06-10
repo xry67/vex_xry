@@ -48,11 +48,10 @@ bool ChangeStance()
 }
 
 int RemoteControl_child()
-{ 
+{
     bool LastB = false;
     while (1)
     {
-
 
         LastB = ControlData.ButtonB;
         wait(10, msec);
@@ -147,12 +146,15 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
         ChangeStance();
 
         // intake
-        if (ControlData.ButtonR1){
-          ToolMotor1.spin(forward, 13, volt);
-          ToolMotor2.spin(forward, 13, volt);
-        }else{
-          ToolMotor1.spin(forward, 0, volt);
-          ToolMotor2.spin(forward, 0, volt);
+        if (ControlData.ButtonR1)
+        {
+            ToolMotor1.spin(forward, 13, volt);
+            ToolMotor2.spin(forward, 13, volt);
+        }
+        else
+        {
+            ToolMotor1.spin(forward, 0, volt);
+            ToolMotor2.spin(forward, 0, volt);
         }
 
         // 爪子
@@ -163,6 +165,10 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
         if (LastL2 && !ControlData.ButtonL2)
         {
             clawController.changeMod(2);
+        }
+        if (ControlData.ButtonDown)
+        {
+            clawController.changeMod(1);
         }
 
         // 反转
@@ -210,7 +216,6 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
         {
             wait(50, msec);
         }
-
 
         LastX = ControlData.ButtonX;
         LastB = ControlData.ButtonB;

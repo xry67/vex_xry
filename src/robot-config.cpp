@@ -49,7 +49,7 @@ motor_group RightMotorGroup = motor_group(RightMotor1, RightMotor2, RightMotor3)
 
 motor ToolMotor1 = motor(PORT10, ratio6_1, 0); // intake1
 motor ToolMotor2 = motor(PORT9, ratio6_1, 0);  // intake2
-motor ToolMotor3 = motor(PORT7, ratio6_1, 0);  // 爪子开合
+motor ToolMotor3 = motor(PORT7, ratio6_1, 1);  // 爪子开合
 motor ToolMotor4 = motor(PORT8, ratio6_1, 0);  // 爪子反转
 motor ToolMotor5 = motor(PORT20, ratio6_1, 0); // 抬升
 
@@ -87,8 +87,6 @@ distance Distance_bl = distance(PORT21); // 左后
 distance Distance_br = distance(PORT21); // 右后
 distance Distance_l = distance(PORT17);  // 左
 distance Distance_r = distance(PORT18);  // 右
-
-
 
 // 设别列表
 std::vector<char *> MotorNames = {"L1", "L2", "L3", "R1", "R2", "R3", "T1", "T2", "T3"};
