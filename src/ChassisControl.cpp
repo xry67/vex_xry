@@ -85,7 +85,7 @@ ChassisControl ChassisControlSTS = ChassisControl(); // sts底盘控制
 ChassisControl::ChassisControl()
 {
   // pps参数设置相关
-  ChassisSpeedConfig = 450;
+  ChassisSpeedConfig = 360;
   ResetPPS();
 }
 
@@ -93,14 +93,14 @@ ChassisControl::ChassisControl()
 void ChassisControl::ResetPPS()
 {
   // 直线修正
-  std::map<int, std::vector<double>> Straight_PPS_Map = {{343, {7.5, 0.0, 0.1}}, {450, {3, 0.0, 0.1}}, {300, {7.5, 0.0, 0.1}}};
+  std::map<int, std::vector<double>> Straight_PPS_Map = {{343, {7.5, 0.0, 0.1}}, {360, {3, 0.0, 0.1}}, {300, {7.5, 0.0, 0.1}}};
 
   // 编码器
-  std::map<int, std::vector<double>> Move_PPS_Map = {{343, {0.00950, 0.800, 2}}, {450, {0.0082, 0.5, 2}}, {300, {0.02, 0.800, 2}}};
-  std::map<int, double> Min_Move_Speed_Map = {{343, 0.75}, {450, 0.95}, {300, 0.95}};
+  std::map<int, std::vector<double>> Move_PPS_Map = {{343, {0.00950, 0.800, 2}}, {360, {0.01, 0.5, 2.5}}, {300, {0.02, 0.800, 2}}};
+  std::map<int, double> Min_Move_Speed_Map = {{343, 0.75}, {360, 0.95}, {300, 0.95}};
 
   // 距离传感器
-  std::map<int, std::vector<double>> Distance_PPS_Map = {{343, {0.0165, 0.3, 2.5}}, {450, {0.017, 0.3, 1}}, {300, {0.0165, 0.3, 2.5}}};
+  std::map<int, std::vector<double>> Distance_PPS_Map = {{343, {0.0165, 0.3, 2.5}}, {360, {0.017, 0.3, 1}}, {300, {0.0165, 0.3, 2.5}}};
 
   // 陀螺仪
   std::map<int, std::vector<double>> Turn_PPS_Map = {{343, {0.075, 0, 3}}, {450, {0.024, 0.45, 5.8}}, {300, {0.042, 0.5, 5}}};
