@@ -76,4 +76,7 @@ double medianOfThree(double a, double b, double c);
 // 获取时间（秒）
 double GetNowTime();
 
+// 获取时间（毫秒）
+double GetNowTime_ms();
+
 #endif

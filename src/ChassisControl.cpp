@@ -388,8 +388,11 @@ double ChassisControl::GetPositions_mean()
 {
   double ans = 0.0;
 
-  ans += medianOfThree(LeftMotor1.position(vex::rotationUnits::deg), LeftMotor2.position(vex::rotationUnits::deg), LeftMotor3.position(vex::rotationUnits::deg));
-  ans += medianOfThree(RightMotor1.position(vex::rotationUnits::deg), RightMotor2.position(vex::rotationUnits::deg), RightMotor3.position(vex::rotationUnits::deg));
+  // ans += medianOfThree(LeftMotor1.position(vex::rotationUnits::deg), LeftMotor2.position(vex::rotationUnits::deg), LeftMotor3.position(vex::rotationUnits::deg));
+  // ans += medianOfThree(RightMotor1.position(vex::rotationUnits::deg), RightMotor2.position(vex::rotationUnits::deg), RightMotor3.position(vex::rotationUnits::deg));
+
+  ans += LeftMotor1.position(vex::rotationUnits::deg);
+  ans += RightMotor1.position(vex::rotationUnits::deg);
 
   return ans / 2;
 }
@@ -399,8 +402,11 @@ double ChassisControl::GetVelocity_mean()
 {
   double ans = 0.0;
 
-  ans += std::abs(medianOfThree(LeftMotor1.velocity(dps), LeftMotor2.velocity(dps), LeftMotor3.velocity(dps)));
-  ans += std::abs(medianOfThree(RightMotor1.velocity(dps), RightMotor2.velocity(dps), RightMotor3.velocity(dps)));
+  // ans += std::abs(medianOfThree(LeftMotor1.velocity(dps), LeftMotor2.velocity(dps), LeftMotor3.velocity(dps)));
+  // ans += std::abs(medianOfThree(RightMotor1.velocity(dps), RightMotor2.velocity(dps), RightMotor3.velocity(dps)));
+
+  ans += LeftMotor1.velocity(dps);
+  ans += RightMotor1.velocity(dps);
 
   return ans / 2;
 }
@@ -410,8 +416,11 @@ double ChassisControl::GetVelocity_pct_mean()
 {
   double ans = 0.0;
 
-  ans += std::abs(medianOfThree(LeftMotor1.velocity(pct), LeftMotor2.velocity(pct), LeftMotor3.velocity(pct)));
-  ans += std::abs(medianOfThree(RightMotor1.velocity(pct), RightMotor2.velocity(pct), RightMotor3.velocity(pct)));
+  // ans += std::abs(medianOfThree(LeftMotor1.velocity(pct), LeftMotor2.velocity(pct), LeftMotor3.velocity(pct)));
+  // ans += std::abs(medianOfThree(RightMotor1.velocity(pct), RightMotor2.velocity(pct), RightMotor3.velocity(pct)));
+
+  ans += LeftMotor1.velocity(pct);
+  ans += RightMotor1.velocity(pct);
 
   return ans / 2;
 }
@@ -1226,6 +1235,75 @@ void ChassisControl::TurnTo(double v, double val, bool task)
   {
     this->Turn(v, lval, 'l', task);
   }
+}
+
+// 旋转到指定角度pid
+void ChassisControl::Turn_PID(double v, double val, double P, double I, double D, double error)
+{
+  // 多线程阻断等待
+  while (MoveEnd == false)
+  {
+    wait(10, msec);
+    Moveing = false;
+  }
+
+  Moveing = true;                      // 当前在运动
+  MoveEnd = false;                     // 运动没有完成
+  int overcount = 0;                   // 到位计数
+  double start_time = GetNowTime_ms(); // 开始时间
+
+  double integral = 0;
+  double prevError = 0;
+
+  while (true)
+  {
+    Whileing = true;
+
+    double currentPos = ChassisInertial.rotation();
+    double errorDist = val - currentPos;
+
+    // 到达目标位置
+    if (abs(errorDist) <= error)
+    {
+      overcount += 1;
+      if (overcount >= Over_count)
+      {
+        break;
+      }
+    }
+    else
+    {
+      overcount = 0;
+    }
+
+    // 多线程保护
+    if (Moveing == false)
+    {
+      break;
+    }
+
+    // 超时保护
+    double now_time = GetNowTime_ms();
+    if (now_time - start_time >= Move_time_out)
+    {
+      break;
+    }
+
+    // PID计算（dt = 0.01秒）
+    integral += errorDist * 0.01;
+    double derivative = (errorDist - prevError) / 0.01;
+    prevError = errorDist;
+
+    double output = P * errorDist + I * integral + D * derivative;
+    double outputLimited = NumInterval(output, 0, v);
+
+    ChassisLeftControl(outputLimited);
+    ChassisRightControl(-1 * outputLimited);
+
+    wait(10, msec);
+  }
+
+  MoveOver();
 }
 
 // 等待底盘运动开始

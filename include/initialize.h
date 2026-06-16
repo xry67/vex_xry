@@ -121,7 +121,7 @@ void vexcodeInit(void)
     EquipmentMonitor_task = vex::task(EquipmentMonitor);   // 电量监控开启
 
     // 初始位置设置
-    clawController.init();
+    // clawController.init();
 
     clawStateMaintain_task = vex::task(clawStateMaintain); // 爪子状态维护开启
     ChassisInertialInit();                                 // 底盘陀螺仪初始化

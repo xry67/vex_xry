@@ -239,6 +239,9 @@ public:
     // 旋转到指定角度
     void TurnTo(double v, double val, bool task);
 
+    // 旋转到指定角度pid
+    void Turn_PID(double v, double val, double P, double I, double D, double error);
+
     // 追随某个目标
     void FollowTarget(double v, double val);
 
@@ -269,6 +272,7 @@ public:
     int ChassisSpeedConfig = 0; // 底盘速度
 
     double Move_time_out = 10000;               // 超时保护，默认3000毫秒
+    double Turn_PID_time_out = 3000;            // 旋转超时保护，默认3000毫秒
     double Stuck_time_out = 300;                // 电机卡死保护，默认1000毫秒
     double Stuck_threshold = 10;                // 电机卡死认定阈值，单位dps
     double Move_max_speed = 0.0;                // 直行最大速度

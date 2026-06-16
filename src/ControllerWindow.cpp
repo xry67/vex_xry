@@ -131,7 +131,8 @@ int RunAutoFunAndUpdataToControl()
     Task.interrupt(); // 中止线程
     if (ChassisControlSTS.IsMoving())
     {
-        ChassisControlSTS.StopMoving();
+        // ChassisControlSTS.StopMoving();
+        ChassisControlSTS.Moveing = false;
     }
     double end_time = GetNowTime();
     ChassisControlSTS.ChassisStoppingCoast(); // 底盘停止抱死

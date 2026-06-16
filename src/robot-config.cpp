@@ -18,9 +18,6 @@ double Sensitivity_Straight = 1;    // 直行灵敏度
 double Sensitivity_Precision = 0.1; // 精密遥控比例
 int auto_index = -1;                // 自动选择
 
-bool claw_reversal = false; // 爪子反转状态(true正，false反)
-int claw_mod = 0;           // 爪子模式(0关闭，1半开，2打开)
-
 // 遥控期间自动追踪的灵敏度
 double Auto_Turn_To_Target_Speed = 50;
 
@@ -37,21 +34,21 @@ brain Brain;
 controller Controller = controller();
 competition Competition;
 
-motor LeftMotor1 = motor(PORT21, ratio6_1, 1);
-motor LeftMotor2 = motor(PORT21, ratio6_1, 0);
-motor LeftMotor3 = motor(PORT21, ratio6_1, 1);
+motor LeftMotor1 = motor(PORT18, ratio6_1, 1);
+motor LeftMotor2 = motor(PORT19, ratio6_1, 1);
+motor LeftMotor3 = motor(PORT20, ratio6_1, 1);                                // 小的
 motor_group LeftMotorGroup = motor_group(LeftMotor1, LeftMotor2, LeftMotor3); // 左边电机组
 
-motor RightMotor1 = motor(PORT21, ratio6_1, 0);
-motor RightMotor2 = motor(PORT21, ratio6_1, 1);
-motor RightMotor3 = motor(PORT21, ratio6_1, 0);
+motor RightMotor1 = motor(PORT11, ratio6_1, 0);
+motor RightMotor2 = motor(PORT12, ratio6_1, 0);
+motor RightMotor3 = motor(PORT13, ratio6_1, 0);                                   // 小的
 motor_group RightMotorGroup = motor_group(RightMotor1, RightMotor2, RightMotor3); // 右边边电机组
 
 motor ToolMotor1 = motor(PORT10, ratio6_1, 0); // intake1
 motor ToolMotor2 = motor(PORT9, ratio6_1, 0);  // intake2
-motor ToolMotor3 = motor(PORT7, ratio6_1, 1);  // 爪子开合
-motor ToolMotor4 = motor(PORT8, ratio6_1, 0);  // 爪子反转
-motor ToolMotor5 = motor(PORT20, ratio6_1, 0); // 抬升
+motor ToolMotor3 = motor(PORT6, ratio6_1, 1);  // 爪子开合
+motor ToolMotor4 = motor(PORT7, ratio6_1, 0);  // 爪子反转
+motor ToolMotor5 = motor(PORT8, ratio6_1, 0);  // 抬升
 
 ClawController clawController = ClawController(ToolMotor4, ToolMotor3);
 

@@ -5,8 +5,7 @@
 // 自动函数增加
 void AddAutoFun()
 {
-    AutoFunctions.push_back(AutoFun("", auto1));
-
+    AutoFunctions.push_back(AutoFun("pid旋转测试", auto1, 99999999999999999));
 }
 
 // 比赛的自动函数

@@ -184,7 +184,8 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
         }
         else
         {
-            ToolMotor5.spin(forward, 0, pct);
+            ToolMotor5.stop();
+            ToolMotor5.setStopping(hold);
         }
 
         if (!LastX && ControlData.ButtonX)

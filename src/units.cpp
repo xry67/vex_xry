@@ -219,3 +219,9 @@ double GetNowTime()
 {
     return std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count(); // 运动开始时间
 }
+
+// 获取时间（毫秒）
+double GetNowTime_ms()
+{
+    return Brain.Timer.time();
+}

@@ -90,7 +90,6 @@ public:
     }
     else if (claw_mod == 2)
     {
-      mod_motor.setStopping(hold);
     }
   }
 
@@ -180,7 +179,7 @@ public:
       wait(10, msec);
     }
 
-    mod_motor.spin(forward, 0, volt);
+    mod_motor.stop();
 
     // 状态维护
     claw_mod = claw_mod_target;
