@@ -7,7 +7,6 @@
 #include "AutoFun.h"
 #include "PPS.h"
 #include "ChassisRemoteControl.h"
-#include "ClawController.h"
 #include <map>
 
 using namespace vex;
@@ -63,6 +62,8 @@ extern digital_out digitalF;
 extern digital_out digitalH; // 抬升
 extern digital_out digitalG;
 
+extern bumper bumper_elevator;
+
 extern inertial ChassisInertial; // 底盘陀螺仪
 extern smartdrive Smartdrive;    // 官方底盘驱动
 
@@ -81,8 +82,6 @@ extern distance Distance_bl; // 左后
 extern distance Distance_br; // 右后
 extern distance Distance_l;  // 左
 extern distance Distance_r;  // 右
-
-extern ClawController clawController;
 
 // 视觉传感器
 // extern aivision::colordesc Red;

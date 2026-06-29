@@ -34,6 +34,21 @@ brain Brain;
 controller Controller = controller();
 competition Competition;
 
+// motor LeftMotor1 = motor(PORT1, ratio6_1, 1);
+// motor LeftMotor2 = motor(PORT2, ratio6_1, 1);
+// motor LeftMotor3 = motor(PORT10, ratio6_1, 1);                                 // 小的
+// motor_group LeftMotorGroup = motor_group(LeftMotor1, LeftMotor2, LeftMotor3); // 左边电机组
+
+// motor RightMotor1 = motor(PORT8, ratio6_1, 0);
+// motor RightMotor2 = motor(PORT9, ratio6_1, 0);
+// motor RightMotor3 = motor(PORT3, ratio6_1, 0);                                   // 小的
+// motor_group RightMotorGroup = motor_group(RightMotor1, RightMotor2, RightMotor3); // 右边边电机组
+
+// motor ToolMotor1 = motor(PORT7, ratio6_1, 0);  // 抬升1
+// motor ToolMotor2 = motor(PORT4, ratio6_1, 1);  // 抬升2
+// motor ToolMotor3 = motor(PORT5, ratio6_1, 0);  // intake
+// motor ToolMotor4 = motor(PORT21, ratio6_1, 1); // intake
+
 motor LeftMotor1 = motor(PORT18, ratio6_1, 1);
 motor LeftMotor2 = motor(PORT19, ratio6_1, 1);
 motor LeftMotor3 = motor(PORT20, ratio6_1, 1);                                // 小的
@@ -44,13 +59,10 @@ motor RightMotor2 = motor(PORT12, ratio6_1, 0);
 motor RightMotor3 = motor(PORT13, ratio6_1, 0);                                   // 小的
 motor_group RightMotorGroup = motor_group(RightMotor1, RightMotor2, RightMotor3); // 右边边电机组
 
-motor ToolMotor1 = motor(PORT10, ratio6_1, 0); // intake1
-motor ToolMotor2 = motor(PORT9, ratio6_1, 0);  // intake2
-motor ToolMotor3 = motor(PORT6, ratio6_1, 1);  // 爪子开合
-motor ToolMotor4 = motor(PORT7, ratio6_1, 0);  // 爪子反转
-motor ToolMotor5 = motor(PORT8, ratio6_1, 0);  // 抬升
-
-ClawController clawController = ClawController(ToolMotor4, ToolMotor3);
+motor ToolMotor1 = motor(PORT17, ratio6_1, 0); // 抬升1
+motor ToolMotor2 = motor(PORT14, ratio6_1, 1); // 抬升2
+motor ToolMotor3 = motor(PORT15, ratio6_1, 0); // intake
+motor ToolMotor4 = motor(PORT21, ratio6_1, 1); // intake
 
 digital_out digitalA = digital_out(Brain.ThreeWirePort.A);
 digital_out digitalB = digital_out(Brain.ThreeWirePort.B);
@@ -60,6 +72,8 @@ digital_out digitalE = digital_out(Brain.ThreeWirePort.E); //
 digital_out digitalF = digital_out(Brain.ThreeWirePort.F);
 digital_out digitalH = digital_out(Brain.ThreeWirePort.H); // 抬升
 digital_out digitalG = digital_out(Brain.ThreeWirePort.G); // 抬升
+
+bumper bumper_elevator = bumper(Brain.ThreeWirePort.H);
 
 optical Optical1 = optical(PORT1); // 颜色传感器 前面
 optical Optical2 = optical(PORT2); // 颜色传感器 后面

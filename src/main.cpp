@@ -10,6 +10,20 @@ using namespace vex;
 int main()
 {
   std::cout << "-------------------->" << std::endl;
+
+  // while (1)
+  // {
+  //   if (bumper_elevator.pressing())
+  //   {
+  //     Brain.Screen.printAt(100, 150, "++++");
+  //   }
+  //   else
+  //   {
+  //     Brain.Screen.printAt(100, 150, "----");
+  //   }
+  //   wait(10, msec);
+  // }
+
   vexcodeInit(); // 机器人初始化
 
   Competition.autonomous(AutoControl); // 自动程序加入

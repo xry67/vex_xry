@@ -50,9 +50,53 @@ bool ChangeStance()
 int RemoteControl_child()
 {
     bool LastB = false;
+    bool LastRight = false;
     while (1)
     {
 
+        // if (!ControlData.ButtonRight && LastRight)
+        // {
+        //     // 关闭夹子
+        //     digitalA.set(1);
+        //     wait(500, msec);
+        //     digitalC.set(0);
+        //     wait(500, msec);
+
+        //     // 电梯下降
+        //     int count = 0;
+        //     while (true)
+        //     {
+        //         // 按键中断
+        //         if (ControlData.ButtonL1 || ControlData.ButtonL2 || ControlData.ButtonB || ControlData.ButtonX)
+        //         {
+        //             break;
+        //         }
+
+        //         ToolMotor1.spin(forward, 13, volt);
+        //         ToolMotor2.spin(forward, 13, volt);
+
+        //         // std::cout << "-->" << reversal_motor.velocity(dps) << std::endl;
+        //         if (abs(ToolMotor1.velocity(dps)) <= 2 || abs(ToolMotor2.velocity(dps)) <= 2)
+        //         {
+        //             count += 1;
+        //         }
+        //         else
+        //         {
+        //             count = 0;
+        //         }
+        //         if (count >= 5)
+        //         {
+        //             break;
+        //         }
+        //         wait(10, msec);
+        //     }
+
+        //     // 电机停转
+        //     ToolMotor1.spin(forward, 0, volt);
+        //     ToolMotor2.spin(forward, 0, volt);
+        // }
+
+        LastRight = ControlData.ButtonRight;
         LastB = ControlData.ButtonB;
         wait(10, msec);
     }
@@ -112,6 +156,7 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
     bool LastB = false;
     bool LastL1 = false;
     bool LastL2 = false;
+    bool LastDown = false;
 
     vex::task Task(RemoteControl_child); // 线程开启
 
@@ -148,49 +193,64 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
         // intake
         if (ControlData.ButtonR1)
         {
-            ToolMotor1.spin(forward, 13, volt);
-            ToolMotor2.spin(forward, 13, volt);
+            ToolMotor3.spin(forward, 13, volt);
+        }
+        else if (ControlData.ButtonR2)
+        {
+            ToolMotor3.spin(forward, -13, volt);
         }
         else
         {
-            ToolMotor1.spin(forward, 0, volt);
-            ToolMotor2.spin(forward, 0, volt);
+            ToolMotor3.spin(forward, 0, volt);
         }
 
-        // 爪子
-        if (LastL1 && !ControlData.ButtonL1)
+        // 爪子 折叠
+        if (LastDown && !ControlData.ButtonDown)
         {
-            clawController.changeMod(0);
-        }
-        if (LastL2 && !ControlData.ButtonL2)
-        {
-            clawController.changeMod(2);
-        }
-        if (ControlData.ButtonDown)
-        {
-            clawController.changeMod(1);
+            digitalC.set(!digitalC.value());
         }
 
-        // 反转
+        // 夹子 反转
         if (LastB && !ControlData.ButtonB)
         {
-            clawController.reversal();
+            digitalB.set(!digitalB.value());
+        }
+
+        // 夹子 开合
+        if (!LastX && ControlData.ButtonX)
+        {
+            digitalA.set(!digitalA.value());
         }
 
         // 抬升
-        if (ControlData.axis2 > 5 || ControlData.axis2 < -5)
+        std::cout << "-->" << ToolMotor1.torque(Nm) << std::endl;
+        if (ControlData.ButtonL1)
         {
-            ToolMotor5.spin(forward, -ControlData.axis2, pct);
+            ToolMotor1.spin(forward, -13, volt);
+            ToolMotor2.spin(forward, -13, volt);
+        }
+        else if (ControlData.ButtonL2)
+        {
+            if (bumper_elevator.pressing())
+            {
+                // Controller.rumble("..");
+                ToolMotor1.stop();
+                ToolMotor1.setStopping(brake);
+                ToolMotor2.stop();
+                ToolMotor3.setStopping(brake);
+            }
+            else
+            {
+                ToolMotor1.spin(forward, 13, volt);
+                ToolMotor2.spin(forward, 13, volt);
+            }
         }
         else
         {
-            ToolMotor5.stop();
-            ToolMotor5.setStopping(hold);
-        }
-
-        if (!LastX && ControlData.ButtonX)
-        {
-            digitalH.set(!digitalH.value());
+            ToolMotor1.stop();
+            ToolMotor1.setStopping(brake);
+            ToolMotor2.stop();
+            ToolMotor3.setStopping(brake);
         }
 
         // 退出
@@ -222,6 +282,7 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
         LastB = ControlData.ButtonB;
         LastL1 = ControlData.ButtonL1;
         LastL2 = ControlData.ButtonL2;
+        LastDown = ControlData.ButtonDown;
     }
 }
 

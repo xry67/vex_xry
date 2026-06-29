@@ -157,23 +157,23 @@ BaseWindow *InitWindowFun()
     PrintInLine(3);
     Controller.Screen.print("      红方(R1+R2)   ");
 
-    while (true)
-    {
-        // 选项确认
-        if (Controller.ButtonR1.pressing() && Controller.ButtonR2.pressing())
-        {
-            stance = 'r';
-            break;
-        }
+    // while (true)
+    // {
+    //     // 选项确认
+    //     if (Controller.ButtonR1.pressing() && Controller.ButtonR2.pressing())
+    //     {
+    //         stance = 'r';
+    //         break;
+    //     }
 
-        if (Controller.ButtonL2.pressing() && Controller.ButtonL1.pressing())
-        {
-            stance = 'b';
-            break;
-        }
+    //     if (Controller.ButtonL2.pressing() && Controller.ButtonL1.pressing())
+    //     {
+    //         stance = 'b';
+    //         break;
+    //     }
 
-        wait(50, msec);
-    }
+    //     wait(50, msec);
+    // }
 
     // 如果遥控已经确定，则跳过遥控选择 进行模式选择
     return RemoteControlWindow;

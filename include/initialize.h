@@ -42,20 +42,6 @@ int EquipmentMonitor()
     }
 }
 
-// 爪子状态维护
-vex::task clawStateMaintain_task;
-int clawStateMaintain()
-{
-    double reversal_p = 0.12;
-    while (true)
-    {
-        clawController.maintenance();
-        
-        wait(10, msec);
-    }
-    return 0;
-}
-
 // 等待按下x
 void WaitForX()
 {
@@ -114,17 +100,62 @@ void CheckEquipment()
     // 其他检查
 }
 
+// 夹子初始化
+void ClawControllerInit()
+{
+    PrintInLine(2);
+    Controller.Screen.print("电梯下限位设置...");
+    int count = 0;
+    while (true)
+    {
+        if (bumper_elevator.pressing())
+        {
+            break;
+        }
+        ToolMotor1.spin(forward, 2, volt);
+        ToolMotor2.spin(forward, 2, volt);
+        wait(10, msec);
+    }
+    count = 0;
+    while (true)
+    {
+        ToolMotor1.spin(forward, -2, volt);
+        ToolMotor2.spin(forward, -2, volt);
+
+        std::cout << "-->" << ToolMotor1.torque(Nm) << std::endl;
+        // if (ToolMotor1.torque(Nm) >= 0.1 || ToolMotor2.torque(Nm) >= 0.1)
+        if (abs(ToolMotor1.velocity(pct)) <= 2 || abs(ToolMotor2.velocity(pct)) <= 2 || !bumper_elevator.pressing())
+        {
+            count += 1;
+        }
+        else
+        {
+            count = 0;
+        }
+        if (count >= 5)
+        {
+            break;
+        }
+        wait(10, msec);
+    }
+    ToolMotor1.spin(forward, 0, volt);
+    ToolMotor2.spin(forward, 0, volt);
+    ToolMotor1.resetPosition();
+    ToolMotor2.resetPosition();
+}
+
 // 初始化
 void vexcodeInit(void)
 {
-    CheckEquipment();                                      // 设备检查
-    EquipmentMonitor_task = vex::task(EquipmentMonitor);   // 电量监控开启
+    CheckEquipment();                                    // 设备检查
+    EquipmentMonitor_task = vex::task(EquipmentMonitor); // 电量监控开启
 
     // 初始位置设置
-    // clawController.init();
+    // ClawControllerInit();
+    ChassisInertialInit(); // 底盘陀螺仪初始化
 
-    clawStateMaintain_task = vex::task(clawStateMaintain); // 爪子状态维护开启
-    ChassisInertialInit();                                 // 底盘陀螺仪初始化
+    ToolMotor1.resetPosition();
+    ToolMotor2.resetPosition();
 
     // 初始状态
     // digitalC.set(1);

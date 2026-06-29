@@ -1,10 +1,13 @@
-#ifndef ROBOTCONTROL_H  
+#ifndef ROBOTCONTROL_H
 #define ROBOTCONTROL_H
 
 #include "vex.h"
 
 // 指定电机旋转到指定位置
 void MotorSpinFor(vex::motor Motor, double v, double val, bool task);
+
+// 移动到卡死为止
+double moveToConNotMove(vex::motor motor_, double speed, int max_count);
 
 // 将所有装置恢复到默认状态（马达停转）
 void RestoreInitial();
@@ -18,7 +21,4 @@ int InertialCalibrating();
 // 检测是否飘值
 bool CheckInertialCalibrationFailed(double time, double max_error);
 
-
 #endif
-
-
