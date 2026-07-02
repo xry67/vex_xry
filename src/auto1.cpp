@@ -8,14 +8,8 @@
 void auto1()
 {
 
-    // ChassisControlSTS.Turn_PID(10, 90, 0.8, 0.01, 0.05, 2);
-    // ChassisControlSTS.Turn_PID(10, 180, 0.8, 0.001, 0.05, 2);
-    // ChassisControlSTS.Turn_PID(10, 270, 0.8, 0.005, 0.05, 2);
-    // ChassisControlSTS.Turn_PID(10, 360, 0.8, 0.0001, 0.05, 2);
-
-    ChassisControlSTS.Move(10, 500, 0, 'n');
-    ChassisControlSTS.Turn_PID(10, 90, 0.8, 0.001, 0.05, 2);
-    ChassisControlSTS.Move(10, 500, 90, 'n');
-    ChassisControlSTS.Turn_PID(10, -90, 0.8, 0.001, 0.05, 2);
-    ChassisControlSTS.Move(10, 500, -90, 'n');
+    ChassisControlSTS.Move(4, 500, 0, 'n', 1);
+    ChassisControlSTS.WaitPositionArrive(500);
+    ChassisControlSTS.ReSetToCurveMove_Angle(220, 90, 'n');
+    ChassisControlSTS.WaitMoveFinish();
 }

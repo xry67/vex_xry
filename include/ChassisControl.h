@@ -200,6 +200,12 @@ public:
     // 曲线运动可选多线程
     void CurveMove(double v, double r, double TargetPosition, char direction, bool task);
 
+    // 曲线-角度移动
+    void CurveAngleMove(double v, double r, double TargetAngle, char direction);
+
+    // 曲线运动 -角度 多线程
+    void CurveAngleMove(double v, double r, double TargetAngle, char direction, bool task);
+
     // 组合运动
     void ComboMove(std::vector<ComboMoveParams> MoveParams);
 
@@ -311,6 +317,9 @@ public:
     double min_turn_speed = 0;       // 自转的最小速度
     double turn_allowable_error = 2; // 旋转允许误差 1.5
 
+    // 曲线
+    std::vector<double> CurveAngle_PPS;
+
     // 距离传感器
     int Distance_negative;
     char DistanceChioce;
@@ -341,6 +350,8 @@ int FollowTargetTask(void *args);
 int MoveToDistancetTask(void *args);
 // 多线程曲线友元函数
 int CurveMoveTask(void *args);
+// 多线程曲线角度友元函数
+int CurveAngleMoveTask(void *args);
 
 // 多线程准备的结构体函数
 struct ChassisMoveParams
@@ -377,6 +388,16 @@ struct CurveMoveParams
     double v;
     double r;
     double TargetPosition;
+    char direction;
+};
+
+// 曲线角度运动结构体函数
+struct CurveAngleMoveParams
+{
+    ChassisControl *self;
+    double v;
+    double r;
+    double TargetAngle;
     char direction;
 };
 

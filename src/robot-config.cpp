@@ -100,9 +100,10 @@ distance Distance_l = distance(PORT17);  // 左
 distance Distance_r = distance(PORT18);  // 右
 
 // 设别列表
-std::vector<char *> MotorNames = {"L1", "L2", "L3", "R1", "R2", "R3", "T1", "T2", "T3"};
-std::vector<motor> Motors = {LeftMotor1, LeftMotor2, LeftMotor3,
-                             RightMotor1, RightMotor2, RightMotor3, ToolMotor1, ToolMotor2, ToolMotor3};
+std::vector<char *> MotorNames = {"L1", "L2", "R1", "R2", "T1", "T2", "T3"};
+std::vector<motor> Motors = {LeftMotor1, LeftMotor2,
+                             RightMotor1, RightMotor3,
+                             ToolMotor1, ToolMotor2, ToolMotor3};
 
 std::vector<char *> DistanceNames = {"Fl", "Fr", "Bl", "Nr", "L", "R"};
 std::vector<distance> Distances = {Distance_fl, Distance_fr, Distance_bl,

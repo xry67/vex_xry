@@ -149,13 +149,14 @@ int RunAutoFunAndUpdataToControl()
 BaseWindow *InitWindowFun()
 {
     // 站位选择
+    // 当前用不到 已屏蔽 ////////////////////////////////////////
 
-    PrintInLine(1);
-    Controller.Screen.print("选择你的站位");
-    PrintInLine(2);
-    Controller.Screen.print("      蓝方(L1+L2)   ");
-    PrintInLine(3);
-    Controller.Screen.print("      红方(R1+R2)   ");
+    // PrintInLine(1);
+    // Controller.Screen.print("选择你的站位");
+    // PrintInLine(2);
+    // Controller.Screen.print("      蓝方(L1+L2)   ");
+    // PrintInLine(3);
+    // Controller.Screen.print("      红方(R1+R2)   ");
 
     // while (true)
     // {
@@ -176,6 +177,7 @@ BaseWindow *InitWindowFun()
     // }
 
     // 如果遥控已经确定，则跳过遥控选择 进行模式选择
+
     return RemoteControlWindow;
 }
 
@@ -214,6 +216,16 @@ BaseWindow *RemoteControlWindowFun()
     // 更改遥控模式
     ChassisRomoteControlSTS.name = ChassisRomoteControlList[index].name;
     ChassisRomoteControlSTS.func = ChassisRomoteControlList[index].Work;
+
+    // 一小段遥控，允许用户进行简单操作
+    PrintInLine(2);
+    Controller.Screen.print("<<临时遥控>>");
+    RemoteControlUnit(false, false, 5, "", 999999999999);
+    Controller.rumble("..");
+    while (Controller.ButtonB.pressing())
+    {
+        wait(10, msec);
+    }
 
     std::cout << options[index] << std::endl;
 
@@ -271,6 +283,7 @@ BaseWindow *RemoteControlWindow_ModFun()
 
     // std::cout << options[index] << std::endl;
     // Controller.Screen.clearScreen();  // 清除屏幕
+    PrintInLine(2);
     RemoteControl();
 
     return ModWindow;

@@ -31,6 +31,10 @@ public:
         setpoint = val;
     }
 
+    void setStartpoint(double val){
+        startpoint = val;
+    }
+
     void reset(double kp1_, double kp2_, double ks_)
     {
         kp1 = kp1_;
@@ -53,7 +57,7 @@ public:
 
         // 分段pps测试
         double k = kp2;
-        double Completeness = 1 - std::abs(measured - setpoint) / std::abs(setpoint); // 完成度
+        double Completeness = 1 - std::abs(measured - setpoint) / std::abs(startpoint - setpoint); // 完成度
 
         if (Completeness < k && k >= 0.001)
         {
@@ -84,6 +88,7 @@ private:
     double kp2;
     double ks;
     double setpoint;
+    double startpoint = 0;
     double prev_error;
     double integral;
 };

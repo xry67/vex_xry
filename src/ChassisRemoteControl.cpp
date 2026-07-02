@@ -211,6 +211,11 @@ void ChassisBothHandsRomoteControl_Turn()
     }
 }
 
+// 无底盘
+void ChassisBothHandsRomoteControl_NAN()
+{
+}
+
 void AddRomoteFun()
 {
     ChassisRomoteControlList.push_back(ChassisRomoteControlParams("双摇杆", ChassisBothHandsRomoteControl)); // 双摇杆加入
@@ -221,4 +226,5 @@ void AddRomoteFun()
     ChassisRomoteControlList.push_back(ChassisRomoteControlParams("坦克遥控", ChassisTankRomoteControl));              // 坦克遥控
     ChassisRomoteControlList.push_back(ChassisRomoteControlParams("人机遥控", ChassisHumanMachineRomoteControl));      // 坦克遥控
     ChassisRomoteControlList.push_back(ChassisRomoteControlParams("双-转向", ChassisBothHandsRomoteControl_Turn));     // 双-转向
+    ChassisRomoteControlList.push_back(ChassisRomoteControlParams("无底盘", ChassisBothHandsRomoteControl_NAN));       // 双-转向
 }

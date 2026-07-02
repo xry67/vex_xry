@@ -134,8 +134,6 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
 
     // ai_target.SetColor(Red);
 
-    PrintInLine(2);
-
     // 分球暂停计数器
     int ErrorBall1 = 0;
     int ErrorBall2 = 0;
@@ -143,8 +141,9 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
     // 退出计数
     int HoldButtonBCount = 0;
 
-    // 递球卡死检测
+    // 卡死检测
     int MotorBlocked = true;
+    int MotorBlocked_count = 0;
 
     // 时间变量
     double start_time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count();
@@ -223,21 +222,28 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
         }
 
         // 抬升
-        std::cout << "-->" << ToolMotor1.torque(Nm) << std::endl;
+        // Brain.Screen.printAt(100, 120, "%f", ToolMotor1.position(deg));
         if (ControlData.ButtonL1)
         {
             ToolMotor1.spin(forward, -13, volt);
             ToolMotor2.spin(forward, -13, volt);
+            MotorBlocked = false;
+            MotorBlocked_count = 0;
         }
-        else if (ControlData.ButtonL2)
+        else if (ControlData.ButtonL2 && !MotorBlocked)
         {
-            if (bumper_elevator.pressing())
+            if (abs(ToolMotor1.velocity(dps)) <= 2 || abs(ToolMotor2.velocity(dps)) <= 2)
             {
                 // Controller.rumble("..");
-                ToolMotor1.stop();
-                ToolMotor1.setStopping(brake);
-                ToolMotor2.stop();
-                ToolMotor3.setStopping(brake);
+                if (MotorBlocked_count > 3)
+                {
+                    ToolMotor1.stop();
+                    ToolMotor1.setStopping(brake);
+                    ToolMotor2.stop();
+                    ToolMotor3.setStopping(brake);
+                    MotorBlocked = true;
+                }
+                MotorBlocked_count += 1;
             }
             else
             {

@@ -102,9 +102,12 @@ void ChassisControl::ResetPPS()
   // 距离传感器
   std::map<int, std::vector<double>> Distance_PPS_Map = {{343, {0.0165, 0.3, 2.5}}, {360, {0.017, 0.3, 1}}, {300, {0.0165, 0.3, 2.5}}};
 
+  // 曲线-角度
+  std::map<int, std::vector<double>> CurveAngle_PPS_Map = {{343, {0.075, 0, 3}}, {360, {0.15, 0.1, 3}}, {300, {0.042, 0.5, 5}}};
+
   // 陀螺仪
-  std::map<int, std::vector<double>> Turn_PPS_Map = {{343, {0.075, 0, 3}}, {450, {0.024, 0.45, 5.8}}, {300, {0.042, 0.5, 5}}};
-  std::map<int, double> Min_Turn_Speed_Map = {{343, 1.10}, {450, 1.6}, {300, 1.5}};
+  std::map<int, std::vector<double>> Turn_PPS_Map = {{343, {0.075, 0, 3}}, {360, {0.024, 0.45, 5.8}}, {300, {0.042, 0.5, 5}}};
+  std::map<int, double> Min_Turn_Speed_Map = {{343, 1.10}, {360, 1.6}, {300, 1.5}};
 
   min_move_speed = Min_Move_Speed_Map[ChassisSpeedConfig]; // 直行电机的最小速度
   min_turn_speed = Min_Turn_Speed_Map[ChassisSpeedConfig]; // 自转的最小速度
@@ -113,6 +116,7 @@ void ChassisControl::ResetPPS()
   Move_PPS = Move_PPS_Map[ChassisSpeedConfig];
   Turn_PPS = Turn_PPS_Map[ChassisSpeedConfig];
   Distance_PPS = Distance_PPS_Map[ChassisSpeedConfig];
+  CurveAngle_PPS = CurveAngle_PPS_Map[ChassisSpeedConfig];
 }
 
 // 重新设置各个PPS
@@ -405,8 +409,8 @@ double ChassisControl::GetVelocity_mean()
   // ans += std::abs(medianOfThree(LeftMotor1.velocity(dps), LeftMotor2.velocity(dps), LeftMotor3.velocity(dps)));
   // ans += std::abs(medianOfThree(RightMotor1.velocity(dps), RightMotor2.velocity(dps), RightMotor3.velocity(dps)));
 
-  ans += LeftMotor1.velocity(dps);
-  ans += RightMotor1.velocity(dps);
+  ans += std::abs(LeftMotor1.velocity(dps));
+  ans += std::abs(RightMotor1.velocity(dps));
 
   return ans / 2;
 }
@@ -467,6 +471,10 @@ double ChassisControl::GetNowCurrentPosition()
   {
     return GetDistance(this->DistanceChioce);
   }
+  else if (Now_Mod == CurveMove_Angle)
+  {
+    return ChassisInertial.rotation();
+  }
   return 0;
 }
 
@@ -491,6 +499,7 @@ void ChassisControl::ReSetToEncoderWheel(double val_, double yaw_, char directio
   {
     negative = 1;
   }
+  pps.setStartpoint(0);
   pps.setSetpoint(this->val);
   move_allowable_error = 15;
 }
@@ -515,6 +524,7 @@ void ChassisControl::ReSetToEncoderWheel(double val_, char direction)
   {
     negative = 1;
   }
+  pps.setStartpoint(0);
   pps.setSetpoint(this->val);
   move_allowable_error = 15;
 }
@@ -542,6 +552,7 @@ void ChassisControl::ReSetToDistance(double val_, char DistanceChioce_)
   }
 
   pps = PPS(this->Distance_PPS[0], this->Distance_PPS[1], this->Distance_PPS[2]);
+  pps.setStartpoint(0);
   pps.setSetpoint(val - Distance_start_val); // 设置目标位置
   move_allowable_error = 10;
 }
@@ -583,7 +594,9 @@ void ChassisControl::ReSetToDistance(double val_, double yaw_, char DistanceChio
   }
 
   pps = PPS(this->Distance_PPS[0], this->Distance_PPS[1], this->Distance_PPS[2]);
+
   pps.setSetpoint(val - Distance_start_val); // 设置目标位置
+  pps.setStartpoint(this->Distance_start_val);
   move_allowable_error = 10;
 }
 
@@ -619,6 +632,7 @@ void ChassisControl::ReSetToCurveMove_Position(double r_, double TargetPosition_
   this->r = r_;
   this->val = TargetPosition_;
   pps.setSetpoint(TargetPosition_);
+  pps.setStartpoint(0);
   start_angle = ChassisInertial.rotation(); // 运动开始角度
   move_allowable_error = 15;
 }
@@ -626,6 +640,50 @@ void ChassisControl::ReSetToCurveMove_Position(double r_, double TargetPosition_
 // 设置曲线运动（角度）
 void ChassisControl::ReSetToCurveMove_Angle(double r_, double TargetAngle_, char direction)
 {
+  /*
+  r: 半径
+  TargetAngle_： 目标角度，世界角度
+  direction： 'n':前方、 'u':后方
+  */
+  ChassisRsetPosition(); // 电机初始化
+  Now_Mod = CurveMove_Angle;
+  pps = PPS(this->CurveAngle_PPS[0], this->CurveAngle_PPS[1], this->CurveAngle_PPS[2]); // PPS切换
+  Brain.Screen.printAt(100, 20, "1");
+  double now_angle = ChassisInertial.rotation();
+
+  //  方向指示器
+  if (direction == 'n')
+  {
+    if (now_angle < TargetAngle_)
+    {
+      negative = 1;
+      yaw_negative = 1;
+    }
+    if (now_angle >= TargetAngle_)
+    {
+      negative = -1;
+      yaw_negative = -1;
+    }
+  }
+  else if (direction == 'u')
+  {
+    if (now_angle < TargetAngle_)
+    {
+      negative = -1;
+      yaw_negative = -1;
+    }
+    if (now_angle >= TargetAngle_)
+    {
+      negative = 1;
+      yaw_negative = 1;
+    }
+  }
+
+  this->r = r_;
+  this->val = TargetAngle_;
+  pps.setSetpoint(TargetAngle_);
+  pps.setStartpoint(now_angle);
+  move_allowable_error = 2;
 }
 
 // 获得输出
@@ -642,6 +700,10 @@ double ChassisControl::GetOutPut()
   else if (Now_Mod == Distance)
   {
     return Distance_OutPut();
+  }
+  else if (Now_Mod == CurveMove_Angle)
+  {
+    return CurveMove_Angle_OutPut();
   }
   return 0;
 }
@@ -664,8 +726,9 @@ double ChassisControl::CurveMove_Position_OutPut()
 //  曲线运动 角度
 double ChassisControl::CurveMove_Angle_OutPut()
 {
+  double current_angle = ChassisInertial.rotation();
 
-  return 0;
+  return pps.calculate(current_angle, 0.01);
 }
 
 double ChassisControl::Distance_OutPut()
@@ -688,6 +751,10 @@ void ChassisControl::ChassisBasicMove(double now_speed)
   else if (Now_Mod == Distance)
   {
     Distance_Move(now_speed);
+  }
+  else if (Now_Mod == CurveMove_Angle)
+  {
+    CurveMove_Angle_Move(now_speed);
   }
 }
 
@@ -713,9 +780,13 @@ void ChassisControl::CurveMove_Position_Move(double now_speed)
   ChassisRightControl(now_speed * (1 - 200 / (2 * r) * yaw_negative) - angle_compensation * 0.1);
 }
 
-//  曲线运动 位置
+//  曲线运动 角度
 void ChassisControl::CurveMove_Angle_Move(double now_speed)
 {
+  double PI = 3.1415;
+
+  ChassisLeftControl(negative * (now_speed * (1 + 200 / (2 * r) * yaw_negative)));
+  ChassisRightControl(negative * (now_speed * (1 - 200 / (2 * r) * yaw_negative)));
 }
 
 // 距离传感器运动
@@ -763,11 +834,17 @@ void ChassisControl::BasicMove()
   {
     Whileing = true;                                   // 表示正在循环了
     double current_position = GetNowCurrentPosition(); // 当前位置
+    if (Now_Mod == CurveMove_Angle)
+    {
+      current_position = ChassisInertial.rotation();
+    }
+
     // Brain.Screen.printAt( 10, 50, "current_position %f", current_position);
     this->ChassisForwardAngle(this->StraightAngle);
 
     double output = this->GetOutPut(); // 补偿
     // std::cout << output << " " << val << std::endl;
+    std::cout << current_position << " " << output << std::endl;
 
     if (std::abs(current_position - val) <= move_allowable_error && std::abs(output) <= min_move_speed * 10)
     {
@@ -929,6 +1006,37 @@ void ChassisControl::CurveMove(double v, double r, double TargetPosition, char d
   else
   {
     CurveMove(v, r, TargetPosition, direction);
+  }
+}
+
+// 曲线-角度移动
+void ChassisControl::CurveAngleMove(double v, double r, double TargetAngle, char direction)
+{
+  move_allowable_error = 3;
+  this->ResetMaxSpeed(v);
+  this->ReSetToCurveMove_Angle(r, TargetAngle, direction);
+  this->BasicMove();
+}
+
+// 曲线运动 -角度 多线程
+void ChassisControl::CurveAngleMove(double v, double r, double TargetAngle, char direction, bool task)
+{
+  if (task == true)
+  {
+    CurveAngleMoveParams *Params = new CurveAngleMoveParams();
+    Params->self = this;
+    Params->v = v;
+    Params->r = r;
+    Params->TargetAngle = TargetAngle;
+    Params->direction = direction;
+
+    void *p = Params;
+    vex::task Task(CurveAngleMoveTask, p);
+    this->WaitMoveStart();
+  }
+  else
+  {
+    CurveAngleMove(v, r, TargetAngle, direction);
   }
 }
 
@@ -1669,6 +1777,21 @@ int CurveMoveTask(void *args)
   double TargetPosition = params->TargetPosition; // 路径长度
   char direction = params->direction;             // 方向
   self->CurveMove(v, r, TargetPosition, direction);
+
+  // delete args;
+  return 0;
+}
+
+// 多线程曲线角度友元函数
+int CurveAngleMoveTask(void *args)
+{
+  CurveAngleMoveParams *params = (CurveAngleMoveParams *)args;
+  ChassisControl *self = params->self;      // 当前类
+  double v = params->v;                     // 速度
+  double r = params->r;                     // 半径
+  double TargetAngle = params->TargetAngle; // 路径长度
+  char direction = params->direction;       // 方向
+  self->CurveMove(v, r, TargetAngle, direction);
 
   // delete args;
   return 0;
