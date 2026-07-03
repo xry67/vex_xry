@@ -49,20 +49,25 @@ competition Competition;
 // motor ToolMotor3 = motor(PORT5, ratio6_1, 0);  // intake
 // motor ToolMotor4 = motor(PORT21, ratio6_1, 1); // intake
 
-motor LeftMotor1 = motor(PORT18, ratio6_1, 1);
-motor LeftMotor2 = motor(PORT19, ratio6_1, 1);
-motor LeftMotor3 = motor(PORT20, ratio6_1, 1);                                // 小的
+motor LeftMotor1 = motor(PORT22, ratio6_1, 1);
+motor LeftMotor2 = motor(PORT22, ratio6_1, 1);
+motor LeftMotor3 = motor(PORT22, ratio6_1, 1);                                // 小的
 motor_group LeftMotorGroup = motor_group(LeftMotor1, LeftMotor2, LeftMotor3); // 左边电机组
 
-motor RightMotor1 = motor(PORT11, ratio6_1, 0);
-motor RightMotor2 = motor(PORT12, ratio6_1, 0);
-motor RightMotor3 = motor(PORT13, ratio6_1, 0);                                   // 小的
+motor RightMotor1 = motor(PORT22, ratio6_1, 0);
+motor RightMotor2 = motor(PORT22, ratio6_1, 0);
+motor RightMotor3 = motor(PORT22, ratio6_1, 0);                                   // 小的
 motor_group RightMotorGroup = motor_group(RightMotor1, RightMotor2, RightMotor3); // 右边边电机组
 
-motor ToolMotor1 = motor(PORT17, ratio6_1, 0); // 抬升1
-motor ToolMotor2 = motor(PORT14, ratio6_1, 1); // 抬升2
-motor ToolMotor3 = motor(PORT15, ratio6_1, 0); // intake
-motor ToolMotor4 = motor(PORT21, ratio6_1, 1); // intake
+motor ToolMotor1 = motor(PORT9, ratio6_1, 1);  // 抬升1
+motor ToolMotor2 = motor(PORT10, ratio6_1, 0); // 抬升2
+motor ToolMotor3 = motor(PORT1, ratio6_1, 0);  // intake
+motor ToolMotor4 = motor(PORT4, ratio6_1, 1);  // 折叠
+motor ToolMotor5 = motor(PORT3, ratio6_1, 1);  // 翻转
+motor ToolMotor6 = motor(PORT1, ratio6_1, 1);  // 刷子
+// motor ToolMotor7 = motor(PORT21, ratio6_1, 1); // intake
+
+ClawController Claw(ToolMotor5, ToolMotor4); // 夹子
 
 digital_out digitalA = digital_out(Brain.ThreeWirePort.A);
 digital_out digitalB = digital_out(Brain.ThreeWirePort.B);

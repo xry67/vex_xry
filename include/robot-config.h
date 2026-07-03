@@ -7,6 +7,7 @@
 #include "AutoFun.h"
 #include "PPS.h"
 #include "ChassisRemoteControl.h"
+#include "ClawController.h"
 #include <map>
 
 using namespace vex;
@@ -52,6 +53,9 @@ extern motor ToolMotor2; //
 extern motor ToolMotor3; //
 extern motor ToolMotor4; //
 extern motor ToolMotor5;
+extern motor ToolMotor6;
+
+extern ClawController Claw; // 夹子
 
 extern digital_out digitalA;
 extern digital_out digitalB;

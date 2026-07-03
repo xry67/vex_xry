@@ -51,51 +51,34 @@ int RemoteControl_child()
 {
     bool LastB = false;
     bool LastRight = false;
+    bool LastX = false;
+    bool LastA = false;
     while (1)
     {
+        if (!ControlData.ButtonX && LastX)
+        {
+            int count = 0;
+            while (count < 5)
+            {
+                if (abs(ToolMotor3.velocity(dps)) <= 2)
+                {
+                    count += 1;
+                }
+                else
+                {
+                    count = 0;
+                }
+                ToolMotor3.spin(forward, 16, volt);
+                wait(10, msec);
+            }
+        }
+        if (!ControlData.ButtonA && LastA)
+        {
+            Claw.reversal();
+        }
 
-        // if (!ControlData.ButtonRight && LastRight)
-        // {
-        //     // 关闭夹子
-        //     digitalA.set(1);
-        //     wait(500, msec);
-        //     digitalC.set(0);
-        //     wait(500, msec);
-
-        //     // 电梯下降
-        //     int count = 0;
-        //     while (true)
-        //     {
-        //         // 按键中断
-        //         if (ControlData.ButtonL1 || ControlData.ButtonL2 || ControlData.ButtonB || ControlData.ButtonX)
-        //         {
-        //             break;
-        //         }
-
-        //         ToolMotor1.spin(forward, 13, volt);
-        //         ToolMotor2.spin(forward, 13, volt);
-
-        //         // std::cout << "-->" << reversal_motor.velocity(dps) << std::endl;
-        //         if (abs(ToolMotor1.velocity(dps)) <= 2 || abs(ToolMotor2.velocity(dps)) <= 2)
-        //         {
-        //             count += 1;
-        //         }
-        //         else
-        //         {
-        //             count = 0;
-        //         }
-        //         if (count >= 5)
-        //         {
-        //             break;
-        //         }
-        //         wait(10, msec);
-        //     }
-
-        //     // 电机停转
-        //     ToolMotor1.spin(forward, 0, volt);
-        //     ToolMotor2.spin(forward, 0, volt);
-        // }
-
+        LastX = ControlData.ButtonX;
+        LastA = ControlData.ButtonA;
         LastRight = ControlData.ButtonRight;
         LastB = ControlData.ButtonB;
         wait(10, msec);
@@ -206,13 +189,13 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
         // 爪子 折叠
         if (LastDown && !ControlData.ButtonDown)
         {
-            digitalC.set(!digitalC.value());
+            Claw.changeMod();
         }
 
         // 夹子 反转
         if (LastB && !ControlData.ButtonB)
         {
-            digitalB.set(!digitalB.value());
+            Claw.reversal();
         }
 
         // 夹子 开合
