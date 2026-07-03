@@ -55,6 +55,9 @@ extern motor ToolMotor4; //
 extern motor ToolMotor5;
 extern motor ToolMotor6;
 
+extern rotation Rotation;         // 抬升旋转
+extern double StartLiftPosititon; // 抬升初始位置
+
 extern ClawController Claw; // 夹子
 
 extern digital_out digitalA;

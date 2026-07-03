@@ -4,7 +4,11 @@
 #include "vex.h"
 using namespace vex;
 
+class ClawController;
+
 double moveToConNotMove(vex::motor motor_, double speed, int max_count);
+void task_ClawController_reversalMove(ClawController *claw_);
+void task_ClawController_modMove(ClawController *claw_);
 
 class ClawController
 {
@@ -12,7 +16,7 @@ class ClawController
 public:
   bool claw_reversal = false;        // 爪子反转状态(true正，false反)
   bool claw_reversal_target = false; // 爪子的期望位置
-  int claw_mod = 0;                  // 爪子折叠模式(0关闭，1)
+  int claw_mod = 0;                  // 爪子折叠模式(0平，1低)
   int claw_mod_target = 0;           // 爪子折叠期望位置
   double claw_half_circle = 304;     // 翻转一圈需要的度数
   double claw_open_position = 0;     // 打开时最大角度
@@ -20,14 +24,22 @@ public:
 
   int claw_normal_position = 0; // 爪子的默认度数
   vex::motor reversal_motor;    // 翻转电机
-  vex::motor mod_motor;         // 开合电机
+  vex::motor mod_motor;         // 折叠电机
+  vex::motor intake_motor;      // intake电机
+  vex::motor lift_motor1;       // 抬升电机
+  vex::motor lift_motor2;       // 抬升电机
+
+  rotation Rotation; // 抬升旋转
 
   bool reversal_move_flag = false; // 爪子翻转运动标志
   bool mod_move_flag = false;      // 爪子开合运动标志
+  bool moveing_flag = false;       // 爪子运动标志
+  bool lift_move_flag = false;     // 抬升运动标志
+  double StartLiftPosititon;       // 抬升初始位置
 
   // 构造函数
-  ClawController(vex::motor reversal_motor_, vex::motor mod_motor_)
-      : reversal_motor(reversal_motor_), mod_motor(mod_motor_)
+  ClawController(vex::motor reversal_motor_, vex::motor mod_motor_, vex::motor intake_motor_, vex::motor lift_motor1_, vex::motor lift_motor2_, rotation Rotation_, double start_lift_position)
+      : reversal_motor(reversal_motor_), mod_motor(mod_motor_), intake_motor(intake_motor_), lift_motor1(lift_motor1_), lift_motor2(lift_motor2_), Rotation(Rotation_), StartLiftPosititon(start_lift_position)
   {
     reversal_motor_.setStopping(brake);
     mod_motor_.setStopping(hold);
@@ -45,8 +57,82 @@ public:
     claw_open_position = moveToConNotMove(mod_motor, 5, 20); // 打开时最大角度
     wait(50, msec);
     claw_close_position = moveToConNotMove(mod_motor, -5, 20); // 关闭的最大角度
-    std::cout << claw_open_position << " " << claw_close_position << std::endl;
+    // std::cout << claw_open_position << " " << claw_close_position << std::endl;
 
+    return true;
+  }
+
+  // 折叠前置条件满足
+  void precondition()
+  {
+    if (Rotation.angle() >= StartLiftPosititon + 22)
+    {
+      return;
+    }
+    LiftMove(StartLiftPosititon + 22);
+  }
+
+  bool LiftMove(double target)
+  {
+    lift_move_flag = true;
+
+    // PID参数
+    double kp = 0.2;
+    double ki = 0.05;
+    double kd = 0.008;
+
+    double integral = 0;
+    double prevError = 0;
+    double val = target;
+    double error = 5;
+
+    int stall_count = 0;
+
+    while (true)
+    {
+
+      double currentPos = Rotation.angle();
+      double errorDist = val - currentPos;
+
+      // 到达目标位置
+      if (abs(errorDist) <= error)
+      {
+        break;
+      }
+
+      // PID计算（dt = 0.01秒）
+      integral += errorDist * 0.01;
+      double derivative = (errorDist - prevError) / 0.01;
+      prevError = errorDist;
+
+      double output = kp * errorDist + ki * integral + kd * derivative;
+      // output = kp * errorDist;
+
+      lift_motor1.spin(forward, -output, volt);
+      lift_motor2.spin(forward, -output, volt);
+
+      // 堵转检测
+      if (abs(lift_motor1.velocity(dps)) <= 2)
+      {
+        stall_count += 1;
+      }
+
+      // 堵转退出
+      if (stall_count >= 10)
+      {
+        break;
+      }
+
+      wait(10, msec);
+    }
+
+    lift_motor1.spin(forward, 0, volt);
+    lift_motor2.spin(forward, 0, volt);
+    lift_motor1.stop();
+    lift_motor2.stop();
+
+    lift_move_flag = false;
+    // std::cout << "end-->" << reversal_motor.position(deg) << std::endl;
     return true;
   }
 
@@ -55,14 +141,17 @@ public:
   {
     // 翻转状态维护
     double reversal_p = 0.12;
-    if (claw_reversal_target != claw_reversal)
+    // std::cout << "claw_reversal_target" << claw_reversal_target << " " << claw_reversal << std::endl;
+    if (claw_reversal_target != claw_reversal && !reversal_move_flag)
     {
-      reversalMove();
+      std::cout << "claw_reversal_target" << std::endl;
+      task_ClawController_reversalMove(this);
     }
-    std::cout << claw_mod_target << " " << claw_mod << std::endl;
-    if (claw_mod_target != claw_mod)
+    // std::cout << claw_mod_target << " " << claw_mod << std::endl;
+    if (claw_mod_target != claw_mod && !mod_move_flag)
     {
-      modMove();
+      precondition();
+      task_ClawController_modMove(this);
     }
 
     // 反转维护
@@ -79,28 +168,42 @@ public:
     //   reversal_motor.spin(forward, 0, volt);
     // }
 
-    // // 夹子折叠维护
-    // if (claw_mod == 0)
-    // {
-    //   mod_motor.setStopping(hold);
-    // }
-    // else if (claw_mod == 1 && (abs(mod_motor.position(vex::rotationUnits::deg) - (claw_close_position + claw_open_position) / 2) >= 10))
-    // {
-    //   mod_motor.spin(forward, ((claw_close_position + claw_open_position) / 3 - mod_motor.position(vex::rotationUnits::deg)) * 0.2, volt);
-    // }
+    // 夹子折叠维护
+    if (!mod_move_flag)
+    {
+      if (claw_mod == 0 && (abs(mod_motor.position(vex::rotationUnits::deg) - claw_close_position) >= 10))
+      {
+        mod_motor.spin(forward, (claw_close_position - mod_motor.position(vex::rotationUnits::deg)) * 0.2, volt);
+      }
+      else if (claw_mod == 1 && (abs(mod_motor.position(vex::rotationUnits::deg) - claw_open_position) >= 10))
+      {
+        // mod_motor.spin(forward, ((claw_close_position + claw_open_position) / 3 - mod_motor.position(vex::rotationUnits::deg)) * 0.2, volt);
+      }
+    }
+  }
+
+  void waitMoveStart()
+  {
+    while (!moveing_flag)
+    {
+      wait(10, msec);
+    }
   }
 
   // 折叠控制
   bool changeMod()
   {
     claw_mod_target = claw_mod_target ^ 1;
+    waitMoveStart();
     return 1;
   }
 
   // 折叠控制
   bool modMove()
   {
-
+    mod_move_flag = true;
+    moveing_flag = true;
+    intake_motor.spin(forward, -5, volt);
     double kp = 0.1;
     double ki = 0.05;
     double kd = 0.008;
@@ -124,7 +227,7 @@ public:
       {
         val = claw_open_position;
       }
-      std::cout << mod_motor.position(deg) << " " << claw_mod_target << std::endl;
+      // std::cout << mod_motor.position(deg) << " " << claw_mod_target << std::endl;
 
       double currentPos = mod_motor.position(rotationUnits::deg);
       double errorDist = val - currentPos;
@@ -164,19 +267,26 @@ public:
 
     // 状态维护
     claw_mod = claw_mod_target;
-    std::cout << "end-->" << mod_motor.position(deg) << std::endl;
+    // std::cout << "end-->" << mod_motor.position(deg) << std::endl;
+    intake_motor.spin(forward, 0, volt);
+    moveing_flag = false;
+    mod_move_flag = false;
     return true;
   }
 
   bool reversal()
   {
+    // std::cout << "reversal:" << claw_reversal_target << " " << claw_reversal << std::endl;
     claw_reversal_target = claw_reversal_target ^ 1;
+    waitMoveStart();
     return true;
   }
 
   // 翻转移动
   bool reversalMove()
   {
+    moveing_flag = true;
+    intake_motor.spin(forward, -5, volt);
     reversal_move_flag = true;
 
     // PID参数
@@ -246,7 +356,9 @@ public:
     // 状态维护
     claw_reversal = claw_reversal_target;
     reversal_move_flag = false;
-    std::cout << "end-->" << reversal_motor.position(deg) << std::endl;
+    // std::cout << "end-->" << reversal_motor.position(deg) << std::endl;
+    intake_motor.spin(forward, 0, volt);
+    moveing_flag = false;
     return true;
   }
 };
