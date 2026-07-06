@@ -43,6 +43,8 @@ public:
   {
     reversal_motor_.setStopping(brake);
     mod_motor_.setStopping(hold);
+    lift_motor1.setStopping(hold);
+    lift_motor2.setStopping(hold);
   }
 
   bool init()
@@ -203,7 +205,7 @@ public:
   {
     mod_move_flag = true;
     moveing_flag = true;
-    intake_motor.spin(forward, -5, volt);
+    intake_motor.spin(forward, -3, volt);
     double kp = 0.1;
     double ki = 0.05;
     double kd = 0.008;
@@ -286,7 +288,7 @@ public:
   bool reversalMove()
   {
     moveing_flag = true;
-    intake_motor.spin(forward, -5, volt);
+    intake_motor.spin(forward, -3, volt);
     reversal_move_flag = true;
 
     // PID参数
