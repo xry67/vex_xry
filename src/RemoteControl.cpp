@@ -75,7 +75,7 @@ int RemoteControl_child()
                 Claw.changeMod();
             }
 
-            Claw.LiftMove(StartLiftPosititon + 2);
+            Claw.LiftMove(StartLiftPosititon + 15);
         }
         // 半自动 夹！
         if (!ControlData.ButtonRight && LastRight)
@@ -286,8 +286,8 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
         }
         else if (ControlData.ButtonL2)
         {
-            ToolMotor1.spin(forward, 13, volt);
-            ToolMotor2.spin(forward, 13, volt);
+            ToolMotor1.spin(forward, 6, volt);
+            ToolMotor2.spin(forward, 6, volt);
         }
         else if (!Claw.lift_move_flag)
         {
