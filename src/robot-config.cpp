@@ -75,11 +75,11 @@ ClawController Claw(ToolMotor5, ToolMotor4, ToolMotor6, ToolMotor1, ToolMotor2, 
 digital_out digitalA = digital_out(Brain.ThreeWirePort.A);
 digital_out digitalB = digital_out(Brain.ThreeWirePort.B);
 digital_out digitalC = digital_out(Brain.ThreeWirePort.C);
-digital_out digitalD = digital_out(Brain.ThreeWirePort.D); //
-digital_out digitalE = digital_out(Brain.ThreeWirePort.E); //
+digital_out digitalD = digital_out(Brain.ThreeWirePort.D); 
+digital_out digitalE = digital_out(Brain.ThreeWirePort.E); 
 digital_out digitalF = digital_out(Brain.ThreeWirePort.F);
-digital_out digitalH = digital_out(Brain.ThreeWirePort.H); // 抬升
-digital_out digitalG = digital_out(Brain.ThreeWirePort.G); // 抬升
+digital_out digitalH = digital_out(Brain.ThreeWirePort.H); 
+digital_out digitalG = digital_out(Brain.ThreeWirePort.G); 
 
 bumper bumper_elevator = bumper(Brain.ThreeWirePort.H);
 

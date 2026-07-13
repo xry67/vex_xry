@@ -37,6 +37,7 @@ int EquipmentMonitor()
         // 设备监控
         Draw_Equipment_Monitor.Updata();
 
+        Brain.Screen.printAt(280, 80, "Lift %f", Rotation.angle());
         Brain.Screen.printAt(280, 100, "Angle %f", ChassisInertial.rotation());
         vex::task::sleep(1000);
     }

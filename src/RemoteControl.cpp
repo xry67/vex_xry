@@ -47,6 +47,7 @@ bool ChangeStance()
     return false;
 }
 
+bool halfauto = false; // 半自动模式
 int RemoteControl_child()
 {
     bool LastB = false;
@@ -63,6 +64,7 @@ int RemoteControl_child()
         // 半自动 预备
         if (!ControlData.ButtonDown && LastDown)
         {
+            halfauto = true;
             // 判断夹子的位置
             std::cout << Claw.claw_reversal << " " << Claw.reversal_move_flag << std::endl;
             if (Claw.claw_reversal && Claw.reversal_move_flag == false)
@@ -70,31 +72,34 @@ int RemoteControl_child()
                 std::cout << "reversal" << std::endl;
                 Claw.reversal();
             }
-            if (!Claw.claw_mod && Claw.mod_move_flag == false)
+            if (Claw.claw_mod != 1 && Claw.mod_move_flag == false)
             {
-                Claw.changeMod();
+                Claw.changeMod(1);
             }
 
             Claw.LiftMove(StartLiftPosititon + 15);
+            halfauto = false;
         }
         // 半自动 夹！
         if (!ControlData.ButtonRight && LastRight)
         {
+            halfauto = true;
+            ToolMotor3.spin(forward, 0, volt);
             // 先执行一个这个动作
             if (Claw.claw_reversal && Claw.reversal_move_flag == false)
             {
                 Claw.reversal();
             }
-            if (!Claw.claw_mod && Claw.mod_move_flag == false)
+            if (Claw.claw_mod != 2 && Claw.mod_move_flag == false)
             {
-                Claw.changeMod();
+                Claw.changeMod(2);
             }
             if (Claw.Rotation.angle() < StartLiftPosititon + 22)
             {
                 Claw.moveing_flag = true;
                 ToolMotor6.spin(forward, 3, volt);
             }
-            Claw.LiftMove(StartLiftPosititon + 22);
+            Claw.LiftMove(StartLiftPosititon + 25);
 
             while (Claw.mod_move_flag || Claw.reversal_move_flag)
             {
@@ -102,26 +107,23 @@ int RemoteControl_child()
             }
             Claw.moveing_flag = true;
             ToolMotor6.spin(forward, -13, volt);
-            Claw.LiftMove(StartLiftPosititon + 3);
+            Claw.LiftMove(StartLiftPosititon + 14);
 
             wait(0.5, seconds);
 
             // 两个一起动
-            Claw.lift_move_flag = true;
-            Claw.moveing_flag = true;
+            Claw.claw_mod = 1;
             while (Claw.Rotation.angle() < StartLiftPosititon + 18)
             {
                 Claw.lift_motor1.spin(forward, -1, volt);
                 Claw.lift_motor2.spin(forward, -1, volt);
-                Claw.mod_motor.spin(forward, -6, volt);
+                Claw.mod_motor.spin(forward, -13, volt);
                 wait(10, msec);
             }
-            Claw.moveing_flag = false;
-            Claw.lift_move_flag = false;
-
-            Claw.LiftMove(StartLiftPosititon + 22);
-            Claw.moveing_flag = false;
             Claw.changeMod();
+            Claw.LiftMove(StartLiftPosititon + 22);
+            
+            halfauto = false;
         }
         LastR1 = ControlData.ButtonR1;
         LastR2 = ControlData.ButtonR2;
@@ -178,6 +180,10 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
     int MotorBlocked = true;
     int MotorBlocked_count = 0;
 
+    double LiftUpSpeed = 0;   // 抬升速度
+    double LiftDownSpeed = 0; // 抬升速度
+    double LiftSpeed = 1;     // 抬升速度
+
     int intake_mod = 1; // intake状态
 
     // 时间变量
@@ -226,32 +232,35 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
         // ChangeStance();
 
         // intake
-        if (!ControlData.ButtonX && LastX)
-        {
-            ToolMotor3.spin(forward, -13 * (intake_mod), volt);
-            intake_mod = -intake_mod;
-        }
-        if (ControlData.ButtonA)
-        {
-            ToolMotor3.spin(forward, 0, volt);
-            intake_mod = 1;
-        }
+        // if (!ControlData.ButtonX && LastX)
+        // {
+        //     ToolMotor3.spin(forward, -13 * (intake_mod), volt);
+        //     intake_mod = -intake_mod;
+        // }
+        // if (ControlData.ButtonA)
+        // {
+        //     ToolMotor3.spin(forward, 0, volt);
+        //     intake_mod = 1;
+        // }
 
         // 夹子收吐
         if (ControlData.ButtonR1)
         {
             ToolMotor6.spin(forward, -13, volt);
+            ToolMotor3.spin(forward, -13, volt);
         }
         else if (ControlData.ButtonR2)
         {
             ToolMotor6.spin(forward, 3, volt);
+            ToolMotor3.spin(forward, 13, volt);
         }
         else
         {
-            if (!Claw.moveing_flag)
+            if (!halfauto)
             {
                 ToolMotor6.spin(forward, 0, volt);
             }
+            ToolMotor3.spin(forward, 0, volt);
         }
 
         // 爪子 折叠
@@ -281,16 +290,22 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
         }
         else if (ControlData.ButtonL1)
         {
-            ToolMotor1.spin(forward, -13, volt);
-            ToolMotor2.spin(forward, -13, volt);
+            LiftUpSpeed -= LiftSpeed;
+            LiftDownSpeed = 0;
+            ToolMotor1.spin(forward, LiftUpSpeed, volt);
+            ToolMotor2.spin(forward, LiftUpSpeed, volt);
         }
         else if (ControlData.ButtonL2)
         {
-            ToolMotor1.spin(forward, 6, volt);
-            ToolMotor2.spin(forward, 6, volt);
+            LiftDownSpeed += LiftSpeed;
+            LiftUpSpeed = 0;
+            ToolMotor1.spin(forward, LiftDownSpeed, volt);
+            ToolMotor2.spin(forward, LiftDownSpeed, volt);
         }
-        else if (!Claw.lift_move_flag)
+        else if (!halfauto)
         {
+            LiftUpSpeed = 0;
+            LiftDownSpeed = 0;
             ToolMotor1.setStopping(hold);
             ToolMotor2.setStopping(hold);
             ToolMotor1.stop();

@@ -12,4 +12,5 @@ void auto1()
     ChassisControlSTS.WaitPositionArrive(500);
     ChassisControlSTS.ReSetToCurveMove_Angle(220, 90, 'n');
     ChassisControlSTS.WaitMoveFinish();
+    ChassisControlSTS.Turn_PID(10, 180, 0.8, 0.001, 0.05, 2);
 }

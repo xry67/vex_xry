@@ -184,15 +184,6 @@ BaseWindow *InitWindowFun()
 // 遥控模式选择
 BaseWindow *RemoteControlWindowFun()
 {
-
-    // 如果没得选，则跳过
-    if (ChassisRomoteControlList.size() == 1)
-    {
-        ChassisRomoteControlSTS.name = ChassisRomoteControlList[0].name;
-        ChassisRomoteControlSTS.func = ChassisRomoteControlList[0].Work;
-        return ModWindow;
-    }
-
     int index = -1;
     std::vector<char *> options;
 
@@ -206,7 +197,14 @@ BaseWindow *RemoteControlWindowFun()
     PrintInLine(3);
     Controller.Screen.print("      确定(A)   返回(B)");
 
-    index = ChoiceIndex(options); // 获取用户操作
+    if (ChassisRomoteControlList.size() != 1)
+    {
+        index = ChoiceIndex(options); // 获取用户操作
+    }
+    else
+    {
+        index = 0;
+    }
 
     if (index == -1)
     {

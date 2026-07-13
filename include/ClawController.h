@@ -16,11 +16,12 @@ class ClawController
 public:
   bool claw_reversal = false;        // 爪子反转状态(true正，false反)
   bool claw_reversal_target = false; // 爪子的期望位置
-  int claw_mod = 0;                  // 爪子折叠模式(0平，1低)
+  int claw_mod = 0;                  // 爪子折叠模式(0平，1中间，2折叠)
   int claw_mod_target = 0;           // 爪子折叠期望位置
   double claw_half_circle = 304;     // 翻转一圈需要的度数
   double claw_open_position = 0;     // 打开时最大角度
   double claw_close_position = 0;    // 关闭的最大角度
+  double claw_mid_position = 0.8;    //
 
   int claw_normal_position = 0; // 爪子的默认度数
   vex::motor reversal_motor;    // 翻转电机
@@ -61,17 +62,19 @@ public:
     claw_close_position = moveToConNotMove(mod_motor, -5, 20); // 关闭的最大角度
     // std::cout << claw_open_position << " " << claw_close_position << std::endl;
 
+    claw_mid_position = claw_close_position + (claw_open_position - claw_close_position) * 0.7;
+
     return true;
   }
 
   // 折叠前置条件满足
   void precondition()
   {
-    if (Rotation.angle() >= StartLiftPosititon + 22)
+    if (Rotation.angle() >= StartLiftPosititon + 30)
     {
       return;
     }
-    LiftMove(StartLiftPosititon + 22);
+    LiftMove(StartLiftPosititon + 30);
   }
 
   bool LiftMove(double target)
@@ -79,14 +82,14 @@ public:
     lift_move_flag = true;
 
     // PID参数
-    double kp = 0.2;
+    double kp = 0.35;
     double ki = 0.05;
     double kd = 0.008;
 
     double integral = 0;
     double prevError = 0;
     double val = target;
-    double error = 5;
+    double error = 2;
 
     int stall_count = 0;
 
@@ -177,9 +180,18 @@ public:
       {
         mod_motor.spin(forward, (claw_close_position - mod_motor.position(vex::rotationUnits::deg)) * 0.2, volt);
       }
-      else if (claw_mod == 1 && (abs(mod_motor.position(vex::rotationUnits::deg) - claw_open_position) >= 10))
+      else if (claw_mod == 2 && (abs(mod_motor.position(vex::rotationUnits::deg) - claw_open_position) >= 10))
       {
-        // mod_motor.spin(forward, ((claw_close_position + claw_open_position) / 3 - mod_motor.position(vex::rotationUnits::deg)) * 0.2, volt);
+        mod_motor.spin(forward, (claw_open_position - mod_motor.position(vex::rotationUnits::deg)) * 0.2, volt);
+      }
+      else if (claw_mod == 1 && (abs(mod_motor.position(vex::rotationUnits::deg) - claw_mid_position) >= 10))
+      {
+        mod_motor.spin(forward, (claw_mid_position - mod_motor.position(vex::rotationUnits::deg)) * 0.2, volt);
+      }
+      else
+      {
+        mod_motor.setStopping(hold);
+        mod_motor.stop();
       }
     }
   }
@@ -195,7 +207,21 @@ public:
   // 折叠控制
   bool changeMod()
   {
-    claw_mod_target = claw_mod_target ^ 1;
+    if (claw_mod_target >= 1)
+    {
+      claw_mod_target = 0;
+    }
+    else
+    {
+      claw_mod_target = 2;
+    }
+    waitMoveStart();
+    return 1;
+  }
+
+  bool changeMod(int target)
+  {
+    claw_mod_target = target;
     waitMoveStart();
     return 1;
   }
@@ -226,6 +252,10 @@ public:
         val = claw_close_position;
       }
       else if (claw_mod_target == 1)
+      {
+        val = claw_mid_position;
+      }
+      else if (claw_mod_target == 2)
       {
         val = claw_open_position;
       }
