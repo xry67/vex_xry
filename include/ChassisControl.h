@@ -282,7 +282,7 @@ public:
     double Stuck_time_out = 300;                // 电机卡死保护，默认1000毫秒
     double Stuck_threshold = 10;                // 电机卡死认定阈值，单位dps
     double Move_max_speed = 0.0;                // 直行最大速度
-    int Over_count = 10;                        // 到位计数当前次数后，才会退出
+    int Over_count = 5;                         // 到位计数当前次数后，才会退出
     bool Moveing = false;                       // 记录是否在运动
     bool MoveEnd = true;                        // 记录运动是否完成
     bool Whileing = false;                      // 是否进入循环
@@ -309,6 +309,7 @@ public:
     PPS pps; // 当前的PPS
     std::vector<double> Move_PPS;
     std::vector<double> MoveBySmallWheel_PPS;
+    std::vector<double> Movement_D;   // 各个运动的D参数
     double min_move_speed = 0;        // 电机的最小速度
     double move_allowable_error = 15; // 直行允许误差
 

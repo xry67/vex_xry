@@ -93,21 +93,25 @@ ChassisControl::ChassisControl()
 void ChassisControl::ResetPPS()
 {
   // 直线修正
-  std::map<int, std::vector<double>> Straight_PPS_Map = {{343, {7.5, 0.0, 0.1}}, {360, {3, 0.0, 0.1}}, {300, {7.5, 0.0, 0.1}}};
+  std::map<int, std::vector<double>> Straight_PPS_Map = {{360, {3, 0.0, 0.1}}};
 
   // 编码器
-  std::map<int, std::vector<double>> Move_PPS_Map = {{343, {0.00950, 0.800, 2}}, {360, {0.01, 0.5, 2.5}}, {300, {0.02, 0.800, 2}}};
-  std::map<int, double> Min_Move_Speed_Map = {{343, 0.75}, {360, 0.95}, {300, 0.95}};
+  std::map<int, std::vector<double>> Move_PPS_Map = {{360, {0.013, 0.5, 2.5}}};
+  std::map<int, double> Min_Move_Speed_Map = {{360, 0.95}};
 
   // 距离传感器
-  std::map<int, std::vector<double>> Distance_PPS_Map = {{343, {0.0165, 0.3, 2.5}}, {360, {0.017, 0.3, 1}}, {300, {0.0165, 0.3, 2.5}}};
+  std::map<int, std::vector<double>> Distance_PPS_Map = {{360, {0.017, 0.3, 1}}};
 
   // 曲线-角度
-  std::map<int, std::vector<double>> CurveAngle_PPS_Map = {{343, {0.075, 0, 3}}, {360, {0.15, 0.1, 3}}, {300, {0.042, 0.5, 5}}};
+  std::map<int, std::vector<double>> CurveAngle_PPS_Map = {{360, {0.2, 0.4, 3}}};
+
+  // 各个运动的D参数，小布发现了D参数的重要性
+  // int EncoderWheel = 0, Distance = 1, CurveMove_Position = 2, CurveMove_Angle = 3;
+  Movement_D = {0.0005, 0.0005, 0.0005, 0.0005, 0};
 
   // 陀螺仪
-  std::map<int, std::vector<double>> Turn_PPS_Map = {{343, {0.075, 0, 3}}, {360, {0.024, 0.45, 5.8}}, {300, {0.042, 0.5, 5}}};
-  std::map<int, double> Min_Turn_Speed_Map = {{343, 1.10}, {360, 1.6}, {300, 1.5}};
+  std::map<int, std::vector<double>> Turn_PPS_Map = {{360, {0.024, 0.45, 5.8}}};
+  std::map<int, double> Min_Turn_Speed_Map = {{360, 1.6}};
 
   min_move_speed = Min_Move_Speed_Map[ChassisSpeedConfig]; // 直行电机的最小速度
   min_turn_speed = Min_Turn_Speed_Map[ChassisSpeedConfig]; // 自转的最小速度
@@ -648,11 +652,10 @@ void ChassisControl::ReSetToCurveMove_Angle(double r_, double TargetAngle_, char
   ChassisRsetPosition(); // 电机初始化
   Now_Mod = CurveMove_Angle;
   pps = PPS(this->CurveAngle_PPS[0], this->CurveAngle_PPS[1], this->CurveAngle_PPS[2]); // PPS切换
-  Brain.Screen.printAt(100, 20, "1");
   double now_angle = ChassisInertial.rotation();
 
   //  方向指示器
-  if (direction == 'n')
+  if (direction == 'n' || direction == 'p' || direction == 'q')
   {
     if (now_angle < TargetAngle_)
     {
@@ -665,7 +668,7 @@ void ChassisControl::ReSetToCurveMove_Angle(double r_, double TargetAngle_, char
       yaw_negative = -1;
     }
   }
-  else if (direction == 'u')
+  else if (direction == 'u' || direction == 'b' || direction == 'd')
   {
     if (now_angle < TargetAngle_)
     {
@@ -784,7 +787,7 @@ void ChassisControl::CurveMove_Position_Move(double now_speed)
 void ChassisControl::CurveMove_Angle_Move(double now_speed)
 {
   double PI = 3.1415;
-
+  std::cout << "nnnn" << yaw_negative << " " << (now_speed * (1 + 200 / (2 * r) * yaw_negative)) << (now_speed * (1 + 200 / (2 * r) * yaw_negative)) << "  " << negative * (now_speed * (1 - 200 / (2 * r) * yaw_negative)) << std::endl;
   ChassisLeftControl(negative * (now_speed * (1 + 200 / (2 * r) * yaw_negative)));
   ChassisRightControl(negative * (now_speed * (1 - 200 / (2 * r) * yaw_negative)));
 }
@@ -830,6 +833,9 @@ void ChassisControl::BasicMove()
   double last_speed = 0;
   bool add_over = false;
 
+  double prevError = 0; // 上次误差
+  double NowError = 0;  // 这次误差
+
   while (true)
   {
     Whileing = true;                                   // 表示正在循环了
@@ -843,8 +849,15 @@ void ChassisControl::BasicMove()
     this->ChassisForwardAngle(this->StraightAngle);
 
     double output = this->GetOutPut(); // 补偿
-    // std::cout << output << " " << val << std::endl;
-    std::cout << current_position << " " << output << std::endl;
+
+    // 增加D参数设置
+    double D = this->Movement_D[Now_Mod];
+
+    double errorDist = val - current_position;
+    output += (errorDist - prevError) / 0.01 * D;
+    prevError = errorDist;
+
+    std::cout << "->" << current_position << " " << output << " " << (errorDist - prevError) / 0.01 * D << std::endl;
 
     if (std::abs(current_position - val) <= move_allowable_error && std::abs(output) <= min_move_speed * 10)
     {
@@ -889,7 +902,7 @@ void ChassisControl::BasicMove()
         std::cout << "baosi" << std::endl;
         break;
       }
-      now_min_speed += 0.1;
+      now_min_speed += 0.15;
     }
     else
     {
@@ -922,8 +935,9 @@ void ChassisControl::BasicMove()
 
     last_speed = now_speed;
 
-    std::cout << now_speed << " " << current_position << std::endl;
+    // std::cout << now_speed << " " << current_position << std::endl;
     now_speed = NumInterval(now_speed, now_min_speed, this->Move_max_speed);
+    std::cout << now_speed << " " << current_position << std::endl;
     this->ChassisBasicMove(now_speed);
 
     wait(dt * 1000.0, msec);

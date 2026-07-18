@@ -82,9 +82,9 @@ public:
     lift_move_flag = true;
 
     // PID参数
-    double kp = 0.35;
-    double ki = 0.05;
-    double kd = 0.008;
+    double kp = 0.2;
+    double ki = 0.2;
+    double kd = 0.;
 
     double integral = 0;
     double prevError = 0;
@@ -149,7 +149,6 @@ public:
     // std::cout << "claw_reversal_target" << claw_reversal_target << " " << claw_reversal << std::endl;
     if (claw_reversal_target != claw_reversal && !reversal_move_flag)
     {
-      std::cout << "claw_reversal_target" << std::endl;
       task_ClawController_reversalMove(this);
     }
     // std::cout << claw_mod_target << " " << claw_mod << std::endl;
@@ -178,11 +177,11 @@ public:
     {
       if (claw_mod == 0 && (abs(mod_motor.position(vex::rotationUnits::deg) - claw_close_position) >= 10))
       {
-        mod_motor.spin(forward, (claw_close_position - mod_motor.position(vex::rotationUnits::deg)) * 0.2, volt);
+        mod_motor.spin(forward, (claw_close_position - mod_motor.position(vex::rotationUnits::deg)) * 0.0005 - 12.8 * 0.03, volt);
       }
       else if (claw_mod == 2 && (abs(mod_motor.position(vex::rotationUnits::deg) - claw_open_position) >= 10))
       {
-        mod_motor.spin(forward, (claw_open_position - mod_motor.position(vex::rotationUnits::deg)) * 0.2, volt);
+        mod_motor.spin(forward, (claw_open_position - mod_motor.position(vex::rotationUnits::deg)) * 0.0005 + 12.8 * 0.03, volt);
       }
       else if (claw_mod == 1 && (abs(mod_motor.position(vex::rotationUnits::deg) - claw_mid_position) >= 10))
       {

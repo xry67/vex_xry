@@ -77,7 +77,7 @@ int RemoteControl_child()
                 Claw.changeMod(1);
             }
 
-            Claw.LiftMove(StartLiftPosititon + 15);
+            Claw.LiftMove(StartLiftPosititon + 16.5);
             halfauto = false;
         }
         // 半自动 夹！
@@ -105,24 +105,31 @@ int RemoteControl_child()
             {
                 wait(10, msec);
             }
-            Claw.moveing_flag = true;
-            ToolMotor6.spin(forward, -13, volt);
-            Claw.LiftMove(StartLiftPosititon + 14);
 
-            wait(0.5, seconds);
+            Claw.moveing_flag = true;
+            ToolMotor6.spin(forward, -8, volt);
+            int StrtLiftTime = GetNowTime();
+            Claw.LiftMove(StartLiftPosititon + 12);
+            wait(0.3 - (GetNowTime() - StrtLiftTime), sec);
+            ToolMotor6.spin(forward, -2, volt);
 
             // 两个一起动
-            Claw.claw_mod = 1;
+            Claw.mod_move_flag = 1;
             while (Claw.Rotation.angle() < StartLiftPosititon + 18)
             {
-                Claw.lift_motor1.spin(forward, -1, volt);
-                Claw.lift_motor2.spin(forward, -1, volt);
+                Claw.lift_motor1.spin(forward, -3.8, volt);
+                Claw.lift_motor2.spin(forward, -3.8, volt);
                 Claw.mod_motor.spin(forward, -13, volt);
                 wait(10, msec);
             }
+            Claw.mod_move_flag = 0;
             Claw.changeMod();
             Claw.LiftMove(StartLiftPosititon + 22);
-            
+
+            while (Claw.mod_move_flag)
+            {
+                wait(10, msec);
+            }
             halfauto = false;
         }
         LastR1 = ControlData.ButtonR1;
@@ -246,12 +253,18 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
         // 夹子收吐
         if (ControlData.ButtonR1)
         {
-            ToolMotor6.spin(forward, -13, volt);
+            if (Claw.claw_mod == 0)
+            {
+                ToolMotor6.spin(forward, -13, volt);
+            }
             ToolMotor3.spin(forward, -13, volt);
         }
         else if (ControlData.ButtonR2)
         {
-            ToolMotor6.spin(forward, 3, volt);
+            if (Claw.claw_mod == 0)
+            {
+                ToolMotor6.spin(forward, 3, volt);
+            }
             ToolMotor3.spin(forward, 13, volt);
         }
         else
@@ -283,17 +296,13 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
 
         // 抬升
         // Brain.Screen.printAt(100, 120, "%f", ToolMotor1.position(deg));
-        if (std::abs(ControlData.axis2) > 10)
-        {
-            // ToolMotor1.spin(forward, -ControlData.axis2, pct);
-            // ToolMotor2.spin(forward, -ControlData.axis2, pct);
-        }
-        else if (ControlData.ButtonL1)
+        if (ControlData.ButtonL1)
         {
             LiftUpSpeed -= LiftSpeed;
             LiftDownSpeed = 0;
             ToolMotor1.spin(forward, LiftUpSpeed, volt);
             ToolMotor2.spin(forward, LiftUpSpeed, volt);
+            Brain.Screen.printAt(200, 100, "++++>%f", LiftUpSpeed);
         }
         else if (ControlData.ButtonL2)
         {
@@ -301,6 +310,7 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
             LiftUpSpeed = 0;
             ToolMotor1.spin(forward, LiftDownSpeed, volt);
             ToolMotor2.spin(forward, LiftDownSpeed, volt);
+            Brain.Screen.printAt(200, 100, "--->%f", LiftDownSpeed);
         }
         else if (!halfauto)
         {
@@ -310,6 +320,7 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
             ToolMotor2.setStopping(hold);
             ToolMotor1.stop();
             ToolMotor2.stop();
+            Brain.Screen.printAt(200, 100, "000>%f", LiftUpSpeed);
         }
 
         // 退出
