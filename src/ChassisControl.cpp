@@ -1374,7 +1374,7 @@ void ChassisControl::Turn_PID(double v, double val, double P, double I, double D
   int overcount = 0;                   // 到位计数
   double start_time = GetNowTime_ms(); // 开始时间
 
-  double integral = 0;
+  double integral = 0.0;
   double prevError = 0;
 
   while (true)

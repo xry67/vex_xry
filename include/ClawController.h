@@ -84,7 +84,21 @@ public:
     // PID参数
     double kp = 0.2;
     double ki = 0.2;
-    double kd = 0.;
+    double kd = 0.0375;
+
+    // 两套pid选择
+    if (Rotation.angle() < target)
+    {
+      kp = 0.5;
+      ki = 0.4;
+      kd = 0.0;
+    }
+    else
+    {
+      kp = 0.2;
+      ki = 0.2;
+      kd = 0.0375;
+    }
 
     double integral = 0;
     double prevError = 0;
@@ -92,6 +106,7 @@ public:
     double error = 2;
 
     int stall_count = 0;
+    int over_count = 0;
 
     while (true)
     {
@@ -102,7 +117,15 @@ public:
       // 到达目标位置
       if (abs(errorDist) <= error)
       {
-        break;
+        over_count += 1;
+        if (over_count >= 5)
+        {
+          break;
+        }
+      }
+      else
+      {
+        over_count = 0;
       }
 
       // PID计算（dt = 0.01秒）
@@ -154,7 +177,7 @@ public:
     // std::cout << claw_mod_target << " " << claw_mod << std::endl;
     if (claw_mod_target != claw_mod && !mod_move_flag)
     {
-      precondition();
+      // precondition();
       task_ClawController_modMove(this);
     }
 

@@ -77,7 +77,7 @@ int RemoteControl_child()
                 Claw.changeMod(1);
             }
 
-            Claw.LiftMove(StartLiftPosititon + 16.5);
+            Claw.LiftMove(StartLiftPosititon + 21.5); // 56.5
             halfauto = false;
         }
         // 半自动 夹！
@@ -109,7 +109,7 @@ int RemoteControl_child()
             Claw.moveing_flag = true;
             ToolMotor6.spin(forward, -8, volt);
             int StrtLiftTime = GetNowTime();
-            Claw.LiftMove(StartLiftPosititon + 12);
+            Claw.LiftMove(StartLiftPosititon + 16);
             wait(0.3 - (GetNowTime() - StrtLiftTime), sec);
             ToolMotor6.spin(forward, -2, volt);
 
@@ -132,6 +132,13 @@ int RemoteControl_child()
             }
             halfauto = false;
         }
+
+        // 爪子 折叠
+        if (LastUp && !ControlData.ButtonUp)
+        {
+            Claw.changeMod();
+        }
+
         LastR1 = ControlData.ButtonR1;
         LastR2 = ControlData.ButtonR2;
         LastUp = ControlData.ButtonUp;
@@ -274,12 +281,6 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
                 ToolMotor6.spin(forward, 0, volt);
             }
             ToolMotor3.spin(forward, 0, volt);
-        }
-
-        // 爪子 折叠
-        if (LastUp && !ControlData.ButtonUp)
-        {
-            Claw.changeMod();
         }
 
         // 夹子 反转
