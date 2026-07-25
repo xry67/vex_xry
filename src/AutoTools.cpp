@@ -82,3 +82,13 @@ void SimulatedRemoteControl(std::string input)
   //   ToolMotor2.spin(forward, 5, pct);
   // }
 }
+
+void ChassisForward(double angle, double speed, double time)
+{
+  ChassisControlSTS.ChassisForwardAngle(angle);
+  for (int i = 0; i < time / 10; i++)
+  {
+    ChassisControlSTS.ChassisForward(speed);
+    wait(10, msec);
+  }
+}

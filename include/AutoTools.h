@@ -8,4 +8,6 @@
 // 模拟遥控器控制电机
 void SimulatedRemoteControl(std::string input);
 
+void ChassisForward(double angle, double speed, double time);
+
 #endif
