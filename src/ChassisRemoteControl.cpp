@@ -64,7 +64,7 @@ void ChassisBothHandsRomoteControl()
     int axis3 = ControlData.axis3;
     int axis4 = ControlData.axis4;
     // 死区判定
-    if (abs(axis3) > blindCA || abs(axis1) > blindCA)
+    if (std::abs(axis3) > blindCA || std::abs(axis1) > blindCA)
     {
         LeftMotorControl(axis3 * Sensitivity_Straight + axis1 * Sensitivity_Turn);
         RightMotorControl(axis3 * Sensitivity_Straight - axis1 * Sensitivity_Turn);
@@ -83,7 +83,7 @@ void ChassisBothHandsRomoteControl_reverse()
     int axis3 = ControlData.axis3;
     int axis4 = ControlData.axis4;
     // 死区判定
-    if (abs(axis3) > blindCA || abs(axis1) > blindCA)
+    if (std::abs(axis3) > blindCA || std::abs(axis1) > blindCA)
     {
         LeftMotorControl(-(axis3 * Sensitivity_Straight - axis1 * Sensitivity_Turn));
         RightMotorControl(-(axis3 * Sensitivity_Straight + axis1 * Sensitivity_Turn));
@@ -101,12 +101,12 @@ void ChassisLeftHandsRomoteControl()
     int axis2 = ControlData.axis2;
     int axis3 = ControlData.axis3;
     int axis4 = ControlData.axis4;
-    if (abs(axis3) > blindCA || abs(axis4) > blindCA)
+    if (std::abs(axis3) > blindCA || std::abs(axis4) > blindCA)
     {
         LeftMotorControl(axis3 * Sensitivity_Straight + axis4 * Sensitivity_Turn);
         RightMotorControl(axis3 * Sensitivity_Straight - axis4 * Sensitivity_Turn);
     }
-    else if (abs(axis1) > blindCA || abs(axis2) > blindCA)
+    else if (std::abs(axis1) > blindCA || std::abs(axis2) > blindCA)
     {
         double current_position = ChassisInertial.rotation(); // 当前位置
 
@@ -130,7 +130,7 @@ void ChassisRightHandsRomoteControl()
     int axis2 = ControlData.axis2;
     int axis3 = ControlData.axis3;
     int axis4 = ControlData.axis4;
-    if (abs(axis2) > blindCA || abs(axis1) > blindCA)
+    if (std::abs(axis2) > blindCA || std::abs(axis1) > blindCA)
     {
         LeftMotorControl(axis2 * Sensitivity_Straight + axis1 * Sensitivity_Turn);
         RightMotorControl(axis2 * Sensitivity_Straight - axis1 * Sensitivity_Turn);
@@ -148,7 +148,7 @@ void ChassisTankRomoteControl()
     int axis2 = ControlData.axis2;
     int axis3 = ControlData.axis3;
     int axis4 = ControlData.axis4;
-    if (abs(axis3) > blindCA || abs(axis2) > blindCA)
+    if (std::abs(axis3) > blindCA || std::abs(axis2) > blindCA)
     {
         LeftMotorControl(axis3 * Sensitivity_Straight);
         RightMotorControl(axis2 * Sensitivity_Straight);
@@ -168,12 +168,12 @@ void ChassisHumanMachineRomoteControl()
     int axis2 = ControlData.axis2;
     int axis3 = ControlData.axis3;
     int axis4 = ControlData.axis4;
-    if (abs(axis3) > blindCA)
+    if (std::abs(axis3) > blindCA)
     {
         LeftMotorControl(CHMRCP.GetSpeed(axis3 * Sensitivity_Straight));
         RightMotorControl(CHMRCP.GetSpeed(axis3 * Sensitivity_Straight));
     }
-    else if (abs(axis1) > blindCA || abs(axis2) > blindCA)
+    else if (std::abs(axis1) > blindCA || std::abs(axis2) > blindCA)
     {
         double current_position = ChassisInertial.rotation(); // 当前位置
 
@@ -200,7 +200,7 @@ void ChassisBothHandsRomoteControl_Turn()
     double temp_Sensitivity_Turn = Sensitivity_Turn + std::abs((double)axis3 / 100.0) * 0.5;
 
     // 死区判定
-    if (abs(axis3) > blindCA || abs(axis1) > blindCA)
+    if (std::abs(axis3) > blindCA || std::abs(axis1) > blindCA)
     {
         LeftMotorControl(axis3 * Sensitivity_Straight + axis1 * temp_Sensitivity_Turn);
         RightMotorControl(axis3 * Sensitivity_Straight - axis1 * temp_Sensitivity_Turn);

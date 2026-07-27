@@ -1,5 +1,4 @@
 #include <vector>
-#include <cstdlib>
 #include "vex.h"
 #include "robot-config.h"
 #include "RobotControl.h"
@@ -22,7 +21,7 @@ double moveToConNotMove(vex::motor motor_, double speed, int max_count)
     {
         motor_.spin(forward, speed, volt);
         // std::cout << "-->" << reversal_motor.velocity(dps) << std::endl;
-        if (abs(motor_.velocity(dps)) <= 2)
+        if (std::abs(motor_.velocity(dps)) <= 2)
         {
             count += 1;
         }

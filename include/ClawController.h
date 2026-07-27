@@ -2,6 +2,7 @@
 #define CLAWCONTROLLER_H
 
 #include "vex.h"
+
 using namespace vex;
 
 class ClawController;
@@ -115,7 +116,7 @@ public:
       double errorDist = val - currentPos;
 
       // 到达目标位置
-      if (abs(errorDist) <= error)
+      if (std::abs(errorDist) <= error)
       {
         over_count += 1;
         if (over_count >= 5)
@@ -140,7 +141,7 @@ public:
       lift_motor2.spin(forward, -output, volt);
 
       // 堵转检测
-      if (abs(lift_motor1.velocity(dps)) <= 2)
+      if (std::abs(lift_motor1.velocity(dps)) <= 2)
       {
         stall_count += 1;
       }
@@ -181,32 +182,18 @@ public:
       task_ClawController_modMove(this);
     }
 
-    // 反转维护
-    // if (!claw_reversal && abs(claw_normal_position - reversal_motor.position(vex::rotationUnits::deg)) >= 5)
-    // {
-    //   reversal_motor.spin(forward, (claw_normal_position - reversal_motor.position(vex::rotationUnits::deg)) * reversal_p, volt);
-    // }
-    // else if (claw_reversal && abs(claw_half_circle - reversal_motor.position(vex::rotationUnits::deg)) >= 5)
-    // {
-    //   reversal_motor.spin(forward, (-reversal_motor.position(vex::rotationUnits::deg) + claw_half_circle) * reversal_p, volt);
-    // }
-    // else
-    // {
-    //   reversal_motor.spin(forward, 0, volt);
-    // }
-
     // 夹子折叠维护
     if (!mod_move_flag)
     {
-      if (claw_mod == 0 && (abs(mod_motor.position(vex::rotationUnits::deg) - claw_close_position) >= 10))
+      if (claw_mod == 0 && ((mod_motor.position(vex::rotationUnits::deg) - claw_close_position) >= 10))
       {
         mod_motor.spin(forward, (claw_close_position - mod_motor.position(vex::rotationUnits::deg)) * 0.0005 - 12.8 * 0.03, volt);
       }
-      else if (claw_mod == 2 && (abs(mod_motor.position(vex::rotationUnits::deg) - claw_open_position) >= 10))
+      else if (claw_mod == 2 && ((mod_motor.position(vex::rotationUnits::deg) - claw_open_position) >= 10))
       {
         mod_motor.spin(forward, (claw_open_position - mod_motor.position(vex::rotationUnits::deg)) * 0.0005 + 12.8 * 0.03, volt);
       }
-      else if (claw_mod == 1 && (abs(mod_motor.position(vex::rotationUnits::deg) - claw_mid_position) >= 10))
+      else if (claw_mod == 1 && ((mod_motor.position(vex::rotationUnits::deg) - claw_mid_position) >= 10))
       {
         mod_motor.spin(forward, (claw_mid_position - mod_motor.position(vex::rotationUnits::deg)) * 0.2, volt);
       }
@@ -287,7 +274,7 @@ public:
       double errorDist = val - currentPos;
 
       // 到达目标位置
-      if (abs(errorDist) <= error)
+      if ((errorDist) <= error)
       {
         break;
       }
@@ -303,7 +290,7 @@ public:
       mod_motor.spin(forward, output, volt);
 
       // 堵转检测
-      if (abs(mod_motor.velocity(dps)) <= 2)
+      if ((mod_motor.velocity(dps)) <= 2)
       {
         stall_count += 1;
       }
@@ -374,7 +361,7 @@ public:
       double errorDist = val - currentPos;
 
       // 到达目标位置
-      if (abs(errorDist) <= error)
+      if ((errorDist) <= error)
       {
         break;
       }
@@ -390,7 +377,7 @@ public:
       reversal_motor.spin(forward, output, volt);
 
       // 堵转检测
-      if (abs(reversal_motor.velocity(dps)) <= 2)
+      if ((reversal_motor.velocity(dps)) <= 2)
       {
         stall_count += 1;
       }

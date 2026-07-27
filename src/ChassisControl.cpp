@@ -6,7 +6,6 @@
 #include "vex.h"
 #include "robot-config.h"
 #include "ChassisControl.h"
-#include "Positioning.h"
 #include "units.h"
 
 double GetDistance_front()
@@ -1239,86 +1238,6 @@ void ChassisControl::Turn(double v, double val, char direction, bool task)
   }
 }
 
-// 自动选择pps旋转
-void ChassisControl::AutoPPSTurn(double v, double val, char direction)
-{
-  double abs_val = std::abs(val);
-  if (abs_val < 70)
-  {
-    ChassisControlSTS.Turn_PPS = {0.09, 0.5, 2};
-    ChassisControlSTS.min_turn_speed = 1.5;
-  }
-  else if (abs_val < 150)
-  {
-    ChassisControlSTS.Turn_PPS = {0.0625, 0.5, 2};
-    ChassisControlSTS.min_turn_speed = 1.5;
-  }
-  else
-  {
-    ChassisControlSTS.Turn_PPS = {0.055, 0.5, 2};
-    ChassisControlSTS.min_turn_speed = 1;
-  }
-  this->Turn(v, val, direction);
-}
-
-// 自动选择pps转至
-void ChassisControl::AutoPPSTurnTo(double v, double val)
-{
-  double start_angle = ChassisInertial.rotation();
-  double start_angle_norm = NormsAngle(start_angle);
-
-  if (start_angle_norm < 0)
-  {
-    start_angle_norm = 360 + start_angle_norm;
-  }
-  if (val < 0)
-  {
-    val = 360 + val;
-  }
-  // std::cout << start_angle_norm - val  << std::endl;
-
-  double lval = start_angle_norm - val;
-  double rval = 360 - lval;
-
-  if (start_angle_norm > val)
-  {
-    lval = start_angle_norm - val;
-    rval = 360 - lval;
-  }
-  else
-  {
-    rval = val - start_angle_norm;
-    lval = 360 - rval;
-  }
-
-  // 自动参数选择s
-  double abs_val = std::abs(std::min(rval, lval));
-  if (abs_val < 70)
-  {
-    ChassisControlSTS.Turn_PPS = {0.5, 0.5, 2};
-    ChassisControlSTS.min_turn_speed = 1;
-  }
-  else if (abs_val < 150)
-  {
-    ChassisControlSTS.Turn_PPS = {0.050, 0.5, 2};
-    ChassisControlSTS.min_turn_speed = 1.5;
-  }
-  else
-  {
-    ChassisControlSTS.Turn_PPS = {0.050, 0.5, 2};
-    ChassisControlSTS.min_turn_speed = 1;
-  }
-
-  if (lval > rval)
-  {
-    this->Turn(v, rval, 'r', false);
-  }
-  else
-  {
-    this->Turn(v, lval, 'l', false);
-  }
-}
-
 // 旋转到指定角度
 void ChassisControl::TurnTo(double v, double val, bool task)
 {
@@ -1377,6 +1296,8 @@ void ChassisControl::Turn_PID(double v, double val, double P, double I, double D
   double integral = 0.0;
   double prevError = 0;
 
+  int stuck_time_count = 0;
+
   while (true)
   {
     Whileing = true;
@@ -1385,11 +1306,12 @@ void ChassisControl::Turn_PID(double v, double val, double P, double I, double D
     double errorDist = val - currentPos;
 
     // 到达目标位置
-    if (abs(errorDist) <= error)
+    if (std::abs(errorDist) <= error)
     {
       overcount += 1;
       if (overcount >= Over_count)
       {
+        std::cout << "daowei" << std::endl;
         break;
       }
     }
@@ -1408,13 +1330,31 @@ void ChassisControl::Turn_PID(double v, double val, double P, double I, double D
     double now_time = GetNowTime_ms();
     if (now_time - start_time >= Move_time_out)
     {
+      std::cout << "chaoshi" << std::endl;
       break;
     }
 
+    
+    // 电机抱死保护
+    if (GetVelocity_mean() <= Stuck_threshold)
+    {
+      stuck_time_count += 1; // 计算抱死时间
+      if (stuck_time_count >= Stuck_time_out)
+      {
+        std::cout << "baosi" << std::endl;
+        break;
+      }
+    }
+
     // PID计算（dt = 0.01秒）
-    integral += errorDist * 0.01;
+    if (std::abs(errorDist) < 20){
+      integral += errorDist * 0.01;
+    }else{
+      integral = 0;
+    }
     double derivative = (errorDist - prevError) / 0.01;
     prevError = errorDist;
+    std::cout << integral * I <<  " " << D * derivative << std::endl;
 
     double output = P * errorDist + I * integral + D * derivative;
     double outputLimited = NumInterval(output, 0, v);
@@ -1562,7 +1502,7 @@ void ChassisControl::MoveBySmallWheel(double v, double val, double yaw, char dir
   }
 
   // 直线修正指示器
-  if (abs(yaw) < 0.01)
+  if (std::abs(yaw) < 0.01)
   {
     ChassisControl::ChassisStraight(ChassisInertial.rotation());
     // ( 10, 50, "start %f", ChassisInertial.rotation());
