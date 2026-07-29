@@ -274,7 +274,7 @@ public:
       double errorDist = val - currentPos;
 
       // 到达目标位置
-      if ((errorDist) <= error)
+      if (std::abs(errorDist) <= error)
       {
         break;
       }
@@ -287,16 +287,29 @@ public:
       double output = kp * errorDist + ki * integral + kd * derivative;
       // output = kp * errorDist;
 
-      mod_motor.spin(forward, output, volt);
+      // mod_motor.spin(forward, output, volt);
+      if (val == claw_mid_position)
+      {
+        mod_motor.spin(forward, output, volt);
+      }
+      else
+      {
+        mod_motor.spin(forward, output, volt);
+        std::cout << "[[ ]]=== " << output << " " << claw_close_position << " " << claw_open_position << " " << currentPos << std::endl;
+      }
 
       // 堵转检测
       if ((mod_motor.velocity(dps)) <= 2)
       {
         stall_count += 1;
       }
+      else
+      {
+        stall_count = 0;
+      }
 
       // 堵转退出
-      if (stall_count >= 10)
+      if (stall_count >= 100)
       {
         break;
       }
@@ -361,7 +374,7 @@ public:
       double errorDist = val - currentPos;
 
       // 到达目标位置
-      if ((errorDist) <= error)
+      if (std::abs(errorDist) <= error)
       {
         break;
       }
@@ -375,15 +388,20 @@ public:
       // output = kp * errorDist;
 
       reversal_motor.spin(forward, output, volt);
+      std::cout << "[[ ]] " << output << " " << claw_normal_position << " " << claw_half_circle << " " << currentPos << std::endl;
 
       // 堵转检测
       if ((reversal_motor.velocity(dps)) <= 2)
       {
         stall_count += 1;
       }
+      else
+      {
+        stall_count = 0;
+      }
 
       // 堵转退出
-      if (stall_count >= 10)
+      if (stall_count >= 100)
       {
         break;
       }

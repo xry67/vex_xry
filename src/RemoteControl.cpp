@@ -208,6 +208,7 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
 
     bool LastX = false;
     bool LastB = false;
+    bool LastY = false;
     bool LastL1 = false;
     bool LastL2 = false;
     bool LastDown = false;
@@ -303,7 +304,6 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
             LiftDownSpeed = 0;
             ToolMotor1.spin(forward, LiftUpSpeed, volt);
             ToolMotor2.spin(forward, LiftUpSpeed, volt);
-            Brain.Screen.printAt(200, 100, "++++>%f", LiftUpSpeed);
         }
         else if (ControlData.ButtonL2)
         {
@@ -311,7 +311,6 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
             LiftUpSpeed = 0;
             ToolMotor1.spin(forward, LiftDownSpeed, volt);
             ToolMotor2.spin(forward, LiftDownSpeed, volt);
-            Brain.Screen.printAt(200, 100, "--->%f", LiftDownSpeed);
         }
         else if (!halfauto)
         {
@@ -321,7 +320,6 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
             ToolMotor2.setStopping(hold);
             ToolMotor1.stop();
             ToolMotor2.stop();
-            Brain.Screen.printAt(200, 100, "000>%f", LiftUpSpeed);
         }
 
         // 退出
@@ -349,6 +347,7 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
             wait(50, msec);
         }
 
+        LastY = ControlData.ButtonY;
         LastX = ControlData.ButtonX;
         LastB = ControlData.ButtonB;
         LastL1 = ControlData.ButtonL1;
