@@ -132,5 +132,5 @@ void Help(){
     // 999999999：运行的时间。文件读完或者时间到了会退出程序，因此这里选无限时间
     AutoRemoteControl(FileName, 999999999);
 
-
+    int test_6666 = 6666;
 }
