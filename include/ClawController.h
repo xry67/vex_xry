@@ -230,11 +230,12 @@ public:
 
   void waitMoveStart()
   {
-    while (!moveing_flag)
+    for (int i=0; i<1000; i++) 
     {
-      std::cout << "-" << std::endl;
+      if (moveing_flag){
+        break;
+      }
       wait(10, msec);
-      std::cout << "|" << std::endl;
     }
   }
 
@@ -256,7 +257,7 @@ public:
   bool changeMod(int target)
   {
     claw_mod_target = target;
-    waitMoveStart();
+    // waitMoveStart();
     return 1;
   }
 
@@ -359,7 +360,7 @@ public:
   {
     // std::cout << "reversal:" << claw_reversal_target << " " << claw_reversal << std::endl;
     claw_reversal_target = claw_reversal_target ^ 1;
-    waitMoveStart();
+    // waitMoveStart();
     return true;
   }
 
