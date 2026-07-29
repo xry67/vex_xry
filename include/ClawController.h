@@ -63,7 +63,7 @@ public:
     claw_close_position = moveToConNotMove(mod_motor, -5, 20); // 关闭的最大角度
     // std::cout << claw_open_position << " " << claw_close_position << std::endl;
 
-    claw_mid_position = claw_close_position + (claw_open_position - claw_close_position) * 0.7;
+    claw_mid_position = claw_close_position + (claw_open_position - claw_close_position) * 1;
 
     return true;
   }
@@ -104,7 +104,7 @@ public:
     double integral = 0;
     double prevError = 0;
     double val = target;
-    double error = 2;
+    double error = 1;
 
     int stall_count = 0;
     int over_count = 0;
@@ -175,10 +175,11 @@ public:
     {
       task_ClawController_reversalMove(this);
     }
-    // std::cout << claw_mod_target << " " << claw_mod << std::endl;
+    // std::cout << "claw_mod_target" << claw_mod_target << " " << claw_mod << std::endl;
     if (claw_mod_target != claw_mod && !mod_move_flag)
     {
       // precondition();
+      std::cout << "claw_mod_target 1" << std::endl;
       task_ClawController_modMove(this);
     }
 
@@ -203,13 +204,37 @@ public:
         mod_motor.stop();
       }
     }
+
+    // 电梯高度维护
+    // if (!lift_move_flag)
+    // {
+    //   if (claw_mod == 1)
+    //   {
+    //     double currentPos = Rotation.angle();
+    //     double target = StartLiftPosititon + 22;
+
+    //     if (std::abs(currentPos - target) > 1.5)
+    //     {
+    //       double p = 12;
+    //       lift_motor1.spin(forward, (currentPos - target) * 2, volt);
+    //       lift_motor2.spin(forward, (currentPos - target) * 2, volt);
+    //     }
+    //     else
+    //     {
+    //       lift_motor1.stop();
+    //       lift_motor2.stop();
+    //     }
+    //   }
+    // }
   }
 
   void waitMoveStart()
   {
     while (!moveing_flag)
     {
+      std::cout << "-" << std::endl;
       wait(10, msec);
+      std::cout << "|" << std::endl;
     }
   }
 
@@ -238,6 +263,7 @@ public:
   // 折叠控制
   bool modMove()
   {
+    std::cout << "claw_mod_target 2" << std::endl;
     mod_move_flag = true;
     moveing_flag = true;
     intake_motor.spin(forward, -3, volt);
@@ -248,13 +274,14 @@ public:
     double integral = 0;
     double prevError = 0;
     double val = 0;
-    double error = 5;
+    double error = 20;
 
     int stall_count = 0;
 
     while (true)
     {
-
+      // mod_move_flag = true;
+      // moveing_flag = true;
       // 目标位置更改
       if (claw_mod_target == 0)
       {

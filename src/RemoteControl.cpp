@@ -77,7 +77,7 @@ int RemoteControl_child()
                 Claw.changeMod(1);
             }
 
-            Claw.LiftMove(StartLiftPosititon + 21.5); // 56.5
+            Claw.LiftMove(StartLiftPosititon + 19); // 38
             halfauto = false;
         }
         // 半自动 夹！
@@ -94,12 +94,15 @@ int RemoteControl_child()
             {
                 Claw.changeMod(2);
             }
-            if (Claw.Rotation.angle() < StartLiftPosititon + 22)
+
+            while (Claw.Rotation.angle() < StartLiftPosititon + 25)
             {
-                Claw.moveing_flag = true;
-                ToolMotor6.spin(forward, 3, volt);
+                Claw.lift_motor1.spin(forward, -7, volt);
+                Claw.lift_motor2.spin(forward, -7, volt);
+                wait(10, msec);
             }
-            Claw.LiftMove(StartLiftPosititon + 25);
+            Claw.lift_motor1.stop();
+            Claw.lift_motor2.stop();
 
             while (Claw.mod_move_flag || Claw.reversal_move_flag)
             {
@@ -109,7 +112,7 @@ int RemoteControl_child()
             Claw.moveing_flag = true;
             ToolMotor6.spin(forward, -8, volt);
             int StrtLiftTime = GetNowTime();
-            Claw.LiftMove(StartLiftPosititon + 16);
+            Claw.LiftMove(StartLiftPosititon + 15);
             wait(0.3 - (GetNowTime() - StrtLiftTime), sec);
             ToolMotor6.spin(forward, -2, volt);
 
