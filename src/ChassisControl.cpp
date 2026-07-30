@@ -1368,6 +1368,10 @@ void ChassisControl::Turn_PID(double v, double val, double P, double I, double D
   MoveOver();
 }
 
+void ChassisControl::Turn_PID(double v, double val) {
+	ChassisControlSTS.Turn_PID(v, val, 0.8, 0.035, 0.05, 2);
+}
+
 // 等待底盘运动开始
 void ChassisControl::WaitMoveStart()
 {

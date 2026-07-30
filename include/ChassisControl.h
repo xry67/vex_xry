@@ -248,6 +248,9 @@ public:
     // 旋转到指定角度pid v：速度（0-12.8）val：旋转（角度，相对，顺时针正）P:正值 I：正值 D：正值 error：允许误差内结束
     void Turn_PID(double v, double val, double P, double I, double D, double error);
 
+    // 旋转到指定角度pid v：速度（0-12.8）val：旋转（角度，相对，顺时针正）
+    void Turn_PID(double v, double val);
+
     // 追随某个目标
     void FollowTarget(double v, double val);
 
