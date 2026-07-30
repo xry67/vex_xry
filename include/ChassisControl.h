@@ -182,16 +182,16 @@ public:
     void BasicMove();
     // =======================================================
 
-    // 直线运动函数
+    // 直线运动函数(可选多线程) v：速度（0-12.8）val：距离（正值，600~=1x底盘长度）direction：方向（n前进|u后退）
     void Move(double v, double val, char direction);
 
-    // 直线运动函数（可选多线程）
+    // 直线运动函数(可选多线程) v：速度（0-12.8）val：距离（正值，600~=1x底盘长度）direction：方向（n前进|u后退）task：true时不阻塞
     void Move(double v, double val, char direction, bool task);
 
-    // 直线运动函数(可选角度)
+    // 直线运动函数(可选多线程) v：速度（0-12.8）val：距离（正值，600~=1x底盘长度）yaw：旋转（角度，相对，顺时针正）direction：方向（n前进|u后退）
     void Move(double v, double val, double yaw, char direction);
 
-    // 直线运动函数(可选角度与多线程 可选多线程)
+    // 直线运动函数(可选多线程) v：速度（0-12.8）val：距离（正值，600~=1x底盘长度）yaw：旋转（角度，相对，顺时针正）direction：方向（n前进|u后退）task：true时不阻塞
     void Move(double v, double val, double yaw, char direction, bool task);
 
     // 曲线移动
