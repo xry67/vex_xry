@@ -51,11 +51,6 @@ public:
 
   bool init()
   {
-    // 翻转限位设置===============
-
-    claw_half_circle = moveToConNotMove(reversal_motor, 5, 20);
-    wait(50, msec);
-    claw_normal_position = moveToConNotMove(reversal_motor, -5, 20);
 
     // 开合限位设置==================================
     claw_open_position = moveToConNotMove(mod_motor, 5, 20); // 打开时最大角度

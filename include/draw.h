@@ -221,7 +221,7 @@ public:
     DrawMotor ToolM2 = DrawMotor(187, 31, 12, 70);
     DrawMotor ToolM3 = DrawMotor(152, 82, 13, 19);
     DrawMotor ToolM4 = DrawMotor(204, 31, 33, 14);
-    DrawMotor ToolM5 = DrawMotor(224, 49, 13, 12);
+    // DrawMotor ToolM5 = DrawMotor(224, 49, 13, 12);
     DrawMotor ToolM6 = DrawMotor(241, 49, 14, 28);
 
     DrawEquipmentMonitor()
@@ -243,7 +243,7 @@ public:
         ToolM2.Draw(ToolMotor2.temperature());
         ToolM3.Draw(ToolMotor3.temperature());
         ToolM4.Draw(ToolMotor4.temperature());
-        ToolM5.Draw(ToolMotor5.temperature());
+        // ToolM5.Draw(ToolMotor5.temperature());
         ToolM6.Draw(ToolMotor6.temperature());
     }
 
@@ -258,7 +258,7 @@ public:
         ToolM2.Draw(ToolMotor2.temperature(celsius));
         ToolM3.Draw(ToolMotor3.temperature(celsius));
         ToolM4.Draw(ToolMotor4.temperature(celsius));
-        ToolM5.Draw(ToolMotor5.temperature(celsius));
+        // ToolM5.Draw(ToolMotor5.temperature(celsius));
         ToolM6.Draw(ToolMotor6.temperature(celsius));
         // std::cout << ToolMotor1.temperature(celsius) << " " << ToolMotor2.temperature(celsius) << " " << ToolMotor3.temperature(celsius) << std::endl;
     }

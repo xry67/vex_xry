@@ -196,6 +196,9 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
     // 卡死检测
     int MotorBlocked = true;
     int MotorBlocked_count = 0;
+    int MotorBlocked5 = true;
+    int MotorBlocked5_count = 0; // 马达5卡死检测
+    bool Motor5_flag = false;
 
     double LiftUpSpeed = 0;   // 抬升速度
     double LiftDownSpeed = 0; // 抬升速度
@@ -249,17 +252,23 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
         ChassisRomoteControlSTS.Work();
         // ChangeStance();
 
-        // intake
-        // if (!ControlData.ButtonX && LastX)
-        // {
-        //     ToolMotor3.spin(forward, -13 * (intake_mod), volt);
-        //     intake_mod = -intake_mod;
-        // }
-        // if (ControlData.ButtonA)
-        // {
-        //     ToolMotor3.spin(forward, 0, volt);
-        //     intake_mod = 1;
-        // }
+        if (ControlData.ButtonR1 || ControlData.ButtonR2)
+        {
+            if (std::abs(ToolMotor5.velocity(pct)) <= 3)
+            {
+                MotorBlocked5_count++;
+            }
+
+            if (MotorBlocked5_count > 10)
+            {
+                MotorBlocked5 = true;
+            }
+        }
+        else
+        {
+            MotorBlocked5 = false;
+            MotorBlocked5_count = 0;
+        }
 
         // 夹子收吐
         if (ControlData.ButtonR1)
@@ -268,15 +277,33 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
             {
                 ToolMotor6.spin(forward, -13, volt);
             }
+
             ToolMotor3.spin(forward, -13, volt);
+
+            // if (!MotorBlocked5)
+            // {
+            //     ToolMotor5.spin(forward, 13, volt);
+            // }
+            // else
+            // {
+            //     ToolMotor5.spin(forward, 2, volt);
+            // }
+            Motor5_flag = true;
         }
         else if (ControlData.ButtonR2)
         {
-            if (Claw.claw_mod == 0)
-            {
-                ToolMotor6.spin(forward, 3, volt);
-            }
             ToolMotor3.spin(forward, 13, volt);
+
+            if (!MotorBlocked5)
+            {
+                ToolMotor5.spin(forward, -13, volt);
+            }
+            else
+            {
+                ToolMotor5.spin(forward, 0, volt);
+            }
+
+            Motor5_flag = false;
         }
         else
         {
@@ -285,6 +312,17 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
                 ToolMotor6.spin(forward, 0, volt);
             }
             ToolMotor3.spin(forward, 0, volt);
+
+            if (Motor5_flag)
+            {
+                ToolMotor5.spin(forward, 2, volt);
+            }
+            else
+            {
+                ToolMotor5.spin(forward, 0, volt);
+            }
+            MotorBlocked5 = false;
+            // MotorBlocked5_count = 0;
         }
 
         // 夹子 反转
