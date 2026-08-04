@@ -118,7 +118,11 @@ void CheckEquipment()
 void ClawControllerInit()
 {
     PrintInLine(2);
-    Controller.Screen.print("限位设置...");
+    Controller.Screen.print("按(A)开始限位设置喵");
+    PrintInLine(3);
+    Controller.Screen.print("注意 抬升会动喵");
+    wait(200, msec);
+    while(!Controller.ButtonA.pressing()) wait(10, msec);;
     Claw.init();
 }
 
@@ -130,16 +134,19 @@ void vexcodeInit(void)
     ClawControllerInit();                                  // 夹子初始化
     clawStateMaintain_task = vex::task(clawStateMaintain); // 爪子状态维护开启
 
+    // Claw.changeMod(1);
+	// wait(500, msec);
+    //Claw.modMove();
+	//wait(200, msec);
+    Claw.LiftMove_Normalized(0.25);
+	wait(200, msec);
+
     // 初始位置设置
     // ClawControllerInit();
     ChassisInertialInit(); // 底盘陀螺仪初始化
 
     ToolMotor1.resetPosition();
     ToolMotor2.resetPosition();
-
-    // 初始状态
-    // digitalC.set(1);
-    // digitalD.set(1);
 
     Optical1.setLightPower(100, percent);
     Optical2.setLightPower(100, percent);

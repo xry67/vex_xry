@@ -7,8 +7,8 @@ void AddAutoFun()
 {
     AutoFunctions.push_back(AutoFun("侧扇区-近", auto1, 15));
     AutoFunctions.push_back(AutoFun("侧扇区-远", auto2, 15));
-    AutoFunctions.push_back(AutoFun("操作区-近", auto3, 15));
-    // AutoFunctions.push_back(AutoFun("操作区-远", auto4, 15));
+    AutoFunctions.push_back(AutoFun("操作区-近喵", auto3, 15));
+    AutoFunctions.push_back(AutoFun("操作区-远喵", auto4, 15));
 }
 
 // 比赛的自动函数

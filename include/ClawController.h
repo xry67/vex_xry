@@ -10,6 +10,7 @@ class ClawController;
 double moveToConNotMove(vex::motor motor_, double speed, int max_count);
 void task_ClawController_reversalMove(ClawController *claw_);
 void task_ClawController_modMove(ClawController *claw_);
+void task_ClawController_liftMove(ClawController *claw_, double lift_target_);
 
 class ClawController
 {
@@ -51,6 +52,13 @@ public:
 
   bool init()
   {
+    LiftMove_Normalized(0.5);
+		wait(300, msec);
+    // 翻转限位设置===============
+
+    claw_half_circle = moveToConNotMove(reversal_motor, 5, 20);
+    wait(50, msec);
+    claw_normal_position = moveToConNotMove(reversal_motor, -5, 20);
 
     // 开合限位设置==================================
     claw_open_position = moveToConNotMove(mod_motor, 5, 20); // 打开时最大角度
@@ -73,33 +81,35 @@ public:
     LiftMove(StartLiftPosititon + 30);
   }
 
-  bool LiftMove(double target)
+  // target：高度（取值最下38-最上153）
+  bool LiftMove(double target, double error)
   {
     lift_move_flag = true;
 
     // PID参数
-    double kp = 0.2;
-    double ki = 0.2;
-    double kd = 0.0375;
+    double kp = 0;
+    double ki = 0;
+    double kd = 0;
 
     // 两套pid选择
     if (Rotation.angle() < target)
     {
       kp = 0.5;
-      ki = 0.4;
-      kd = 0.0;
+      ki = 0.5;
+      kd = 0.05;
     }
     else
     {
-      kp = 0.2;
-      ki = 0.2;
-      kd = 0.0375;
+      kp = 0.5;
+      ki = 0.5;
+      kd = 0.05;
     }
+
+		double absolute_offset = -3.2;
 
     double integral = 0;
     double prevError = 0;
     double val = target;
-    double error = 1;
 
     int stall_count = 0;
     int over_count = 0;
@@ -132,8 +142,8 @@ public:
       double output = kp * errorDist + ki * integral + kd * derivative;
       // output = kp * errorDist;
 
-      lift_motor1.spin(forward, -output, volt);
-      lift_motor2.spin(forward, -output, volt);
+      lift_motor1.spin(forward, -output + absolute_offset, volt);
+      lift_motor2.spin(forward, -output + absolute_offset, volt);
 
       // 堵转检测
       if (std::abs(lift_motor1.velocity(dps)) <= 2)
@@ -159,6 +169,24 @@ public:
     // std::cout << "end-->" << reversal_motor.position(deg) << std::endl;
     return true;
   }
+
+	bool LiftMove(double target) {
+		return LiftMove(target, 1.0);
+	}
+
+	// target：高度（取值最下0.00-最上1.00）
+	bool LiftMove_Normalized(double target, bool task) {
+		if (!task){
+			return LiftMove(target * 115.0 + this->StartLiftPosititon, 5.0);
+		}else{
+			task_ClawController_liftMove(this, target);
+		}
+		return false;
+	}
+
+	bool LiftMove_Normalized(double target) {
+		return LiftMove(target * 115.0 + this->StartLiftPosititon, 5.0); // WTF Spelling 神了
+	}
 
   // 状态维护，多线程保护
   void maintenance()

@@ -188,10 +188,10 @@ public:
     // 直线运动函数(可选多线程) v：速度（0-12.8）val：距离（正值，600~=1x底盘长度）direction：方向（n前进|u后退）task：true时不阻塞
     void Move(double v, double val, char direction, bool task);
 
-    // 直线运动函数(可选多线程) v：速度（0-12.8）val：距离（正值，600~=1x底盘长度）yaw：旋转（角度，相对，顺时针正）direction：方向（n前进|u后退）
+    // 直线运动函数(可选多线程) v：速度（0-12.8）val：距离（正值，600~=1x底盘长度）yaw：旋转（角度，绝对，顺时针正）direction：方向（n前进|u后退）
     void Move(double v, double val, double yaw, char direction);
 
-    // 直线运动函数(可选多线程) v：速度（0-12.8）val：距离（正值，600~=1x底盘长度）yaw：旋转（角度，相对，顺时针正）direction：方向（n前进|u后退）task：true时不阻塞
+    // 直线运动函数(可选多线程) v：速度（0-12.8）val：距离（正值，600~=1x底盘长度）yaw：旋转（角度，绝对，顺时针正）direction：方向（n前进|u后退）task：true时不阻塞
     void Move(double v, double val, double yaw, char direction, bool task);
 
     // 曲线移动
@@ -245,10 +245,10 @@ public:
     // 旋转到指定角度
     void TurnTo(double v, double val, bool task);
 
-    // 旋转到指定角度pid v：速度（0-12.8）val：旋转（角度，相对，顺时针正）P:正值 I：正值 D：正值 error：允许误差内结束
+    // 旋转到指定角度pid v：速度（0-12.8）val：旋转（角度，绝对，顺时针正）P:正值 I：正值 D：正值 error：允许误差内结束
     void Turn_PID(double v, double val, double P, double I, double D, double error);
 
-    // 旋转到指定角度pid v：速度（0-12.8）val：旋转（角度，相对，顺时针正）
+    // 旋转到指定角度pid v：速度（0-12.8）val：旋转（角度，绝对，顺时针正）
     void Turn_PID(double v, double val);
 
     // 追随某个目标

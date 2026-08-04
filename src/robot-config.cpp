@@ -61,14 +61,14 @@ motor_group RightMotorGroup = motor_group(RightMotor1, RightMotor2, RightMotor3)
 
 motor ToolMotor1 = motor(PORT1, ratio6_1, 1); // 抬升1 （左）
 motor ToolMotor2 = motor(PORT2, ratio6_1, 0); // 抬升2 （右）
-motor ToolMotor3 = motor(PORT8, ratio6_1, 0); // intake
+motor ToolMotor3 = motor(PORT8, ratio6_1, 1); // intake
 motor ToolMotor4 = motor(PORT3, ratio6_1, 0); // 折叠
 motor ToolMotor5 = motor(PORT4, ratio6_1, 0); // 开合
 motor ToolMotor6 = motor(PORT5, ratio6_1, 1); // 刷子
 // motor ToolMotor7 = motor(PORT21, ratio6_1, 1); // intake
 
-rotation Rotation = rotation(PORT7); // 抬升旋转
-double StartLiftPosititon = 38;      // 抬升初始位置
+rotation Rotation = rotation(PORT9); // 抬升旋转
+double StartLiftPosititon = 47;      // 抬升初始位置
 
 ClawController Claw(ToolMotor5, ToolMotor4, ToolMotor6, ToolMotor1, ToolMotor2, Rotation, StartLiftPosititon); // 夹子
 
