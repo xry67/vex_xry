@@ -1,59 +1,81 @@
 #include "vex.h"
 #include "robot-config.h"
 #include "ChassisControl.h"
-#include "RobotControl.h"
-#include "RemoteControl.h"
 #include "AutoTools.h"
 
 void auto2()
 {
-    ToolMotor3.spin(forward, -5, volt);
-    wait(20, msec);
-    wait(1000, msec);
-    ToolMotor3.spin(forward, 0, volt);
+    ChassisForward(0, 5, 300);
 
-    ChassisControlSTS.Move(6, 1100, 0, 'n');
-    Claw.LiftMove(50);
-    Claw.changeMod();
-    wait(500, msec);
-    ChassisControlSTS.Turn_PID(6, -90, 0.8, 0.035, 0.05, 2);
-    Claw.LiftMove(60);
-
-    ChassisControlSTS.ChassisForwardAngle(-90);
-    for (int i = 0; i < 60; i++)
+    ChassisControlSTS.ChassisForwardAngle(0);
+    for (int i = 0; i < 100; i++)
     {
-        ChassisControlSTS.ChassisForward(4);
+        ChassisControlSTS.ChassisForward(-5);
         if (i > 30 && std::abs(ChassisControlSTS.GetVelocity_pct_mean()) < 3)
         {
             break;
         }
         wait(10, msec);
     }
-    ToolMotor6.spin(forward, 5, volt);
-    wait(1000, msec);
+    ChassisControlSTS.ChassisStop();
+    // (0, 5, 600);
+
+    ChassisControlSTS.Move(8, 370, 0, 'n');
+    ChassisControlSTS.Turn_PID(10, 58, 0.8, 0.035, 0.05, 2);
+
+    ChassisControlSTS.ChassisForwardAngle(58);
+    for (int i = 0; i < 40; i++)
+    {
+        ChassisControlSTS.ChassisForward(4);
+        if (i == 30)
+        {
+            Claw.LiftMove(400);
+        }
+        if (i > 30 && std::abs(ChassisControlSTS.GetVelocity_pct_mean()) < 3)
+        {
+            break;
+        }
+        wait(10, msec);
+    }
+    Claw.LiftMove(-2000);
+
+    Claw.mod_move_flag = true;
+    Claw.mod_motor.spin(forward, -8, volt);
+    wait(500, msec);
+    Claw.mod_move_flag = false;
+
+    ToolMotor6.spin(forward, 1.5, volt);
+
+    ChassisControlSTS.Move(7, 500, 58, 'u', true);
+    ChassisControlSTS.WaitPositionArrive(260);
+    Claw.claw_mod = 0;
+    Claw.changeMod(1);
+    ChassisControlSTS.WaitMoveFinish();
     ToolMotor6.spin(forward, 0, volt);
 
-    ChassisControlSTS.Move(7, 500, -90, 'u', true);
-    ChassisControlSTS.WaitPositionArrive(260);
-
-    ChassisControlSTS.WaitMoveFinish();
-    ChassisControlSTS.Turn_PID(8, -37, 0.8, 0.035, 0.05, 2);
-    Claw.reversal();
-    Claw.changeMod();
     // 去找第二个
-    Claw.LiftMove(44);
-    ChassisControlSTS.Move(6, 1700, -37, 'n', true);
-    ChassisControlSTS.WaitPositionArrive(600);
+    ChassisControlSTS.Turn_PID(10, 26, 0.8, 0.035, 0.05, 2);
+    ChassisControlSTS.Move(8, 1700, 26, 'n', true);
+    Claw.LiftMove(-2000);
+    ChassisControlSTS.WaitPositionArrive(1000);
     ToolMotor6.spin(forward, -13, volt);
     ChassisControlSTS.ResetMaxSpeed(2);
     ChassisControlSTS.WaitMoveFinish();
     ToolMotor6.spin(forward, -2, volt);
+    
 
-    ChassisControlSTS.Turn_PID(6, -175, 0.8, 0.035, 0.05, 2);
-    Claw.LiftMove(70);
+    ChassisControlSTS.Move(8, 1900, 26, 'u', true);
+    Claw.LiftMove(500);
+    ChassisControlSTS.WaitMoveFinish();
+    ChassisControlSTS.Turn_PID(10, 90, 0.8, 0.035, 0.05, 2);
 
-    ChassisControlSTS.ChassisForwardAngle(-175);
-    for (int i = 0; i < 120; i++)
+    ChassisControlSTS.Move(8, 2500, 88, 'u', true);
+    Claw.LiftMove(2400);
+    ChassisControlSTS.WaitMoveFinish();
+
+    ChassisControlSTS.Turn_PID(10, 48, 0.8, 0.035, 0.05, 2);
+    ChassisControlSTS.ChassisForwardAngle(48);
+    for (int i = 0; i < 80; i++)
     {
         ChassisControlSTS.ChassisForward(4);
         if (i > 30 && std::abs(ChassisControlSTS.GetVelocity_pct_mean()) < 3)
@@ -62,11 +84,10 @@ void auto2()
         }
         wait(10, msec);
     }
-    Claw.LiftMove(50);
+    Claw.LiftMove(500);
     ToolMotor6.spin(forward, 2, volt);
-    ChassisControlSTS.Move(4, 600, 'u', true);
-    ChassisControlSTS.WaitPositionArrive(400);
-    ChassisControlSTS.ResetStraightAngle(-90);
-    ChassisControlSTS.WaitMoveFinish();
+    ChassisControlSTS.Move(4, 400, 90, 'u');
     ToolMotor6.spin(forward, 0, volt);
+
+
 }

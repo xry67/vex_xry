@@ -9,6 +9,8 @@ void MotorSpinFor(vex::motor Motor, double v, double val, bool task);
 // 移动到卡死为止
 double moveToConNotMove(vex::motor motor_, double speed, int max_count);
 
+double moveToConNotMove(vex::motor_group motor_, double speed, int max_count);
+
 // 将所有装置恢复到默认状态（马达停转）
 void RestoreInitial();
 

@@ -55,8 +55,7 @@ extern motor ToolMotor4; //
 extern motor ToolMotor5;
 extern motor ToolMotor6;
 
-extern rotation Rotation;         // 抬升旋转
-extern double StartLiftPosititon; // 抬升初始位置
+extern rotation Rotation; // 抬升旋转
 
 extern ClawController Claw; // 夹子
 
@@ -69,7 +68,7 @@ extern digital_out digitalF;
 extern digital_out digitalH; // 抬升
 extern digital_out digitalG;
 
-extern bumper bumper_elevator;
+extern limit liftLimit;
 
 extern inertial ChassisInertial; // 底盘陀螺仪
 extern smartdrive Smartdrive;    // 官方底盘驱动

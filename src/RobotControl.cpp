@@ -1,4 +1,5 @@
 #include <vector>
+#include <cstdlib>
 #include "vex.h"
 #include "robot-config.h"
 #include "RobotControl.h"
@@ -21,7 +22,33 @@ double moveToConNotMove(vex::motor motor_, double speed, int max_count)
     {
         motor_.spin(forward, speed, volt);
         // std::cout << "-->" << reversal_motor.velocity(dps) << std::endl;
-        if (std::abs(motor_.velocity(dps)) <= 2)
+        if (abs(motor_.velocity(dps)) <= 2)
+        {
+            count += 1;
+        }
+        else
+        {
+            count = 0;
+        }
+        if (count >= max_count)
+        {
+            break;
+        }
+        wait(10, msec);
+    }
+    motor_.spin(forward, 0, volt);
+    return motor_.position(deg);
+}
+
+// 移动到卡死为止
+double moveToConNotMove(vex::motor_group motor_, double speed, int max_count)
+{
+    int count = 0;
+    while (true)
+    {
+        motor_.spin(forward, speed, volt);
+        // std::cout << "-->" << reversal_motor.velocity(dps) << std::endl;
+        if (abs(motor_.velocity(dps)) <= 2)
         {
             count += 1;
         }
