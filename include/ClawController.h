@@ -221,7 +221,7 @@ public:
   {
     mod_move_flag = true;
     moveing_flag = true;
-    intake_motor.spin(forward, -3, volt);
+    // intake_motor.spin(forward, -3, volt);
     double kp = 0.1;
     double ki = 0.05;
     double kd = 0.008;
@@ -286,7 +286,7 @@ public:
     // 状态维护
     claw_mod = claw_mod_target;
     // std::cout << "end-->" << mod_motor.position(deg) << std::endl;
-    intake_motor.spin(forward, 0, volt);
+    // intake_motor.spin(forward, 0, volt);
     moveing_flag = false;
     mod_move_flag = false;
     return true;

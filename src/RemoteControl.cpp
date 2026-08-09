@@ -282,6 +282,12 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
             Claw.reversal();
         }
 
+        // 钩子
+        if (LastX && !ControlData.ButtonX)
+        {
+            digitalH.set(!digitalH.value());
+        }
+
         // 抬升
         // Brain.Screen.printAt(100, 120, "%f", ToolMotor1.position(deg));
         if (std::abs(ControlData.axis2) > 10)

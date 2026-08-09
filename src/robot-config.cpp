@@ -81,7 +81,7 @@ digital_out digitalH = digital_out(Brain.ThreeWirePort.H);
 digital_out digitalG = digital_out(Brain.ThreeWirePort.G);
 
 ClawController Claw(digitalH, ToolMotor4, ToolMotor6, ToolMotor1, ToolMotor2, Rotation); // 夹子
-limit  liftLimit  = limit(Brain.ThreeWirePort.F);
+limit liftLimit = limit(Brain.ThreeWirePort.F);
 
 optical Optical1 = optical(PORT1); // 颜色传感器 前面
 optical Optical2 = optical(PORT2); // 颜色传感器 后面
