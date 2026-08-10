@@ -123,14 +123,16 @@ int RemoteControl_child()
 
             wait(0.5, seconds);
 
+            Claw.LiftMove(200);
+
             // 两个一起动
             Claw.lift_move_flag = true;
             Claw.mod_move_flag = true;
             while (Claw.lift_motor1.position(rotationUnits::deg) < 400)
             {
-                Claw.lift_motor1.spin(forward, 5, volt);
-                Claw.lift_motor2.spin(forward, 5, volt);
-                Claw.mod_motor.spin(forward, 12.8, volt);
+                Claw.lift_motor1.spin(forward, 7, volt);
+                Claw.lift_motor2.spin(forward, 7, volt);
+                Claw.mod_motor.spin(forward, 6, volt);
                 std::cout << "->" << Claw.lift_move_flag << Claw.lift_motor1.position(rotationUnits::deg) << std::endl;
                 wait(10, msec);
             }
