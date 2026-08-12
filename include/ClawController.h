@@ -171,29 +171,12 @@ public:
         mod_motor.spin(forward, (claw_open_position - mod_motor.position(vex::rotationUnits::deg)) * 0.0005 + 12.8 * 0.03, volt);
         // mod_motor.spin(forward, 12.8 * 0.03, volt);
       }
-
-      // if (claw_mod == 0 && (abs(mod_motor.position(vex::rotationUnits::deg) - claw_close_position) >= 10))
-      // {
-      //   // mod_motor.spin(forward, (claw_close_position - mod_motor.position(vex::rotationUnits::deg)) * 0.2, volt);
-      //   mod_motor.spin(forward, -12.8 * 0.03, volt);
-      // }
-      // else if (claw_mod == 1 && (abs(mod_motor.position(vex::rotationUnits::deg) - claw_open_position) >= 10))
-      // {
-      //   // mod_motor.spin(forward, (claw_open_position - mod_motor.position(vex::rotationUnits::deg)) * 0.2, volt);
-      //   mod_motor.spin(forward, 12.8 * 0.03, volt);
-      // }
-      // else
-      // {
-      //   // mod_motor.setStopping(coast);
-      //   // mod_motor.stop();
-      //   mod_motor.spin(forward, 0, volt);
-      // }
     }
   }
 
   void waitMoveStart()
   {
-    for (int i = 0; i < 100; i++)
+    for (int i = 0; (i < 100) && (!moveing_flag); i++)
     {
       wait(10, msec);
     }
