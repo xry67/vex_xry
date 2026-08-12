@@ -193,7 +193,7 @@ public:
 
   void waitMoveStart()
   {
-    while (!moveing_flag)
+    for (int i = 0; i < 100; i++)
     {
       wait(10, msec);
     }
