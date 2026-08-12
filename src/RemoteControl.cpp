@@ -48,6 +48,7 @@ bool ChangeStance()
 }
 
 bool halfauto = false; // 半自动模式
+bool RemoteControlChildFlag = true;  // 掌管子线程生死的变量
 int RemoteControl_child()
 {
     bool LastB = false;
@@ -58,7 +59,7 @@ int RemoteControl_child()
     bool LastX = false;
     bool LastA = false;
     bool LastDown = false;
-    while (1)
+    while (RemoteControlChildFlag)
     {
 
         // 半自动 预备
@@ -217,6 +218,7 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
     bool LastDown = false;
     bool LastUp = false;
 
+    RemoteControlChildFlag = true;
     vex::task Task(RemoteControl_child); // 线程开启
 
     while (now_time - start_time < timeout)
@@ -347,6 +349,8 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
         LastDown = ControlData.ButtonDown;
         LastUp = ControlData.ButtonUp;
     }
+
+    RemoteControlChildFlag = false; // 关闭子线程
 }
 
 // 整体遥控
