@@ -176,7 +176,7 @@ public:
 
   void waitMoveStart()
   {
-    for (int i = 0; (i < 100) && (!moveing_flag); i++)
+    for (int i = 0; (i < 5) && (!moveing_flag); i++)
     {
       wait(10, msec);
     }
