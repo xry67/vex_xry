@@ -5,20 +5,9 @@
 
 void auto2()
 {
-    ChassisForward(0, 5, 300);
-
-    ChassisControlSTS.ChassisForwardAngle(0);
-    for (int i = 0; i < 100; i++)
-    {
-        ChassisControlSTS.ChassisForward(-5);
-        if (i > 30 && std::abs(ChassisControlSTS.GetVelocity_pct_mean()) < 3)
-        {
-            break;
-        }
-        wait(10, msec);
-    }
-    ChassisControlSTS.ChassisStop();
-    // (0, 5, 600);
+    digitalH.set(1);
+    Claw.changeMod();
+    wait(1000, msec);
 
     ChassisControlSTS.Move(8, 370, 0, 'n');
     ChassisControlSTS.Turn_PID(10, 58, 0.8, 0.035, 0.05, 2);
