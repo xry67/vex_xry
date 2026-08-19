@@ -47,8 +47,8 @@ bool ChangeStance()
     return false;
 }
 
-bool halfauto = false; // 半自动模式
-bool RemoteControlChildFlag = true;  // 掌管子线程生死的变量
+bool halfauto = false;              // 半自动模式
+bool RemoteControlChildFlag = true; // 掌管子线程生死的变量
 int RemoteControl_child()
 {
     bool LastB = false;
@@ -281,13 +281,13 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
         }
 
         // 夹子 反转
-        if (LastB && !ControlData.ButtonB)
-        {
-            Claw.reversal();
-        }
+        // if (LastB && !ControlData.ButtonB)
+        // {
+        //     Claw.reversal();
+        // }
 
         // 钩子
-        if (LastX && !ControlData.ButtonX)
+        if (LastB && !ControlData.ButtonB)
         {
             digitalH.set(!digitalH.value());
         }
