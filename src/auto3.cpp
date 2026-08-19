@@ -38,7 +38,7 @@ void auto3()
 
     ToolMotor6.spin(forward, 1.5, volt);
 
-    ChassisControlSTS.Move(7, 1100, -64, 'u', true);
+    ChassisControlSTS.Move(7, 1100, -55, 'u', true);
     ChassisControlSTS.WaitPositionArrive(260);
     Claw.claw_mod = 0;
     Claw.changeMod(1);
