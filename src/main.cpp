@@ -9,7 +9,7 @@ using namespace vex;
 
 int main()
 {
-  std::cout << "-------------------->" << std::endl;
+  //std::cout << "-------------------->" << std::endl;
 
   vexcodeInit(); // 机器人初始化
 

@@ -21,7 +21,7 @@ class BaseWindow{
 
     BaseWindow* Tick(){
         Controller.Screen.clearScreen();  // 清除屏幕
-        std::cout << name << std::endl;
+        //std::cout << name << std::endl;
         return funcPtr();
     }
 

@@ -67,7 +67,7 @@ int RemoteControl_child()
         {
             halfauto = true;
             // 判断夹子的位置
-            std::cout << Claw.claw_reversal << " " << Claw.reversal_move_flag << std::endl;
+            //std::cout << Claw.claw_reversal << " " << Claw.reversal_move_flag << std::endl;
             if (Claw.reversal_digital.value() != 0)
             {
                 Claw.reversal_digital.set(1);
@@ -134,7 +134,7 @@ int RemoteControl_child()
                 Claw.lift_motor1.spin(forward, 7, volt);
                 Claw.lift_motor2.spin(forward, 7, volt);
                 Claw.mod_motor.spin(forward, 6, volt);
-                std::cout << "->" << Claw.lift_move_flag << Claw.lift_motor1.position(rotationUnits::deg) << std::endl;
+                //std::cout << "->" << Claw.lift_move_flag << Claw.lift_motor1.position(rotationUnits::deg) << std::endl;
                 wait(10, msec);
             }
             Claw.mod_move_flag = false;
@@ -231,7 +231,7 @@ void RemoteControl(bool SaveFile, bool ReadFile, int OutTime, std::string file_n
         {
             if (!ControlData.load(inFile))
             {
-                std::cout << "end" << std::endl;
+                //std::cout << "end" << std::endl;
                 break;
             }
             ControlData.print();

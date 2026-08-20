@@ -225,7 +225,7 @@ BaseWindow *RemoteControlWindowFun()
         wait(10, msec);
     }
 
-    std::cout << options[index] << std::endl;
+    //std::cout << options[index] << std::endl;
 
     return ModWindow;
 }
@@ -255,7 +255,7 @@ BaseWindow *ModWindowFun()
         }
     }
 
-    std::cout << options[index] << std::endl;
+    //std::cout << options[index] << std::endl;
 
     std::vector<BaseWindow *> ChildWindow{RemoteControlWindow_Mod, AutoWindow, TestWindow, MemoryWindow, AutoChoiceWindow_Compete};
 
@@ -314,7 +314,7 @@ BaseWindow *RemoteControlWindow_CompeteFun()
     ChassisRomoteControlSTS.name = ChassisRomoteControlList[index].name;
     ChassisRomoteControlSTS.func = ChassisRomoteControlList[index].Work;
 
-    std::cout << options[index] << std::endl;
+    //std::cout << options[index] << std::endl;
 
     return AutoChoiceWindow_Compete;
 }
@@ -423,7 +423,7 @@ BaseWindow *AutoWindowFun()
         return RemoteControlWindow_Mod->Back();
     }
 
-    std::cout << options[index] << std::endl;
+    //std::cout << options[index] << std::endl;
 
     // 运行自动程序
     ChassisControlSTS.ResetPPS();
@@ -670,7 +670,7 @@ BaseWindow *AutoChoiceWindow_CompeteFun()
         return RemoteControlWindow_Mod->Back();
     }
 
-    std::cout << options[index] << std::endl;
+    //std::cout << options[index] << std::endl;
 
     // 运行自动程序
     ChassisControlSTS.ResetPPS();
@@ -856,7 +856,7 @@ BaseWindow *TestMotorChoiceWindowFun()
         return TestMotorChoiceWindow->Back();
     }
 
-    std::cout << options[index] << std::endl;
+    //std::cout << options[index] << std::endl;
     TestMotorWindow->num = index;
     return TestMotorWindow;
 }
@@ -878,7 +878,7 @@ BaseWindow *TestAirpoweredChoiceWindowFun()
         return TestAirpoweredChoiceWindow->Back();
     }
 
-    std::cout << options[index] << std::endl;
+    //std::cout << options[index] << std::endl;
     TestAirpoweredWindow->num = index;
     return TestAirpoweredWindow;
 }
@@ -900,7 +900,7 @@ BaseWindow *TestInertialChoiceWindowFun()
         return TestInertialChoiceWindow->Back();
     }
 
-    std::cout << options[index] << std::endl;
+    //std::cout << options[index] << std::endl;
     TestInertialWindow->num = index;
     return TestInertialWindow;
 }
@@ -922,7 +922,7 @@ BaseWindow *TestDistanceChoiceWindowFun()
         return TestDistanceChoiceWindow->Back();
     }
 
-    std::cout << options[index] << std::endl;
+    //std::cout << options[index] << std::endl;
     TestDistanceWindow->num = index;
     return TestDistanceWindow;
 }

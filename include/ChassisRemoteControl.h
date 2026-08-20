@@ -141,24 +141,24 @@ public:
     }
 
     void print(){
-      std::cout << axis1 << " " 
-                << axis2 << " " 
-                << axis3 << " " 
-                << axis4 << " " 
-                << ButtonA << " " 
-                << ButtonB << " " 
-                << ButtonX << " " 
-                << ButtonY << " " 
-                << ButtonDown << " "
-                << ButtonUp << " "
-                << ButtonLeft << " "
-                << ButtonRight << " "
-                << ButtonL1 << " "
-                << ButtonL2 << " "
-                << ButtonR1 << " "
-                << ButtonR2 << " "
-                << TimeWait << " "
-      << std::endl;
+      //std::cout << axis1 << " " 
+    //             << axis2 << " " 
+    //             << axis3 << " " 
+    //             << axis4 << " " 
+    //             << ButtonA << " " 
+    //             << ButtonB << " " 
+    //             << ButtonX << " " 
+    //             << ButtonY << " " 
+    //             << ButtonDown << " "
+    //             << ButtonUp << " "
+    //             << ButtonLeft << " "
+    //             << ButtonRight << " "
+    //             << ButtonL1 << " "
+    //             << ButtonL2 << " "
+    //             << ButtonR1 << " "
+    //             << ButtonR2 << " "
+    //             << TimeWait << " "
+    //   << std::endl;
     }
 
     bool load(std::ifstream& inFile) {
@@ -251,10 +251,10 @@ class ChassisHumanMachineRomoteControlPara{
         }else{
             ans = std::min(now_speed, last_speed + maxinum_speed_acceleration);
         }
-        std::cout << now_speed << " " << last_speed << std::endl;
+        //std::cout << now_speed << " " << last_speed << std::endl;
         last_speed = ans;
         // nowspeed = output;
-        std::cout << ans << std::endl;
+        //std::cout << ans << std::endl;
         return ans;
     }
 };
