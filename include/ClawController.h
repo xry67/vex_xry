@@ -9,6 +9,7 @@ class ClawController;
 double moveToConNotMove(vex::motor motor_, double speed, int max_count);
 double moveToConNotMove(vex::motor_group motor_, double speed, int max_count);
 void task_ClawController_modMove(ClawController *claw_);
+void task_ClawController_liftMove(ClawController *claw_, double liftMove);
 
 class ClawController
 {
@@ -147,6 +148,14 @@ public:
     lift_move_flag = false;
     // std::cout << "end-->" << reversal_motor.position(deg) << std::endl;
     return true;
+  }
+
+  bool LiftMove(double target, bool task) {
+    if (task) {
+      task_ClawController_liftMove(this, target);
+      return true;
+    }
+    return LiftMove(target);
   }
 
   // 状态维护，多线程保护
