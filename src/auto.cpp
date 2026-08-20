@@ -9,7 +9,7 @@ void AddAutoFun()
     AutoFunctions.push_back(AutoFun("操作区-远", auto2, 15));
     AutoFunctions.push_back(AutoFun("侧扇区-近", auto3, 15));
     AutoFunctions.push_back(AutoFun("侧扇区-远", auto4, 15));
-    AutoFunctions.push_back(AutoFun("ceshi", auto5, 15));
+    AutoFunctions.push_back(AutoFun("操-近+远", auto5, 15));
 }
 
 // 比赛的自动函数
