@@ -361,9 +361,19 @@ void ChassisControl::ChassisRightControl_pct(double v)
   RightMotor3.spin(vex::forward, v, pct);
 }
 
+void ChassisControl::WPA50(double val) {
+  WaitPositionArrive(val, 50);
+}
+
+void ChassisControl::WaitPositionArrive(double val) {
+  WaitPositionArrive(val, 0);
+}
+
 // 等待电机编码器到达某个值
-void ChassisControl::WaitPositionArrive(double val)
+void ChassisControl::WaitPositionArrive(double val, int minimum_wait)
 {
+  // 测试：最低等待50ms
+  if (minimum_wait) wait(minimum_wait, msec);
 
   int now_p;
 

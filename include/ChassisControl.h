@@ -112,8 +112,14 @@ public:
     // 获取当前的速度pct
     double GetVelocity_pct_mean();
 
+    // （这个好用！！！）等待电机编码器到达某个值，最小等50
+    void WPA50(double val);
+
     // 等待电机编码器到达某个值
     void WaitPositionArrive(double val);
+
+    // 等待电机编码器到达某个值
+    void WaitPositionArrive(double val, int minimum_wait);
 
     // 等待定位轮到达
     void WaitSmallWheelPositionArrive(double val);
