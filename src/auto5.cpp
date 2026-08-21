@@ -52,10 +52,12 @@ void auto5()
     ChassisControlSTS.WPA50(350);
     ChassisControlSTS.ResetMaxSpeed(3);
     wait(400, msec);
+    ToolMotor6.stop(coast);
     Claw.LiftMove(-2000, true);
-    // wait(200, msec);
+    wait(300, msec);
     ChassisControlSTS.Move(10, 450, 180, 'u');
 
+    ToolMotor6.spin(reverse, 12.8, volt);
     ChassisControlSTS.Turn_PID(10, 126);
     
     // 测试
@@ -72,12 +74,12 @@ void auto5()
     ChassisControlSTS.WPA50(700);
 
     ChassisControlSTS.ResetStraightAngle(180);
-    Claw.LiftMove(4500, true);
+    Claw.LiftMove(1500, true);
     ChassisControlSTS.WPA50(1000);
 
     ChassisControlSTS.Move(12.8, 99999, 210, 'n', true);
 
-    ChassisControlSTS.WPA50(215);
+    ChassisControlSTS.WPA50(200);
     ChassisControlSTS.ResetStraightAngle(270);
 
     ChassisControlSTS.WPA50(1200);
@@ -85,8 +87,9 @@ void auto5()
     
     ChassisControlSTS.WPA50(1500);
     wait(600, msec);
+    ToolMotor6.stop(coast);
     Claw.LiftMove(-2000, true);
-    // wait(300, msec);
+    wait(300, msec);
     ChassisControlSTS.Move(12.8, 1000, 270, 'u', true);
     wait(500, msec);
 
