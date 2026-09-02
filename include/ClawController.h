@@ -39,6 +39,8 @@ public:
   bool lift_move_flag = false;     // 抬升运动标志
   double StartLiftPosititon;       // 抬升初始位置
 
+  bool modLiftMoveFlag = false;  // 折叠电梯运动
+
   // 构造函数
   ClawController(digital_out reversal_digital_, vex::motor mod_motor_, vex::motor intake_motor_, vex::motor lift_motor1_, vex::motor lift_motor2_, rotation Rotation_)
       : reversal_digital(reversal_digital_), mod_motor(mod_motor_), intake_motor(intake_motor_), lift_motor1(lift_motor1_), lift_motor2(lift_motor2_), Rotation(Rotation_)
@@ -163,7 +165,9 @@ public:
   {
     if (claw_mod_target != claw_mod && !mod_move_flag)
     {
-      precondition();
+      if (modLiftMoveFlag){
+        precondition();
+      }
       task_ClawController_modMove(this);
     }
 
@@ -196,10 +200,17 @@ public:
   {
 
     claw_mod_target ^= 1;
-
+    this->modLiftMoveFlag = true;
     waitMoveStart();
     return 1;
   }
+
+  bool changeModNoLift(){
+    claw_mod_target ^= 1;
+    this->modLiftMoveFlag = false;
+    waitMoveStart();
+    return 1;
+  } 
 
   bool changeMod(int target)
   {

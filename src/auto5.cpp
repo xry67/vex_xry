@@ -5,7 +5,6 @@
 #include "RemoteControl.h"
 #include "AutoTools.h"
 
-
 // 操作区自动，1+2
 void auto5()
 {
@@ -59,12 +58,12 @@ void auto5()
 
     ToolMotor6.spin(reverse, 12.8, volt);
     ChassisControlSTS.Turn_PID(10, 126);
-    
+
     // 测试
     Claw.LiftMove(-2000, true);
-    
+
     ChassisControlSTS.Move(7, 1200, 126, 'n', true);
-    
+
     ChassisControlSTS.WPA50(650);
     ChassisControlSTS.ResetMaxSpeed(2);
     ChassisControlSTS.WaitMoveFinish();
@@ -84,7 +83,7 @@ void auto5()
 
     ChassisControlSTS.WPA50(1200);
     ChassisControlSTS.ResetMaxSpeed(3);
-    
+
     ChassisControlSTS.WPA50(1500);
     wait(600, msec);
     ToolMotor6.stop(coast);

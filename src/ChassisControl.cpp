@@ -361,11 +361,13 @@ void ChassisControl::ChassisRightControl_pct(double v)
   RightMotor3.spin(vex::forward, v, pct);
 }
 
-void ChassisControl::WPA50(double val) {
+void ChassisControl::WPA50(double val)
+{
   WaitPositionArrive(val, 50);
 }
 
-void ChassisControl::WaitPositionArrive(double val) {
+void ChassisControl::WaitPositionArrive(double val)
+{
   WaitPositionArrive(val, 0);
 }
 
@@ -373,7 +375,8 @@ void ChassisControl::WaitPositionArrive(double val) {
 void ChassisControl::WaitPositionArrive(double val, int minimum_wait)
 {
   // 测试：最低等待50ms
-  if (minimum_wait) wait(minimum_wait, msec);
+  if (minimum_wait)
+    wait(minimum_wait, msec);
 
   int now_p;
 
@@ -796,7 +799,7 @@ void ChassisControl::CurveMove_Position_Move(double now_speed)
 void ChassisControl::CurveMove_Angle_Move(double now_speed)
 {
   double PI = 3.1415;
-  //std::cout << "nnnn" << yaw_negative << " " << (now_speed * (1 + 200 / (2 * r) * yaw_negative)) << (now_speed * (1 + 200 / (2 * r) * yaw_negative)) << "  " << negative * (now_speed * (1 - 200 / (2 * r) * yaw_negative)) << std::endl;
+  // std::cout << "nnnn" << yaw_negative << " " << (now_speed * (1 + 200 / (2 * r) * yaw_negative)) << (now_speed * (1 + 200 / (2 * r) * yaw_negative)) << "  " << negative * (now_speed * (1 - 200 / (2 * r) * yaw_negative)) << std::endl;
   ChassisLeftControl(negative * (now_speed * (1 + 200 / (2 * r) * yaw_negative)));
   ChassisRightControl(negative * (now_speed * (1 - 200 / (2 * r) * yaw_negative)));
 }
@@ -866,7 +869,7 @@ void ChassisControl::BasicMove()
     output += (errorDist - prevError) / 0.01 * D;
     prevError = errorDist;
 
-    //std::cout << "->" << current_position << " " << output << " " << (errorDist - prevError) / 0.01 * D << std::endl;
+    // std::cout << "->" << current_position << " " << output << " " << (errorDist - prevError) / 0.01 * D << std::endl;
 
     if (std::abs(current_position - val) <= move_allowable_error && std::abs(output) <= min_move_speed * 10)
     {
@@ -874,7 +877,7 @@ void ChassisControl::BasicMove()
       if (overcount == Over_count)
       {
         // PrintAt(2, " ->到位");
-        //std::cout << "daowei" << std::endl;
+        // std::cout << "daowei" << std::endl;
         break;
       }
     }
@@ -897,7 +900,7 @@ void ChassisControl::BasicMove()
     if (Moveing == false)
     {
       // PrintAt(2, " ->打断");
-      //std::cout << "daduan" << std::endl;
+      // std::cout << "daduan" << std::endl;
       break;
     }
 
@@ -908,7 +911,7 @@ void ChassisControl::BasicMove()
       if (stuck_time_count >= Stuck_time_out)
       {
         // PrintAt(2, " ->抱死");
-        //std::cout << "baosi" << std::endl;
+        // std::cout << "baosi" << std::endl;
         break;
       }
       now_min_speed += 0.15;
@@ -924,7 +927,7 @@ void ChassisControl::BasicMove()
     if (now_time - start_time >= move_time_out / 1000)
     {
       // PrintAt(2, " ->超时");
-      //std::cout << "chaoshi" << std::endl;
+      // std::cout << "chaoshi" << std::endl;
       break;
     }
 
@@ -946,7 +949,7 @@ void ChassisControl::BasicMove()
 
     // std::cout << now_speed << " " << current_position << std::endl;
     now_speed = NumInterval(now_speed, now_min_speed, this->Move_max_speed);
-    //std::cout << now_speed << " " << current_position << std::endl;
+    // std::cout << now_speed << " " << current_position << std::endl;
     this->ChassisBasicMove(now_speed);
 
     wait(dt * 1000.0, msec);
@@ -1321,7 +1324,7 @@ void ChassisControl::Turn_PID(double v, double val, double P, double I, double D
       overcount += 1;
       if (overcount >= Over_count)
       {
-        //std::cout << "daowei" << std::endl;
+        // std::cout << "daowei" << std::endl;
         break;
       }
     }
@@ -1340,31 +1343,33 @@ void ChassisControl::Turn_PID(double v, double val, double P, double I, double D
     double now_time = GetNowTime_ms();
     if (now_time - start_time >= Move_time_out)
     {
-      //std::cout << "chaoshi" << std::endl;
+      // std::cout << "chaoshi" << std::endl;
       break;
     }
 
-    
     // 电机抱死保护
     if (GetVelocity_mean() <= Stuck_threshold)
     {
       stuck_time_count += 1; // 计算抱死时间
       if (stuck_time_count >= Stuck_time_out)
       {
-        //std::cout << "baosi" << std::endl;
+        // std::cout << "baosi" << std::endl;
         break;
       }
     }
 
     // PID计算（dt = 0.01秒）
-    if (std::abs(errorDist) < 20){
+    if (std::abs(errorDist) < 20)
+    {
       integral += errorDist * 0.01;
-    }else{
+    }
+    else
+    {
       integral = 0;
     }
     double derivative = (errorDist - prevError) / 0.01;
     prevError = errorDist;
-    //std::cout << integral * I <<  " " << D * derivative << std::endl;
+    // std::cout << integral * I <<  " " << D * derivative << std::endl;
 
     double output = P * errorDist + I * integral + D * derivative;
     double outputLimited = NumInterval(output, 0, v);
@@ -1378,8 +1383,9 @@ void ChassisControl::Turn_PID(double v, double val, double P, double I, double D
   MoveOver();
 }
 
-void ChassisControl::Turn_PID(double v, double val) {
-	ChassisControlSTS.Turn_PID(v, val, 0.8, 0.035, 0.05, 2);
+void ChassisControl::Turn_PID(double v, double val)
+{
+  ChassisControlSTS.Turn_PID(v, val, 0.8, 0.035, 0.05, 2);
 }
 
 // 等待底盘运动开始
