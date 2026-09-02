@@ -13,7 +13,7 @@ int main()
 
   vexcodeInit(); // 机器人初始化
 
-  Competition.autonomous(AutoControl); // 自动程序加入
+  // Competition.autonomous(AutoControl); // 自动程序加入
 
   // 程序运行
   MainWindow main_window = MainWindow();
