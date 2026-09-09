@@ -4,12 +4,15 @@
 #include "initialize.h"
 #include "ChassisControl.h"
 #include "RemoteControl.h"
+#include <string>
 
 using namespace vex;
 
 int main()
 {
-  //std::cout << "-------------------->" << std::endl;
+
+  Controller.Screen.print(std::string(2, '*').c_str());
+  // std::cout << "-------------------->" << std::endl;
 
   vexcodeInit(); // 机器人初始化
 
