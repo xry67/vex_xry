@@ -42,7 +42,7 @@ void auto6()
 
     ChassisControlSTS.Move(12.8, 650, 0, 'n');
     ChassisControlSTS.Turn_PID(12.8, 15, 0.8, 0, 0, 10);
-    ChassisControlSTS.Move(6, 1850, 90, 'n', true);
+    ChassisControlSTS.Move(6, 1900, 90, 'n', true);
 
     digitalH.set(0);
     ChassisControlSTS.WPA50(300);
@@ -98,7 +98,7 @@ void auto6()
     ChassisControlSTS.ResetStraightAngle(180);
     Claw.LiftMove(1500, true);
     ChassisControlSTS.WPA50(1000);
-    ChassisControlSTS.Move(12.8, 99999, 210, 'n', true);
+    ChassisControlSTS.Move(12.8, 99999, 200, 'n', true);
 
     ChassisControlSTS.WPA50(200);
     ChassisControlSTS.ResetStraightAngle(255);
