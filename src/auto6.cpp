@@ -34,7 +34,7 @@ void auto6()
 
     ChassisControlSTS.Move(9.6, -750, -165, 'n');
     */
-    ToolMotor3.spinFor(vex::directionType::fwd, 3600.0, vex::rotationUnits::deg, 100.0, vex::velocityUnits::pct);
+    ToolMotor3.spinFor(vex::directionType::fwd, 2160.0, vex::rotationUnits::deg, 100.0, vex::velocityUnits::pct);
     digitalH.set(1);
     Claw.changeMod();
 
