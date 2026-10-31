@@ -5,12 +5,18 @@
 
 void auto2()
 {
+    //用侧翻翻toggle
+    ChassisControlSTS.Move(12.8  , 99999, 0, 'u', true);
+    ToolMotor3.spin(forward, 12.8, volt);
+    wait(750, msec);
+    ToolMotor3.stop(coast);
+
     digitalH.set(1);
     Claw.changeMod();
-    wait(1000, msec);
+    //wait(1000, msec);
 
     ChassisControlSTS.Move(8, 370, 0, 'n');
-    ChassisControlSTS.Turn_PID(10, 58, 0.8, 0.035, 0.05, 2);
+    ChassisControlSTS.Turn_PID(10, 59, 0.8, 0.035, 0.05, 2);
 
     ChassisControlSTS.ChassisForwardAngle(58);
     for (int i = 0; i < 40; i++)
@@ -43,7 +49,7 @@ void auto2()
     ToolMotor6.spin(forward, 0, volt);
 
     // 去找第二个
-    ChassisControlSTS.Turn_PID(10, 26, 0.8, 0.035, 0.05, 2);
+    ChassisControlSTS.Turn_PID(10, 26.5, 0.8, 0.035, 0.05, 2);
     ChassisControlSTS.Move(8, 1700, 26, 'n', true);
     Claw.LiftMove(-2000);
     ChassisControlSTS.WaitPositionArrive(1000);

@@ -8,12 +8,18 @@
 // 侧扇区自动，近方
 void auto3()
 {
+    //用侧翻翻toggle
+    ChassisControlSTS.Move(12.8  , 99999, 0, 'u', true);
+    ToolMotor3.spin(forward, 12.8, volt);
+    wait(750, msec);
+    ToolMotor3.stop(coast);
+
     digitalH.set(1);
     Claw.changeMod();
-    wait(1000, msec);
+    //wait(1000, msec);
 
     ChassisControlSTS.Move(8, 370, 0, 'n');
-    ChassisControlSTS.Turn_PID(10, -64, 0.8, 0.035, 0.05, 2);
+    ChassisControlSTS.Turn_PID(10, -63, 0.8, 0.035, 0.05, 2);
 
     ChassisControlSTS.ChassisForwardAngle(-64);
     for (int i = 0; i < 60; i++)
@@ -50,10 +56,10 @@ void auto3()
     ChassisControlSTS.Move(8, 2300, -90, 'n', true);
     Claw.LiftMove(-2000);
     ChassisControlSTS.WaitMoveFinish();
-    ChassisControlSTS.Turn_PID(10, -44, 0.8, 0.035, 0.05, 2);
+    ChassisControlSTS.Turn_PID(10, -43, 0.8, 0.035, 0.05, 2);
 
     ToolMotor6.spin(forward, -13, volt);
-    ChassisControlSTS.Move(8, 450, -44, 'n', true);
+    ChassisControlSTS.Move(8, 450, -43, 'n', true);
     ChassisControlSTS.WaitPositionArrive(80);
     ChassisControlSTS.ResetMaxSpeed(1.5);
     ChassisControlSTS.WaitMoveFinish();

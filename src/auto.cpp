@@ -10,6 +10,7 @@ void AddAutoFun()
     AutoFunctions.push_back(AutoFun("侧扇区-近", auto3, 15));
     AutoFunctions.push_back(AutoFun("侧扇区-远", auto4, 15));
     AutoFunctions.push_back(AutoFun("操-近+远", auto5, 15));
+    AutoFunctions.push_back(AutoFun("临时测试", auto6, 25));
 }
 
 // 比赛的自动函数

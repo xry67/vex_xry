@@ -9,9 +9,16 @@
 // 操作区自动，近方
 void auto1()
 {
+    //用侧翻翻toggle
+    ChassisControlSTS.Move(12.8  , 99999, 0, 'u', true);
+    ToolMotor3.spin(forward, 12.8, volt);
+    wait(750, msec);
+    ToolMotor3.stop(coast);
+
+
     digitalH.set(1);
     Claw.changeMod();
-    wait(1000, msec);
+    //wait(1000, msec);
 
     ChassisControlSTS.Move(8, 370, 0, 'n');
     ChassisControlSTS.Turn_PID(10, 58, 0.8, 0.035, 0.05, 2);
