@@ -76,7 +76,7 @@ void RestoreInitial()
     RightMotor2.spin(vex::forward, 0, voltageUnits::volt);
     RightMotor3.spin(vex::forward, 0, voltageUnits::volt);
 
-    ToolMotor1.spin(vex::forward, 0, voltageUnits::volt);
+    (vex::forward, 0, voltageUnits::volt);
     ToolMotor2.spin(vex::forward, 0, voltageUnits::volt);
     ToolMotor3.spin(vex::forward, 0, voltageUnits::volt);
     ToolMotor4.spin(vex::forward, 0, voltageUnits::volt);
