@@ -5,7 +5,6 @@
 #include "RemoteControl.h"
 #include "AutoTools.h"
 
-// siu
 
 void auto6()
 {
@@ -41,7 +40,7 @@ void auto6()
     Claw.LiftMove(0, true);
 
     ChassisControlSTS.Move(12.8, 650, 0, 'n');
-    ChassisControlSTS.Turn_PID(12.8, 15, 0.8, 0, 0, 10);
+    ChassisControlSTS.Turn_PID(12.8, 27.5, 0.8, 0, 0, 10);
     ChassisControlSTS.Move(6, 1900, 90, 'n', true);
 
     digitalH.set(0);
