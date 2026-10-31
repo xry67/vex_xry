@@ -3,3 +3,5 @@
 /build
 /UI绘图.ai
 compile_commands.json
+
+.DS_Store
