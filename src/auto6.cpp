@@ -34,7 +34,8 @@ void auto6()
 
     ChassisControlSTS.Move(9.6, -750, -165, 'n');
     */
-    digitalH.set(1);
+    Motor1.spinFor(forward, 900, degrees);
+    // digitalH.set(1);
     Claw.changeMod();
 
     Claw.LiftMove(0, true);
